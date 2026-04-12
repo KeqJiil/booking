@@ -16,6 +16,7 @@ services:
       DATABASE_USER: ${DB_USER}
       DATABASE_NAME: ${DB_NAME}
       REDIS_URL: ${REDIS_URL}
+      JWT_SECRET: ${JWT_SECRET}
     ports:
       - "3000:3000"
       - "51212:51212"
