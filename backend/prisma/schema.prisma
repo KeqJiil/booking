@@ -11,3 +11,148 @@ generator client {
 datasource db {
   provider = "postgresql"
 }
+
+model User {
+  id String @id @default(uuid())
+
+  name  String
+  email String @unique
+  role  Roles
+
+  password String
+
+  chatUsers ChatUser[]
+  properties Property[]
+  bookings   Booking[]
+  message    Message[]
+
+  userSettings UserSettings?
+
+  createdAt DateTime   @default(now()) @map("created_at")
+  updatedAt DateTime   @updatedAt() @map("updated_at")
+}
+
+model UserSettings {
+  id String @id @default(uuid())
+
+  theme                  Themes
+  notifications          Boolean @default(true)
+  receiveMarketingEmails Boolean @default(false)
+  receiveBookingUpdates  Boolean @default(true)
+
+  userId String @unique
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("user_settings")
+}
+
+model Property {
+  id String @id @default(uuid())
+
+  name  String
+  price Decimal @db.Decimal(10, 2)
+
+  hostId String @map("host_id")
+  host   User   @relation(references: [id], fields: [hostId], onDelete: Cascade)
+
+  typeId       String?
+  propertyType PropertyType? @relation(references: [id], fields: [typeId], onDelete: SetNull)
+
+  bookings Booking[]
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt() @map("updated_at")
+
+  @@index([typeId, price, hostId])
+}
+
+model PropertyType {
+  id String @id @default(uuid())
+
+  name String @unique
+
+  properties Property[]
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt() @map("updated_at")
+
+  @@map("property_type")
+}
+
+model Booking {
+  id String @id @default(uuid())
+
+  amountDue Decimal @map("amount_due") @db.Decimal(10, 2)
+
+  status Status
+
+  userId String @map("user_id")
+  user   User   @relation(references: [id], fields: [userId], onDelete: Restrict)
+
+  propertyId String   @map("property_id")
+  property   Property @relation(references: [id], fields: [propertyId], onDelete: Restrict)
+
+  startDate DateTime @map("start_date")
+  endDate   DateTime @map("end_date")
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt() @map("updated_at")
+}
+
+model Chat {
+  id String @id @default(uuid())
+
+  chatUsers ChatUser[]
+  messages Message[]
+
+  createdAt DateTime   @default(now()) @map("created_at")
+  updatedAt DateTime   @updatedAt() @map("updated_at")
+}
+
+model Message {
+  id String @id @default(uuid())
+
+  text String
+
+  chat   Chat   @relation(fields: [chatId], references: [id], onDelete: Cascade)
+  chatId String @map("chat_id")
+
+  userId String? @map("user_id")
+  user   User?   @relation(references: [id], fields: [userId], onDelete: SetNull)
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt() @map("updated_at")
+}
+
+model ChatUser {
+  id     String  @id @default(uuid())
+  userId String?
+  user   User?   @relation(fields: [userId], references: [id], onDelete: SetNull)
+  chatId String?
+  chat   Chat?   @relation(fields: [chatId], references: [id], onDelete: SetNull)
+}
+
+enum Roles {
+  USER
+  HOST
+  ADMIN
+}
+
+enum Status {
+  PENDING
+  PAID
+
+  CANCELLED
+  EXPIRED
+  REJECTED
+
+  CONFIRMED
+  COMPLETED
+}
+
+enum Themes {
+  DARK
+  LIGHT
+}
