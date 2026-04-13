@@ -22,11 +22,14 @@
   "dependencies": {
     "@nestjs-modules/ioredis": "^2.2.1",
     "@nestjs/bullmq": "^11.0.4",
+    "@nestjs/cache-manager": "^3.1.0",
     "@nestjs/common": "^11.0.1",
     "@nestjs/config": "^4.0.4",
     "@nestjs/core": "^11.0.1",
+    "@nestjs/cqrs": "^11.0.3",
     "@nestjs/jwt": "^11.0.2",
     "@nestjs/mapped-types": "*",
+    "@nestjs/microservices": "^11.1.18",
     "@nestjs/platform-express": "^11.0.1",
     "@nestjs/platform-socket.io": "^11.1.18",
     "@nestjs/throttler": "^6.5.0",
@@ -35,6 +38,8 @@
     "@prisma/client": "^7.7.0",
     "bcrypt": "^6.0.0",
     "bullmq": "^5.73.4",
+    "cache-manager": "^7.2.8",
+    "cache-manager-redis-store": "^3.0.1",
     "chokidar": "^5.0.0",
     "class-transformer": "^0.5.1",
     "class-validator": "^0.15.1",
@@ -81,7 +86,6 @@
   },
   "jest": {
     "moduleFileExtensions": [
-      "js",
       "json",
       "ts"
     ],

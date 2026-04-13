@@ -4,8 +4,7 @@
 // Get a free hosted Postgres database in seconds: `npx create-db`
 
 generator client {
-  provider = "prisma-client"
-  output   = "../generated/prisma"
+  provider = "prisma-client-js"
 }
 
 datasource db {
@@ -19,17 +18,20 @@ model User {
   email String @unique
   role  Roles
 
+  status LiveStatus
+
   password String
 
-  chatUsers ChatUser[]
+  chatUsers  ChatUser[]
   properties Property[]
   bookings   Booking[]
   message    Message[]
+  reviews    Review[]
 
   userSettings UserSettings?
 
-  createdAt DateTime   @default(now()) @map("created_at")
-  updatedAt DateTime   @updatedAt() @map("updated_at")
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt() @map("updated_at")
 }
 
 model UserSettings {
@@ -41,7 +43,7 @@ model UserSettings {
   receiveBookingUpdates  Boolean @default(true)
 
   userId String @unique
-  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user   User   @relation(fields: [userId], references: [id])
 
   updatedAt DateTime @updatedAt @map("updated_at")
 
@@ -52,15 +54,20 @@ model Property {
   id String @id @default(uuid())
 
   name  String
+  description String
   price Decimal @db.Decimal(10, 2)
+  status LiveStatus
+
+  images Image[]
 
   hostId String @map("host_id")
-  host   User   @relation(references: [id], fields: [hostId], onDelete: Cascade)
+  host   User   @relation(references: [id], fields: [hostId])
 
   typeId       String?
   propertyType PropertyType? @relation(references: [id], fields: [typeId], onDelete: SetNull)
 
   bookings Booking[]
+  reviews  Review[]
 
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt() @map("updated_at")
@@ -81,34 +88,68 @@ model PropertyType {
   @@map("property_type")
 }
 
+model Image {
+  id String @id @default(uuid())
+
+  url        String
+  propertyId String   @map("property_id")
+  property   Property @relation(references: [id], fields: [propertyId])
+
+  createdAt DateTime @default(now()) @map("created_at")
+}
+
 model Booking {
   id String @id @default(uuid())
 
   amountDue Decimal @map("amount_due") @db.Decimal(10, 2)
+  days Int
+  priceAtMoment Decimal @map("price_at_moment") @db.Decimal(10, 2)
 
   status Status
 
   userId String @map("user_id")
-  user   User   @relation(references: [id], fields: [userId], onDelete: Restrict)
+  user   User   @relation(references: [id], fields: [userId])
 
   propertyId String   @map("property_id")
-  property   Property @relation(references: [id], fields: [propertyId], onDelete: Restrict)
+  property   Property @relation(references: [id], fields: [propertyId])
 
   startDate DateTime @map("start_date")
   endDate   DateTime @map("end_date")
 
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt() @map("updated_at")
+
+  @@index([startDate, endDate])
+}
+
+model Review {
+  id String @id @default(uuid())
+
+  rating      Int
+  description String
+
+  reviewerId String @map("reviewer_id")
+  reviewer   User   @relation(references: [id], fields: [reviewerId])
+
+  propertyId String   @map("property_id")
+  property   Property @relation(references: [id], fields: [propertyId])
+
+  createdAt DateTime @default(now())
+
+  @@unique([reviewerId, propertyId])
+  @@index([propertyId])
 }
 
 model Chat {
   id String @id @default(uuid())
 
   chatUsers ChatUser[]
-  messages Message[]
+  messages  Message[]
 
-  createdAt DateTime   @default(now()) @map("created_at")
-  updatedAt DateTime   @updatedAt() @map("updated_at")
+  status LiveStatus
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt() @map("updated_at")
 }
 
 model Message {
@@ -116,11 +157,11 @@ model Message {
 
   text String
 
-  chat   Chat   @relation(fields: [chatId], references: [id], onDelete: Cascade)
+  chat   Chat   @relation(fields: [chatId], references: [id])
   chatId String @map("chat_id")
 
-  userId String? @map("user_id")
-  user   User?   @relation(references: [id], fields: [userId], onDelete: SetNull)
+  userId String @map("user_id")
+  user   User   @relation(references: [id], fields: [userId])
 
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt() @map("updated_at")
@@ -128,10 +169,10 @@ model Message {
 
 model ChatUser {
   id     String  @id @default(uuid())
-  userId String?
-  user   User?   @relation(fields: [userId], references: [id], onDelete: SetNull)
-  chatId String?
-  chat   Chat?   @relation(fields: [chatId], references: [id], onDelete: SetNull)
+  userId String
+  user   User   @relation(fields: [userId], references: [id])
+  chatId String
+  chat   Chat   @relation(fields: [chatId], references: [id])
 }
 
 enum Roles {
@@ -155,4 +196,9 @@ enum Status {
 enum Themes {
   DARK
   LIGHT
+}
+
+enum LiveStatus {
+  DELETED
+  ALIVE
 }
