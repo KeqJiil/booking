@@ -1,9 +1,14 @@
 import { Module } from '@nestjs/common';
-import { ConfigModule } from '@nestjs/config';
+import { ConfigModule, ConfigService } from '@nestjs/config';
 import { ThrottlerModule } from '@nestjs/throttler';
 import { AuthModule } from './modules/auth/auth.module';
 import { CqrsModule } from '@nestjs/cqrs';
 import { CacheModule } from '@nestjs/cache-manager';
+import { UserModule } from './modules/user/user.module';
+import { BookingModule } from './modules/booking/booking.module';
+import { PropertyModule } from './modules/property/property.module';
+import { ReviewModule } from './modules/review/review.module';
+import { createKeyv } from '@keyv/redis';
 
 @Module({
   imports: [
@@ -19,8 +24,22 @@ import { CacheModule } from '@nestjs/cache-manager';
       ],
     }),
     CqrsModule.forRoot(),
-    CacheModule.register(),
+    CacheModule.registerAsync({
+      imports: [ConfigModule],
+      inject: [ConfigService],
+      isGlobal: true,
+      useFactory: async (config: ConfigService) => {
+        const redisUrl = config.getOrThrow<string>('REDIS_URL');
+        return {
+          stores: [createKeyv(redisUrl)],
+        };
+      },
+    }),
     AuthModule,
+    UserModule,
+    BookingModule,
+    PropertyModule,
+    ReviewModule,
   ],
   providers: [],
 })

@@ -16,17 +16,18 @@ model User {
 
   name  String
   email String @unique
-  role  Roles @default(USER)
+  role  Roles  @default(USER)
 
   status LiveStatus @default(ALIVE)
 
   password String
 
-  chatUsers  ChatUser[]
-  properties Property[]
-  bookings   Booking[]
-  message    Message[]
-  reviews    Review[]
+  chatUsers     ChatUser[]
+  properties    Property[]
+  bookings      Booking[]
+  message       Message[]
+  reviews       Review[]
+  notifications Notification[]
 
   userSettings UserSettings?
 
@@ -37,7 +38,7 @@ model User {
 model UserSettings {
   id String @id @default(uuid())
 
-  theme                  Themes @default(LIGHT)
+  theme                  Themes  @default(LIGHT)
   notifications          Boolean @default(true)
   receiveMarketingEmails Boolean @default(false)
   receiveBookingUpdates  Boolean @default(true)
@@ -53,10 +54,14 @@ model UserSettings {
 model Property {
   id String @id @default(uuid())
 
-  name  String
+  name        String
   description String
-  price Decimal @db.Decimal(10, 2)
-  status LiveStatus @default(ALIVE) 
+  price       Decimal    @db.Decimal(10, 2)
+  country     String
+  city        String
+  address     String
+  maxGuests   Int
+  status      LiveStatus @default(ALIVE)
 
   images Image[]
 
@@ -72,7 +77,7 @@ model Property {
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt() @map("updated_at")
 
-  @@index([typeId, price, hostId])
+  @@index([typeId, price, hostId, country, city, status])
 }
 
 model PropertyType {
@@ -93,7 +98,7 @@ model Image {
 
   url        String
   propertyId String   @map("property_id")
-  property   Property @relation(references: [id], fields: [propertyId])
+  property   Property @relation(references: [id], fields: [propertyId], onDelete: Cascade)
 
   createdAt DateTime @default(now()) @map("created_at")
 }
@@ -101,8 +106,8 @@ model Image {
 model Booking {
   id String @id @default(uuid())
 
-  amountDue Decimal @map("amount_due") @db.Decimal(10, 2)
-  days Int
+  amountDue     Decimal @map("amount_due") @db.Decimal(10, 2)
+  days          Int
   priceAtMoment Decimal @map("price_at_moment") @db.Decimal(10, 2)
 
   status Status
@@ -112,6 +117,9 @@ model Booking {
 
   propertyId String   @map("property_id")
   property   Property @relation(references: [id], fields: [propertyId])
+
+  review Review?
+  chats  Chat[]
 
   startDate DateTime @map("start_date")
   endDate   DateTime @map("end_date")
@@ -131,12 +139,14 @@ model Review {
   reviewerId String @map("reviewer_id")
   reviewer   User   @relation(references: [id], fields: [reviewerId])
 
+  bookingId String  @unique @map("booking_id")
+  booking   Booking @relation(references: [id], fields: [bookingId])
+
   propertyId String   @map("property_id")
   property   Property @relation(references: [id], fields: [propertyId])
 
   createdAt DateTime @default(now())
 
-  @@unique([reviewerId, propertyId])
   @@index([propertyId])
 }
 
@@ -147,6 +157,9 @@ model Chat {
   messages  Message[]
 
   status LiveStatus
+
+  bookingId String?  @map("booking_id")
+  booking   Booking? @relation(references: [id], fields: [bookingId], onDelete: Cascade)
 
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt() @map("updated_at")
@@ -168,11 +181,27 @@ model Message {
 }
 
 model ChatUser {
-  id     String  @id @default(uuid())
-  userId String
+  id     String @id @default(uuid())
+  userId String @map("user_id")
   user   User   @relation(fields: [userId], references: [id])
-  chatId String
+  chatId String @map("chat_id")
   chat   Chat   @relation(fields: [chatId], references: [id])
+}
+
+model Notification {
+  id String @id @default(uuid())
+
+  type NotificationTypes
+  text String
+
+  payload Json?
+
+  userId String @map("user_id")
+  user   User   @relation(fields: [userId], references: [id])
+
+  isSeen Boolean @default(false) @map("is_seen")
+
+  createdAt DateTime @default(now()) @map("created_at")
 }
 
 enum Roles {
@@ -201,4 +230,17 @@ enum Themes {
 enum LiveStatus {
   DELETED
   ALIVE
+}
+
+enum NotificationTypes {
+  BOOKING_REQUEST
+  BOOKING_CONFIRMED
+  BOOKING_REJECTED
+  BOOKING_CANCELLED
+  PAYMENT_SUCCESS
+  PAYMENT_FAILED
+  NEW_MESSAGE
+  REVIEW_RECEIVED
+  SYSTEM_INFO
+  SYSTEM_SECURITY
 }

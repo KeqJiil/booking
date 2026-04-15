@@ -1,4 +1,4 @@
-import { Body, Controller, Post, Res } from '@nestjs/common';
+import { Body, Controller, HttpCode, Post, Res } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { LoginDto } from './dto/login.dto';
 import { Cookies } from 'src/common/decorators/cookies.decorator';
@@ -16,6 +16,7 @@ export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
   @Post('refresh')
+  @HttpCode(201)
   async refreshTokens(
     @Cookies('refreshtoken') token: string,
     @Res({ passthrough: true }) res: Response,
@@ -27,6 +28,7 @@ export class AuthController {
   }
 
   @Post('login')
+  @HttpCode(201)
   async login(
     @Body() data: LoginDto,
     @Res({ passthrough: true }) res: Response,
@@ -37,9 +39,23 @@ export class AuthController {
   }
 
   @Post('register')
+  @HttpCode(201)
   async register(@Body() data: RegisterDto, @Res() res: Response) {
     const { accessToken, refreshToken } = await this.authService.register(data);
     res.cookie('refreshtoken', refreshToken, this.refreshConfig);
     return accessToken;
+  }
+
+  @Post('logout')
+  @HttpCode(204)
+  async logout(
+    @Cookies('refreshtoken') token: string,
+    @Res({ passthrough: true }) res: Response,
+  ) {
+    const logout = await this.authService.logout(token);
+    if (logout) {
+      res.clearCookie('refresh');
+      return { success: true };
+    }
   }
 }
