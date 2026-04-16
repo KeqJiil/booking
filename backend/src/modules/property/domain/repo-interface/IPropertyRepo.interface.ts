@@ -1,7 +1,6 @@
 import { PropertyEntity } from '../entities/Property.entity';
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-const orderBy = {
+export const orderBy = {
   price: 'price',
   name: 'name',
 } as const;
@@ -19,6 +18,7 @@ export interface IPropertySearchParams {
   orderBy?: IOrderByProperty;
   limit?: number;
   cursor?: string;
+  maxGuests: number;
 }
 
 export interface IPropertyView {

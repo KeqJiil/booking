@@ -1,4 +1,12 @@
+import { AggregateRoot } from '@nestjs/cqrs';
 import { Address } from '../value-objects/address.value';
+import {
+  PropertyAddressChanged,
+  PropertyCreated,
+  PropertyDeleted,
+  PropertyPriceChanged,
+} from '../../application/events/property.events';
+import { randomUUID } from 'crypto';
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 const LiveStatus = {
@@ -30,16 +38,19 @@ interface IPropertyProps {
   typeId: string;
 }
 
-export class PropertyEntity {
+export class PropertyEntity extends AggregateRoot {
   constructor(
     private _props: IProperty,
-    public readonly id?: string,
-  ) {}
+    private readonly _id: string,
+  ) {
+    super();
+  }
 
   static create(data: IPropertyProps, id?: string) {
     if (data.name.length < 4 || data.description.length < 20) throw new Error();
-
-    return new PropertyEntity(data, id);
+    const entity = new PropertyEntity(data, id ? id : randomUUID());
+    this.apply(new PropertyCreated(entity._props.hostId, entity._id));
+    return entity;
   }
 
   changeName(newName: string) {
@@ -54,6 +65,9 @@ export class PropertyEntity {
 
   changeAddress(newAddress: Address) {
     this._props.address = newAddress;
+    this.apply(
+      new PropertyAddressChanged(this.id, newAddress, this._props.hostId),
+    );
   }
 
   changeMaxGuests(newNumber: number) {
@@ -61,12 +75,28 @@ export class PropertyEntity {
     this._props.maxGuests = newNumber;
   }
 
-  changePrice(number: number) {
-    if (number < 1) throw new Error();
-    this._props.price = number;
+  changePrice(newPrice: number) {
+    if (newPrice < 1) throw new Error();
+    this._props.price = newPrice;
+    this.apply(
+      new PropertyPriceChanged(this._id, newPrice, this._props.hostId),
+    );
+  }
+
+  changeType(type: string) {
+    this._props.typeId = type;
+  }
+
+  deleteProperty() {
+    this._props.status = 'DELETED';
+    this.apply(new PropertyDeleted(this._id, this._props.hostId));
   }
 
   get props() {
     return this._props;
+  }
+
+  get id() {
+    return this._id;
   }
 }

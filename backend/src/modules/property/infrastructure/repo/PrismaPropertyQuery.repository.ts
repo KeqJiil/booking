@@ -1,11 +1,11 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import {
   IPropertyQueryRepo,
-  IPropertySearchParams,
   IPropertyView,
 } from '../../domain/repo-interface/IPropertyRepo.interface';
 import { PrismaService } from 'src/database/prisma.service';
 import { propertyViewSelect } from './prisma.property.select';
+import { PropertySearchParamsDto } from '../../application/dto/searchParams.dto';
 
 @Injectable()
 export class PrismaPropertyQueryRepository implements IPropertyQueryRepo {
@@ -25,9 +25,19 @@ export class PrismaPropertyQueryRepository implements IPropertyQueryRepo {
     };
   }
 
-  async getList(searchParams: IPropertySearchParams): Promise<IPropertyView[]> {
-    const { name, typeId, minPrice, maxPrice, hostId, country, city } =
-      searchParams;
+  async getList(
+    searchParams: PropertySearchParamsDto,
+  ): Promise<IPropertyView[]> {
+    const {
+      name,
+      typeId,
+      minPrice,
+      maxPrice,
+      hostId,
+      country,
+      city,
+      maxGuests,
+    } = searchParams;
     const list = await this.prisma.property.findMany({
       where: {
         name: { contains: name, mode: 'insensitive' },
@@ -35,6 +45,7 @@ export class PrismaPropertyQueryRepository implements IPropertyQueryRepo {
         hostId,
         country,
         city,
+        maxGuests,
         price:
           minPrice || maxPrice
             ? {

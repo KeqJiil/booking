@@ -26,6 +26,7 @@ export class PrismaPropertyRepository implements IPropertyRepo {
   async save(property: PropertyEntity): Promise<void> {
     await this.prisma.property.upsert({
       create: {
+        id: property.id,
         name: property.props.name,
         description: property.props.description,
         price: property.props.price,
