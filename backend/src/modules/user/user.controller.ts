@@ -11,8 +11,8 @@ import { UserService } from './user.service';
 import { Authorization } from 'src/common/decorators/authorization.decorator';
 import { UserSettingsDto } from './dto/settings.dto';
 import { AccessInfo } from 'src/common/decorators/accessInfo.decorator';
-import { Roles } from '@prisma/client';
 import { ChangePasswordDto } from './dto/password.dto';
+import type { Roles } from 'src/common/constants/roleLevels';
 
 @Controller('user')
 export class UserController {

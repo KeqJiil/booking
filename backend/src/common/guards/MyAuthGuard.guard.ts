@@ -1,9 +1,8 @@
 import { ExecutionContext, ForbiddenException } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import { AuthGuard } from '@nestjs/passport';
-import { Roles } from '@prisma/client';
 import { ReqRole } from '../decorators/reqRole.decorator';
-import { roleLevels } from '../constants/roleLevels';
+import { roleLevels, Roles } from '../constants/roleLevels';
 
 export class MyAuthGuard extends AuthGuard('myJwt') {
   constructor(private readonly reflect: Reflector) {

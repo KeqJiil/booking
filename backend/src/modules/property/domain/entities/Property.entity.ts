@@ -5,50 +5,42 @@ import {
   PropertyCreated,
   PropertyDeleted,
   PropertyPriceChanged,
-} from '../../application/events/property.events';
+} from '../events/property.events';
 import { randomUUID } from 'crypto';
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-const LiveStatus = {
+export const LiveStatus = {
   ALIVE: 'ALIVE',
   DELETED: 'DELETED',
 } as const;
 
 export type ILiveStatus = keyof typeof LiveStatus;
 
-interface IProperty {
+export interface IProperty {
   name: string;
   description: string;
   price: number;
   maxGuests: number;
-  status: ILiveStatus;
   hostId: string;
   typeId: string;
   address: Address;
-}
-
-interface IPropertyProps {
-  address: Address;
-  name: string;
-  description: string;
-  price: number;
-  maxGuests: number;
-  status: 'ALIVE' | 'DELETED';
-  hostId: string;
-  typeId: string;
 }
 
 export class PropertyEntity extends AggregateRoot {
   constructor(
     private _props: IProperty,
+    private _status: ILiveStatus,
     private readonly _id: string,
   ) {
     super();
   }
 
-  static create(data: IPropertyProps, id?: string) {
+  static create(data: IProperty, id?: string, status?: ILiveStatus) {
     if (data.name.length < 4 || data.description.length < 20) throw new Error();
-    const entity = new PropertyEntity(data, id ? id : randomUUID());
+    const entity = new PropertyEntity(
+      data,
+      status ? status : 'ALIVE',
+      id ? id : randomUUID(),
+    );
     this.apply(new PropertyCreated(entity._props.hostId, entity._id));
     return entity;
   }
@@ -88,7 +80,7 @@ export class PropertyEntity extends AggregateRoot {
   }
 
   deleteProperty() {
-    this._props.status = 'DELETED';
+    this._status = 'DELETED';
     this.apply(new PropertyDeleted(this._id, this._props.hostId));
   }
 
@@ -98,5 +90,9 @@ export class PropertyEntity extends AggregateRoot {
 
   get id() {
     return this._id;
+  }
+
+  get status() {
+    return this._status;
   }
 }

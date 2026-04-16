@@ -1,15 +1,76 @@
-import { Controller, Get, HttpCode, Param, Query } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  HttpCode,
+  Param,
+  Patch,
+  Post,
+  Query,
+} from '@nestjs/common';
 import { PropertySearchParamsDto } from './application/dto/searchParams.dto';
+import { CreatePropertyDTO } from './application/dto/createProperty.dto';
+import { AccessInfo } from 'src/common/decorators/accessInfo.decorator';
+import { Authorization } from 'src/common/decorators/authorization.decorator';
+import { ChangePropertyDTO } from './application/dto/changeProperty.dto';
+import { CommandBus, QueryBus } from '@nestjs/cqrs';
+import {
+  CreatePropertyCommand,
+  DeletePropertyCommand,
+  EditPropertyCommand,
+} from './application/commands/property.commands';
+import type { Roles } from 'src/common/constants/roleLevels';
 
+@Authorization('HOST')
 @Controller('property')
 export class PropertyController {
-  constructor() {}
+  constructor(
+    private readonly commandBus: CommandBus,
+    private readonly queryBus: QueryBus,
+  ) {}
 
   @Get()
   @HttpCode(200)
-  async getPropertyList(@Query() searchParams: PropertySearchParamsDto) {}
+  async getPropertyList(
+    @Query() searchParams: PropertySearchParamsDto,
+    @AccessInfo('id') id: string,
+  ) {}
 
   @Get(':id')
   @HttpCode(200)
   async getPropertyById(@Param('id') id: string) {}
+
+  @Post('')
+  @HttpCode(201)
+  async createProperty(
+    @Body() createProperty: CreatePropertyDTO,
+    @AccessInfo('id') id: string,
+  ) {
+    await this.commandBus.execute(
+      new CreatePropertyCommand({ ...createProperty, hostId: id }),
+    );
+  }
+
+  @Patch(':id')
+  @HttpCode(200)
+  async changeProperty(
+    @Param('id') id: string,
+    @Body() changeProperty: ChangePropertyDTO,
+    @AccessInfo('id') userId: string,
+  ) {
+    await this.commandBus.execute(
+      new EditPropertyCommand(userId, { ...changeProperty, id }),
+    );
+  }
+
+  @Delete(':id')
+  @HttpCode(200)
+  async deleteProperty(
+    @Param('id') id: string,
+    @AccessInfo('role') role: Roles,
+    @AccessInfo('id') userId: string,
+  ) {
+    await this.commandBus.execute(new DeletePropertyCommand(id, userId, role));
+  }
 }

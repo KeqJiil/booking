@@ -18,7 +18,7 @@ export interface IPropertySearchParams {
   orderBy?: IOrderByProperty;
   limit?: number;
   cursor?: string;
-  maxGuests: number;
+  maxGuests?: number;
 }
 
 export interface IPropertyView {

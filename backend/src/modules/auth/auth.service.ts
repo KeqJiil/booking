@@ -3,12 +3,12 @@ import { JwtService } from '@nestjs/jwt';
 import { PrismaService } from 'src/database/prisma.service';
 import { RegisterDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
-import { Roles } from '@prisma/client';
 import * as bcrypt from 'bcrypt';
 import { CACHE_MANAGER } from '@nestjs/cache-manager';
 import type { Cache } from 'cache-manager';
 import { randomUUID } from 'crypto';
 import { IPayload, ISession } from './types';
+import { Roles } from 'src/common/constants/roleLevels';
 
 @Injectable()
 export class AuthService {

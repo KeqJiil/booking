@@ -1,4 +1,4 @@
-import { Roles } from '@prisma/client';
+import { Roles } from 'src/common/constants/roleLevels';
 
 export interface ISession {
   userId: string;
