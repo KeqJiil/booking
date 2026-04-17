@@ -21,8 +21,11 @@ import {
   EditPropertyCommand,
 } from './application/commands/property.commands';
 import type { Roles } from 'src/common/constants/roleLevels';
+import {
+  FindPropertyByIdQuery,
+  FindPropertyBySearchParamsQuery,
+} from './application/queries/property.queries';
 
-@Authorization('HOST')
 @Controller('property')
 export class PropertyController {
   constructor(
@@ -32,15 +35,19 @@ export class PropertyController {
 
   @Get()
   @HttpCode(200)
-  async getPropertyList(
-    @Query() searchParams: PropertySearchParamsDto,
-    @AccessInfo('id') id: string,
-  ) {}
+  async getPropertyList(@Query() searchParams: PropertySearchParamsDto) {
+    await this.queryBus.execute(
+      new FindPropertyBySearchParamsQuery(searchParams),
+    );
+  }
 
   @Get(':id')
   @HttpCode(200)
-  async getPropertyById(@Param('id') id: string) {}
+  async getPropertyById(@Param('id') id: string) {
+    await this.queryBus.execute(new FindPropertyByIdQuery(id));
+  }
 
+  @Authorization('HOST')
   @Post('')
   @HttpCode(201)
   async createProperty(
@@ -52,6 +59,7 @@ export class PropertyController {
     );
   }
 
+  @Authorization('HOST')
   @Patch(':id')
   @HttpCode(200)
   async changeProperty(
@@ -64,6 +72,7 @@ export class PropertyController {
     );
   }
 
+  @Authorization('HOST')
   @Delete(':id')
   @HttpCode(200)
   async deleteProperty(

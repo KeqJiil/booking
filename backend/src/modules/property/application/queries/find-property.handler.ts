@@ -6,7 +6,7 @@ import { FindPropertyByIdQuery } from './property.queries';
 @QueryHandler(FindPropertyByIdQuery)
 export class FindPropertyHandler implements IQueryHandler<FindPropertyByIdQuery> {
   constructor(
-    @Inject('IPropertyRepo') private repository: IPropertyQueryRepo,
+    @Inject('IPropertyRepoQuery') private repository: IPropertyQueryRepo,
   ) {}
 
   async execute(query: FindPropertyByIdQuery): Promise<any> {

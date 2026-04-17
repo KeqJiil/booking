@@ -6,7 +6,7 @@ import { FindPropertyBySearchParamsQuery } from './property.queries';
 @QueryHandler(FindPropertyBySearchParamsQuery)
 export class FindPropertiesHandler implements IQueryHandler<FindPropertyBySearchParamsQuery> {
   constructor(
-    @Inject('IPropertyRepo') private repository: IPropertyQueryRepo,
+    @Inject('IPropertyRepoQuery') private repository: IPropertyQueryRepo,
   ) {}
 
   async execute(query: FindPropertyBySearchParamsQuery): Promise<any> {

@@ -6,11 +6,13 @@ import { EditPropertyHandler } from './application/commands/edit-property.handle
 import { CreatePropertyHandler } from './application/commands/create-property.handler';
 import { FindPropertyHandler } from './application/queries/find-property.handler';
 import { FindPropertiesHandler } from './application/queries/find-properties.handler';
+import { PrismaPropertyQueryRepository } from './infrastructure/repo/PrismaPropertyQuery.repository';
 
 @Module({
   controllers: [PropertyController],
   providers: [
     { provide: 'IPropertyRepo', useClass: PrismaPropertyRepository },
+    { provide: 'IPropertyRepoQuery', useClass: PrismaPropertyQueryRepository },
     DeletePropertyHandler,
     EditPropertyHandler,
     CreatePropertyHandler,

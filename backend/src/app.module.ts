@@ -9,6 +9,7 @@ import { BookingModule } from './modules/booking/booking.module';
 import { PropertyModule } from './modules/property/property.module';
 import { ReviewModule } from './modules/review/review.module';
 import { createKeyv } from '@keyv/redis';
+import { PropertyTypeModule } from './modules/propertyType/propertyType.module';
 
 @Module({
   imports: [
@@ -28,7 +29,7 @@ import { createKeyv } from '@keyv/redis';
       imports: [ConfigModule],
       inject: [ConfigService],
       isGlobal: true,
-      useFactory: async (config: ConfigService) => {
+      useFactory: (config: ConfigService) => {
         const redisUrl = config.getOrThrow<string>('REDIS_URL');
         return {
           stores: [createKeyv(redisUrl)],
@@ -40,6 +41,7 @@ import { createKeyv } from '@keyv/redis';
     BookingModule,
     PropertyModule,
     ReviewModule,
+    PropertyTypeModule,
   ],
   providers: [],
 })
