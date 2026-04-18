@@ -40,6 +40,7 @@ export class PrismaPropertyQueryRepository implements IPropertyQueryRepo {
     } = searchParams;
     const list = await this.prisma.property.findMany({
       where: {
+        status: 'ALIVE',
         name: { contains: name, mode: 'insensitive' },
         typeId,
         hostId,
@@ -64,7 +65,7 @@ export class PrismaPropertyQueryRepository implements IPropertyQueryRepo {
     return list.map((el) => ({
       ...el,
       host: el.host.name,
-      types: el.propertyType?.name,
+      propertyType: el.propertyType?.name,
       price: Number(el.price),
     }));
   }

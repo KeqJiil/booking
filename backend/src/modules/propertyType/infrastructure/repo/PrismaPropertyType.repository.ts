@@ -3,7 +3,9 @@ import {
   IPropertyType,
   IPropertyTypeRepo,
 } from '../../domain/repo-interface/IPropertyTypeRepo.interface';
+import { Injectable } from '@nestjs/common';
 
+@Injectable()
 export class PrismaPropertyTypeRepository implements IPropertyTypeRepo {
   constructor(private readonly prisma: PrismaService) {}
 
@@ -30,14 +32,14 @@ export class PrismaPropertyTypeRepository implements IPropertyTypeRepo {
 
   async save(data: IPropertyType): Promise<void> {
     await this.prisma.propertyType.upsert({
+      where: {
+        id: data.id,
+      },
       create: {
         ...data,
       },
       update: {
         name: data.name,
-      },
-      where: {
-        id: data.id,
       },
     });
   }

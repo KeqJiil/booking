@@ -15,6 +15,7 @@ export class DeletePropertyHandler implements ICommandHandler<DeletePropertyComm
     if (command.role !== 'ADMIN' && property.props.hostId !== command.userId)
       throw new ForbiddenException();
     property.deleteProperty();
+    console.log(property);
     const propertyWithEvents = this.publisher.mergeObjectContext(property);
     await this.repository.save(property);
     propertyWithEvents.commit();

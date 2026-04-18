@@ -7,6 +7,7 @@ import {
   PropertyPriceChanged,
 } from '../events/property.events';
 import { randomUUID } from 'crypto';
+import { BadRequestException, ConflictException } from '@nestjs/common';
 
 export const LiveStatus = {
   ALIVE: 'ALIVE',
@@ -35,23 +36,25 @@ export class PropertyEntity extends AggregateRoot {
   }
 
   static create(data: IProperty, id?: string, status?: ILiveStatus) {
-    if (data.name.length < 4 || data.description.length < 20) throw new Error();
+    if (data.name.length < 4 || data.description.length < 20)
+      throw new BadRequestException();
+    console.log(data);
     const entity = new PropertyEntity(
       data,
       status ? status : 'ALIVE',
       id ? id : randomUUID(),
     );
-    this.apply(new PropertyCreated(entity._props.hostId, entity._id));
+    entity.apply(new PropertyCreated(entity._props.hostId, entity._id));
     return entity;
   }
 
   changeName(newName: string) {
-    if (newName === this._props.name || newName.length < 4) throw new Error();
+    if (newName.length < 4) throw new ConflictException();
     this._props.name = newName;
   }
 
   changeDescription(newDescription: string) {
-    if (newDescription.length < 20) throw new Error();
+    if (newDescription.length < 20) throw new BadRequestException();
     this._props.description = newDescription;
   }
 
@@ -63,12 +66,12 @@ export class PropertyEntity extends AggregateRoot {
   }
 
   changeMaxGuests(newNumber: number) {
-    if (newNumber < 1) throw new Error();
+    if (newNumber < 1) throw new BadRequestException();
     this._props.maxGuests = newNumber;
   }
 
   changePrice(newPrice: number) {
-    if (newPrice < 1) throw new Error();
+    if (newPrice < 1) throw new BadRequestException();
     this._props.price = newPrice;
     this.apply(
       new PropertyPriceChanged(this._id, newPrice, this._props.hostId),

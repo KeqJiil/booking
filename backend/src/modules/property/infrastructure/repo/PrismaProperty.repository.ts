@@ -34,6 +34,11 @@ export class PrismaPropertyRepository implements IPropertyRepo {
         city: property.props.address.city,
         address: property.props.address.address,
         maxGuests: property.props.maxGuests,
+        propertyType: {
+          connect: {
+            id: property.props.typeId,
+          },
+        },
         host: {
           connect: {
             id: property.props.hostId,
@@ -48,6 +53,7 @@ export class PrismaPropertyRepository implements IPropertyRepo {
         city: property.props.address.city,
         address: property.props.address.address,
         maxGuests: property.props.maxGuests,
+        status: property.status,
       },
       where: {
         id: property.id,

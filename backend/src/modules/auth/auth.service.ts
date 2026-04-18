@@ -98,20 +98,21 @@ export class AuthService {
 
   public async refreshTokens(refreshToken: string) {
     const payload = await this.jwt.verifyAsync<IPayload>(refreshToken);
-    if (!payload) throw new UnauthorizedException();
+    if (!payload) throw new UnauthorizedException('No payload inside token');
     const cache = (await this.cache.get(
       `session:${payload.sessionId}`,
     )) as ISession;
     if (!cache || cache.expiresAt < Date.now())
-      throw new UnauthorizedException();
+      throw new UnauthorizedException('No cache or cache expired');
     const refreshCheck = await bcrypt.compare(refreshToken, cache.refresh);
     if (!refreshCheck && cache.createdAt < Date.now() - 15_000)
-      throw new UnauthorizedException();
+      throw new UnauthorizedException('Bad token');
     const user = await this.prisma.user.findUnique({
       where: { id: payload.id },
       select: { role: true, status: true },
     });
-    if (!user || user.status === 'DELETED') throw new UnauthorizedException();
+    if (!user || user.status === 'DELETED')
+      throw new UnauthorizedException('No such user');
     const tokens = await this.signTokens(
       payload.id,
       user.role,

@@ -54,7 +54,7 @@ export class AuthController {
   ) {
     const logout = await this.authService.logout(token);
     if (logout) {
-      res.clearCookie('refresh');
+      res.clearCookie('refreshtoken');
       return { success: true };
     }
   }

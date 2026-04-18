@@ -36,7 +36,8 @@ export class PropertyController {
   @Get()
   @HttpCode(200)
   async getPropertyList(@Query() searchParams: PropertySearchParamsDto) {
-    await this.queryBus.execute(
+    console.log(searchParams);
+    return await this.queryBus.execute(
       new FindPropertyBySearchParamsQuery(searchParams),
     );
   }
@@ -44,7 +45,7 @@ export class PropertyController {
   @Get(':id')
   @HttpCode(200)
   async getPropertyById(@Param('id') id: string) {
-    await this.queryBus.execute(new FindPropertyByIdQuery(id));
+    return await this.queryBus.execute(new FindPropertyByIdQuery(id));
   }
 
   @Authorization('HOST')

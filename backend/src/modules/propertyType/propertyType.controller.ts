@@ -15,33 +15,34 @@ import { PropertyTypeService } from './application/propertyType.service';
 @Controller('property-type')
 export class PropertyTypeController {
   constructor(private readonly propertyTypeService: PropertyTypeService) {}
-  @Get('/type')
+
+  @Get('')
   @HttpCode(200)
   async getPropertyTypes() {
     return await this.propertyTypeService.getAll();
   }
 
-  @Get('/type/:id')
+  @Get(':id')
   @HttpCode(200)
   async getPropertyTypesById(@Param('id') data: string) {
     return await this.propertyTypeService.getById(data);
   }
 
-  @Get('/type/name/:name')
+  @Get('name/:name')
   @HttpCode(200)
   async getPropertyTypesByName(@Param('name') data: string) {
     return await this.propertyTypeService.getByName(data);
   }
 
   @Authorization('ADMIN')
-  @Post('/type')
+  @Post('')
   @HttpCode(201)
   async createPropertyType(@Body() propertyType: PropertyTypeDto) {
     return await this.propertyTypeService.createType(propertyType.name);
   }
 
   @Authorization('ADMIN')
-  @Patch('/type/:id')
+  @Patch(':id')
   @HttpCode(200)
   async changePropertyType(
     @Body() propertyType: PropertyTypeDto,
@@ -51,7 +52,7 @@ export class PropertyTypeController {
   }
 
   @Authorization('ADMIN')
-  @Delete('/type/:id')
+  @Delete(':id')
   @HttpCode(200)
   async deletePropertyType(@Param('id') id: string) {
     return await this.propertyTypeService.deleteType(id);

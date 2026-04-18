@@ -10,6 +10,8 @@ import { PropertyModule } from './modules/property/property.module';
 import { ReviewModule } from './modules/review/review.module';
 import { createKeyv } from '@keyv/redis';
 import { PropertyTypeModule } from './modules/propertyType/propertyType.module';
+import { PassportModule } from '@nestjs/passport';
+import { MyJwtStrategy } from './modules/auth/strategies/jwt.strategy';
 
 @Module({
   imports: [
@@ -42,7 +44,11 @@ import { PropertyTypeModule } from './modules/propertyType/propertyType.module';
     PropertyModule,
     ReviewModule,
     PropertyTypeModule,
+    PassportModule.register({
+      defaultStrategy: 'myJwt',
+      global: true,
+    }),
   ],
-  providers: [],
+  providers: [MyJwtStrategy],
 })
 export class AppModule {}
