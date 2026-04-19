@@ -13,12 +13,24 @@ export interface IQueryBookings {
   endDate: Date;
 }
 
+export const orderByBooking = {
+  startDate: 'startDate',
+  endDate: 'endDate',
+  totalPrice: 'totalPrice',
+  status: 'status',
+  days: 'days',
+} as const;
+
+export type TOrderByBooking =
+  (typeof orderByBooking)[keyof typeof orderByBooking];
+
 export interface ISearchParams {
   startDate?: Date;
   endDate?: Date;
-  totalPrice?: Date;
+  totalPrice?: number;
   status?: TBookingStatus;
   days?: number;
+  orderBy?: TOrderByBooking;
 }
 
 export interface IBookingRepo {
@@ -31,7 +43,7 @@ export interface IBookingRepoQuery {
     userId: string,
     searchParams: ISearchParams,
   ): Promise<IQueryBookings[]>;
-  getBookingById(id: string): Promise<IQueryBookings>;
+  getBookingById(id: string): Promise<IQueryBookings | null>;
   getBookingByProperty(
     propertyId: string,
     searchParams: ISearchParams,

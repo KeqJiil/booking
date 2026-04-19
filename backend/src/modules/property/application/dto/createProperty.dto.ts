@@ -1,5 +1,4 @@
 import {
-  IsEnum,
   IsNotEmpty,
   IsNumber,
   IsString,
@@ -7,8 +6,6 @@ import {
   Min,
   MinLength,
 } from 'class-validator';
-import { ILiveStatus, LiveStatus } from '../../domain/entities/Property.entity';
-
 export class CreatePropertyDTO {
   @IsString()
   @IsNotEmpty()
@@ -29,10 +26,6 @@ export class CreatePropertyDTO {
   @IsNotEmpty()
   @Min(1)
   maxGuests: number;
-
-  @IsEnum(LiveStatus)
-  @IsNotEmpty()
-  status: ILiveStatus;
 
   @IsUUID()
   @IsNotEmpty()
