@@ -1,4 +1,10 @@
-import { TBookingStatus } from 'src/common/constants/bookingStatuses';
+import { randomUUID } from 'crypto';
+import {
+  badStatuses,
+  TBookingStatus,
+} from 'src/common/constants/bookingStatuses';
+import { BookingCreated, BookingStatusChanges } from '../events/booking.events';
+import { AggregateRoot } from '@nestjs/cqrs';
 
 export interface IBookingDbData {
   priceAtMoment: number;
@@ -25,33 +31,86 @@ export interface IBookingEntityData extends IBookingEntityCreateProps {
   totalPrice: number;
 }
 
-export class BookingEntity {
+export class BookingEntity extends AggregateRoot {
   constructor(
     private _status: TBookingStatus,
     private _bookingData: IBookingEntityData,
-  ) {}
+    private readonly _id: string,
+  ) {
+    super();
+  }
 
-  static create(rawData: IBookingEntityCreateProps) {}
+  static create(rawData: IBookingEntityCreateProps) {
+    const totalPrice = rawData.days * rawData.priceAtMoment;
+    const entity = new BookingEntity(
+      'PENDING',
+      { ...rawData, totalPrice },
+      randomUUID(),
+    );
+    entity.apply(
+      new BookingCreated(
+        rawData.propertyId,
+        rawData.userId,
+        rawData.startDate,
+        rawData.endDate,
+      ),
+    );
+    return entity;
+  }
 
-  static fromDB(rawData: IBookingDbData) {}
+  static fromDB(rawData: IBookingDbData) {
+    const { status, id, ...data } = rawData;
+    if (badStatuses[status] || data.startDate > data.endDate) {
+      throw new Error();
+    }
+    return new BookingEntity(status, data, id);
+  }
 
-  public pay() {}
+  public pay() {
+    if (this._status !== 'CONFIRMED') throw new Error();
+    this.apply(new BookingStatusChanges(this._status, 'PAID'));
+    this._status = 'PAID';
+  }
 
-  public reject() {}
+  public reject() {
+    if (this._status !== 'PENDING') throw new Error();
+    this.apply(new BookingStatusChanges(this._status, 'REJECTED'));
+    this._status = 'REJECTED';
+  }
 
-  public cancel() {}
+  public cancel() {
+    if (this._status !== 'PENDING') throw new Error();
+    this.apply(new BookingStatusChanges(this._status, 'CANCELLED'));
+    this._status = 'CANCELLED';
+  }
 
-  public expire() {}
+  public expire() {
+    if (this._status !== 'PENDING') throw new Error();
+    this.apply(new BookingStatusChanges(this._status, 'EXPIRED'));
+    this._status = 'EXPIRED';
+  }
 
-  public confirm() {}
+  public confirm() {
+    if (this._status !== 'PENDING') throw new Error();
+    this.apply(new BookingStatusChanges(this._status, 'CONFIRMED'));
+    this._status = 'CONFIRMED';
+  }
 
-  public complete() {}
+  public complete() {
+    if (this._status !== 'CONFIRMED') throw new Error();
+    this.apply(new BookingStatusChanges(this._status, 'COMPLETED'));
+    this._status = 'COMPLETED';
+  }
 
   get status() {
     return this._status;
   }
 
   get data() {
-    return this._bookingData;
+    return { ...this._bookingData };
+  }
+
+  get id() {
+    return this._id;
   }
 }

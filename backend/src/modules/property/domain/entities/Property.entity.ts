@@ -9,6 +9,24 @@ import {
 import { randomUUID } from 'crypto';
 import { BadRequestException, ConflictException } from '@nestjs/common';
 
+export type IChangeProperty = Readonly<
+  Partial<Omit<IPlainProperty, 'status' | 'id'>>
+> & { id: string };
+
+export interface IPlainProperty {
+  id: string;
+  name: string;
+  description: string;
+  price: number;
+  maxGuests: number;
+  status: ILiveStatus;
+  hostId: string;
+  typeId: string;
+  city: string;
+  country: string;
+  address: string;
+}
+
 export const LiveStatus = {
   ALIVE: 'ALIVE',
   DELETED: 'DELETED',
@@ -38,7 +56,6 @@ export class PropertyEntity extends AggregateRoot {
   static create(data: IProperty, id?: string, status?: ILiveStatus) {
     if (data.name.length < 4 || data.description.length < 20)
       throw new BadRequestException();
-    console.log(data);
     const entity = new PropertyEntity(
       data,
       status ? status : 'ALIVE',
@@ -48,29 +65,45 @@ export class PropertyEntity extends AggregateRoot {
     return entity;
   }
 
-  changeName(newName: string) {
+  isHost(userId: string) {
+    return this.props.hostId === userId;
+  }
+
+  edit(data: IChangeProperty) {
+    if (data.city && data.address && data.country) {
+      const newAddress = new Address(data.city, data.country, data.address);
+      this.changeAddress(newAddress);
+    }
+    if (data.description) this.changeDescription(data.description);
+    if (data.maxGuests) this.changeMaxGuests(data.maxGuests);
+    if (data.name) this.changeName(data.name);
+    if (data.price) this.changePrice(data.price);
+    if (data.typeId) this.changeType(data.typeId);
+  }
+
+  private changeName(newName: string) {
     if (newName.length < 4) throw new ConflictException();
     this._props.name = newName;
   }
 
-  changeDescription(newDescription: string) {
+  private changeDescription(newDescription: string) {
     if (newDescription.length < 20) throw new BadRequestException();
     this._props.description = newDescription;
   }
 
-  changeAddress(newAddress: Address) {
+  private changeAddress(newAddress: Address) {
     this._props.address = newAddress;
     this.apply(
       new PropertyAddressChanged(this.id, newAddress, this._props.hostId),
     );
   }
 
-  changeMaxGuests(newNumber: number) {
+  private changeMaxGuests(newNumber: number) {
     if (newNumber < 1) throw new BadRequestException();
     this._props.maxGuests = newNumber;
   }
 
-  changePrice(newPrice: number) {
+  private changePrice(newPrice: number) {
     if (newPrice < 1) throw new BadRequestException();
     this._props.price = newPrice;
     this.apply(
@@ -78,17 +111,19 @@ export class PropertyEntity extends AggregateRoot {
     );
   }
 
-  changeType(type: string) {
+  private changeType(type: string) {
     this._props.typeId = type;
   }
 
-  deleteProperty() {
-    this._status = 'DELETED';
-    this.apply(new PropertyDeleted(this._id, this._props.hostId));
+  deleteProperty(userId: string, isAdmin: boolean) {
+    if (userId === this._props.hostId || isAdmin) {
+      this._status = 'DELETED';
+      this.apply(new PropertyDeleted(this._id, this._props.hostId));
+    }
   }
 
   get props() {
-    return this._props;
+    return { ...this._props };
   }
 
   get id() {

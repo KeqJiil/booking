@@ -35,6 +35,7 @@ export interface IPropertyView {
 }
 
 export interface IPropertyRepo {
+  checkBookings(id: string, date: Date): Promise<boolean>;
   getEntityById(id: string): Promise<PropertyEntity>;
   save(property: PropertyEntity): Promise<void>;
 }

@@ -1,11 +1,10 @@
 import { Roles } from 'src/common/constants/roleLevels';
-import { IPlainProperty } from '../mappers/property.mapper';
+import {
+  IChangeProperty,
+  IPlainProperty,
+} from '../../domain/entities/Property.entity';
 
 type ICreateProperty = Readonly<Omit<IPlainProperty, 'id' | 'status'>>;
-
-type IChangeProperty = Readonly<
-  Partial<Omit<IPlainProperty, 'status' | 'id'>>
-> & { id: string };
 
 export class CreatePropertyCommand {
   constructor(public readonly data: ICreateProperty) {}

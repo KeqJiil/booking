@@ -7,8 +7,10 @@ import { CreatePropertyHandler } from './application/commands/create-property.ha
 import { FindPropertyHandler } from './application/queries/find-property.handler';
 import { FindPropertiesHandler } from './application/queries/find-properties.handler';
 import { PrismaPropertyQueryRepository } from './infrastructure/repo/PrismaPropertyQuery.repository';
+import { PrismaModule } from 'src/database/prisma.module';
 
 @Module({
+  imports: [PrismaModule],
   controllers: [PropertyController],
   providers: [
     { provide: 'IPropertyRepo', useClass: PrismaPropertyRepository },

@@ -1,22 +1,8 @@
 import {
-  ILiveStatus,
+  IPlainProperty,
   PropertyEntity,
 } from '../../domain/entities/Property.entity';
 import { Address } from '../../domain/value-objects/address.value';
-
-export interface IPlainProperty {
-  id: string;
-  name: string;
-  description: string;
-  price: number;
-  maxGuests: number;
-  status: ILiveStatus;
-  hostId: string;
-  typeId: string;
-  city: string;
-  country: string;
-  address: string;
-}
 
 export class PropertyMapper {
   static toEntity(data: IPlainProperty): PropertyEntity {

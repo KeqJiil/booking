@@ -12,3 +12,9 @@ export const bookingStatuses = {
 
 export type TBookingStatus =
   (typeof bookingStatuses)[keyof typeof bookingStatuses];
+
+export const badStatuses = {
+  CANCELLED: 'CANCELLED',
+  EXPIRED: 'EXPIRED',
+  REJECTED: 'REJECTED',
+};

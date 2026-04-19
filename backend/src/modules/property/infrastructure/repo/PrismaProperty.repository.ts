@@ -9,6 +9,24 @@ import { propertyPlainSelect } from './prisma.property.select';
 export class PrismaPropertyRepository implements IPropertyRepo {
   constructor(private readonly prisma: PrismaService) {}
 
+  async checkBookings(id: string, date: Date): Promise<boolean> {
+    const bookings = await this.prisma.booking.findMany({
+      where: {
+        propertyId: id,
+        status: {
+          in: ['CONFIRMED', 'PAID', 'PENDING'],
+        },
+        startDate: {
+          gte: date,
+        },
+        endDate: {
+          gte: date,
+        },
+      },
+    });
+    return bookings.length > 0;
+  }
+
   async getEntityById(id: string): Promise<PropertyEntity> {
     const property = await this.prisma.property.findUnique({
       where: { id },
