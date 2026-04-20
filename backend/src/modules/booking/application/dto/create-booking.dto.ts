@@ -22,4 +22,8 @@ export class CreateBookingDto {
   @IsDate()
   @IsNotEmpty()
   endDate: Date;
+
+  @IsUUID()
+  @IsNotEmpty()
+  hostId: string;
 }

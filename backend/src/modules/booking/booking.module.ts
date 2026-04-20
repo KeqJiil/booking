@@ -7,7 +7,7 @@ import { GetMyBookingsQueryHandler } from './application/queries/getMyBookings.q
 import { GetBookingByIdHandler } from './application/queries/getBookingById.query';
 import { GetBookingsByPropertyHandler } from './application/queries/getBookingsByProperty.query';
 import { CreateBookingHandler } from './application/commands/create-booking.handler';
-import { ChangeBookingHandler } from './application/commands/change-status.handler';
+import { ChangeBookingHandler } from './application/commands/expire-status.handler';
 import { BullModule } from '@nestjs/bullmq';
 import { PrismaModule } from 'src/database/prisma.module';
 import { BookingWorker } from './infrastructure/bullmq/expired.worker';

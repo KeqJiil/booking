@@ -26,6 +26,7 @@ export class CreateBookingHandler implements ICommandHandler<CreateBookingComman
           delay: 10 * 60 * 1000,
         },
       );
+      entity.commit();
     });
   }
 }

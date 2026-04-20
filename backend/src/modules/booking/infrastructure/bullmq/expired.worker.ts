@@ -1,7 +1,7 @@
 import { Processor, WorkerHost } from '@nestjs/bullmq';
 import { CommandBus } from '@nestjs/cqrs';
 import { Job } from 'bullmq';
-import { ChangeBookingStatusCommand } from '../../application/commands/booking.commands';
+import { ExpireBookingStatusCommand } from '../../application/commands/booking.commands';
 
 @Processor('booking')
 export class BookingWorker extends WorkerHost {
@@ -9,9 +9,7 @@ export class BookingWorker extends WorkerHost {
     super();
   }
 
-  async process(job: Job, token?: string): Promise<any> {
-    await this.commandBus.execute(
-      new ChangeBookingStatusCommand(job.data.id, 'EXPIRED'),
-    );
+  async process(job: Job): Promise<any> {
+    await this.commandBus.execute(new ExpireBookingStatusCommand(job.data.id));
   }
 }

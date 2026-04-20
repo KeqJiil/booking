@@ -19,11 +19,27 @@ type IDataReturnType = {
   endDate: Date;
   userId: string;
   propertyId: string;
+  hostId: string;
 } | null;
 
 @Injectable()
 export class PrismaBookingRepo implements IBookingRepo {
   constructor(private readonly prisma: PrismaService) {}
+
+  async getIdsToComplete(): Promise<{ id: string }[]> {
+    return await this.prisma.booking.findMany({
+      where: {
+        AND: {
+          status: 'CONFIRMED',
+          endDate: { lte: new Date() },
+        },
+      },
+      select: {
+        id: true,
+      },
+      take: 200,
+    });
+  }
 
   async save(entity: BookingEntity, tx?: Tx): Promise<void> {
     const db = (tx ?? this.prisma) as Tx;
@@ -51,9 +67,15 @@ export class PrismaBookingRepo implements IBookingRepo {
   async getEntityById(id: string, tx?: Tx): Promise<BookingEntity | null> {
     const db = (tx ?? this.prisma) as Tx;
     const data = (await db.$queryRaw`
-    SELECT id, user_id, property_id, price_at_the_moment, amount_due, days, start_date, end_date, status
+    SELECT 
+      Booking.id, Booking.user_id, 
+      Booking.property_id AS "propertyId", Booking.price_at_the_moment AS "priceAtTheMoment", 
+      Booking.amount_due AS "amountDue", Booking.days, 
+      Booking.start_date AS "startDate", Booking.end_date AS "endDate", 
+      Booking.status, Property.host_Id AS "hostId"
     FROM Booking
-    WHERE id = ${id}
+    INNER JOIN Property ON Booking.property_id=Property.id 
+    WHERE Booking.id = ${id}
     FOR UPDATE
     `[0]) as IDataReturnType;
     if (!data) return null;

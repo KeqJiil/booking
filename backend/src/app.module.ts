@@ -13,6 +13,7 @@ import { PropertyTypeModule } from './modules/propertyType/propertyType.module';
 import { PassportModule } from '@nestjs/passport';
 import { MyJwtStrategy } from './modules/auth/strategies/jwt.strategy';
 import { BullModule } from '@nestjs/bullmq';
+import { ScheduleModule } from '@nestjs/schedule';
 
 @Module({
   imports: [
@@ -55,6 +56,7 @@ import { BullModule } from '@nestjs/bullmq';
         port: 6379,
       },
     }),
+    ScheduleModule.forRoot(),
   ],
   providers: [MyJwtStrategy],
 })

@@ -34,6 +34,7 @@ export interface ISearchParams {
 }
 
 export interface IBookingRepo {
+  getIdsToComplete(): Promise<{ id: string }[]>;
   getEntityById(id: string, tx?: unknown): Promise<BookingEntity | null>;
   save(entity: BookingEntity, tx?: unknown): Promise<void>;
 }

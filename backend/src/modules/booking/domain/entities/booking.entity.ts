@@ -16,6 +16,7 @@ export interface IBookingDbData {
   status: TBookingStatus;
   id: string;
   totalPrice: number;
+  hostId: string;
 }
 
 export interface IBookingEntityCreateProps {
@@ -25,6 +26,7 @@ export interface IBookingEntityCreateProps {
   userId: string;
   startDate: Date;
   endDate: Date;
+  hostId: string;
 }
 
 export interface IBookingEntityData extends IBookingEntityCreateProps {
@@ -100,6 +102,14 @@ export class BookingEntity extends AggregateRoot {
     if (this._status !== 'CONFIRMED') throw new Error();
     this.apply(new BookingStatusChanges(this._status, 'COMPLETED'));
     this._status = 'COMPLETED';
+  }
+
+  public isBooker(id: string) {
+    return this._bookingData.userId === id;
+  }
+
+  public isOwner(id: string) {
+    return this._bookingData.hostId === id;
   }
 
   get status() {
