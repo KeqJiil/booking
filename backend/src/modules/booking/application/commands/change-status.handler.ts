@@ -5,7 +5,7 @@ import type { ITransactionRepo } from '../interfaces.ts/TransactionRepo.interfac
 import type { IBookingRepo } from '../../domain/repo-interfaces/IBookingRepo.interface';
 
 @CommandHandler(ChangeBookingStatusCommand)
-export class CreateBookingHandler implements ICommandHandler<ChangeBookingStatusCommand> {
+export class ChangeBookingHandler implements ICommandHandler<ChangeBookingStatusCommand> {
   constructor(
     @Inject('TransactionRepo') private readonly transactions: ITransactionRepo,
     @Inject('BookingRepo') private readonly repo: IBookingRepo,

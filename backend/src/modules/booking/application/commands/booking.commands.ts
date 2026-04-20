@@ -11,3 +11,7 @@ export class ChangeBookingStatusCommand {
     public readonly status: TBookingStatus,
   ) {}
 }
+
+export class ExpireBookingCommand {
+  constructor(public readonly id: string) {}
+}

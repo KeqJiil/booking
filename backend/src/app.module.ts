@@ -12,6 +12,7 @@ import { createKeyv } from '@keyv/redis';
 import { PropertyTypeModule } from './modules/propertyType/propertyType.module';
 import { PassportModule } from '@nestjs/passport';
 import { MyJwtStrategy } from './modules/auth/strategies/jwt.strategy';
+import { BullModule } from '@nestjs/bullmq';
 
 @Module({
   imports: [
@@ -47,6 +48,12 @@ import { MyJwtStrategy } from './modules/auth/strategies/jwt.strategy';
     PassportModule.register({
       defaultStrategy: 'myJwt',
       global: true,
+    }),
+    BullModule.forRoot({
+      connection: {
+        host: 'localhost',
+        port: 6379,
+      },
     }),
   ],
   providers: [MyJwtStrategy],
