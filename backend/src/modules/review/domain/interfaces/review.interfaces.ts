@@ -20,4 +20,6 @@ export interface IReviewViewData {
   createdAt: Date;
 }
 
-export type IReviewChangeData = Pick<IReviewData, 'id' | 'rate' | 'text'>;
+export type IReviewChangeData = Partial<Pick<IReviewData, 'rate' | 'text'>> & {
+  id: string;
+};

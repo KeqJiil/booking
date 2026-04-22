@@ -6,6 +6,7 @@ import {
   IReviewData,
   IReviewViewData,
 } from '../../domain/interfaces/review.interfaces';
+import { SearchParamsReviewsDto } from '../../application/dto/searchParams.dto';
 
 @Injectable()
 export class PrismaReviewRepository implements IReviewRepo {
@@ -37,18 +38,32 @@ export class PrismaReviewRepository implements IReviewRepo {
     });
   }
 
-  async getMyReviews(userId: string): Promise<IReviewViewData[]> {
+  async getMyReviews(
+    userId: string,
+    searchParams: SearchParamsReviewsDto,
+  ): Promise<IReviewViewData[]> {
     return await this.prisma.review.findMany({
       where: {
         reviewerId: userId,
+        rating: searchParams.rate,
+      },
+      orderBy: {
+        [searchParams.orderBy ? searchParams.orderBy : 'createdAt']: 'asc',
       },
     });
   }
 
-  async getReviewsByProperty(propertyId: string): Promise<IReviewViewData[]> {
+  async getReviewsByProperty(
+    propertyId: string,
+    searchParams: SearchParamsReviewsDto,
+  ): Promise<IReviewViewData[]> {
     return await this.prisma.review.findMany({
       where: {
         propertyId,
+        rating: searchParams.rate,
+      },
+      orderBy: {
+        [searchParams.orderBy ? searchParams.orderBy : 'createdAt']: 'asc',
       },
     });
   }

@@ -6,6 +6,7 @@ import { CreateReviewDto } from './dto/createReview.dto';
 import type { IReviewRepo } from '../domain/interfaces/repo.interface';
 import { randomUUID } from 'crypto';
 import { ChangeReviewDto } from './dto/changeReview.dto';
+import { SearchParamsReviewsDto } from './dto/searchParams.dto';
 
 @Injectable()
 export class ReviewService {
@@ -38,11 +39,17 @@ export class ReviewService {
     await this.repo.deleteReview(id, userId);
   }
 
-  public async getMyReviews(userId: string) {
-    return await this.repo.getMyReviews(userId);
+  public async getMyReviews(
+    userId: string,
+    searchParams: SearchParamsReviewsDto,
+  ) {
+    return await this.repo.getMyReviews(userId, searchParams);
   }
 
-  public async getReviewsByProperty(propertyId: string) {
-    return await this.repo.getReviewsByProperty(propertyId);
+  public async getReviewsByProperty(
+    propertyId: string,
+    searchParams: SearchParamsReviewsDto,
+  ) {
+    return await this.repo.getReviewsByProperty(propertyId, searchParams);
   }
 }

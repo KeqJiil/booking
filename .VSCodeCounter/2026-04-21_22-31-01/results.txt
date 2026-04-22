@@ -1,0 +1,249 @@
+Date : 2026-04-21 22:31:01
+Directory : c:\Users\Andriisav\Desktop\portfolio projects\booking
+Total : 126 files,  23753 codes, 93 comments, 685 blanks, all 24531 lines
+
+Languages
++--------------------+------------+------------+------------+------------+------------+
+| language           | files      | code       | comment    | blank      | total      |
++--------------------+------------+------------+------------+------------+------------+
+| JSON               |          9 |     19,995 |          4 |         13 |     20,012 |
+| TypeScript         |         97 |      3,167 |          3 |        498 |      3,668 |
+| Prisma             |          1 |        173 |          3 |         72 |        248 |
+| MS SQL             |          3 |        168 |         82 |         75 |        325 |
+| YAML               |          1 |         69 |          0 |          5 |         74 |
+| JavaScript         |          1 |         37 |          1 |          3 |         41 |
+| JSON with Comments |          2 |         33 |          0 |          2 |         35 |
+| XML                |          2 |         25 |          0 |          1 |         26 |
+| Ignore             |          2 |         22 |          0 |          6 |         28 |
+| JavaScript JSX     |          1 |         22 |          0 |          2 |         24 |
+| TypeScript JSX     |          2 |         16 |          0 |          5 |         21 |
+| Docker             |          2 |         13 |          0 |          0 |         13 |
+| HTML               |          1 |         13 |          0 |          1 |         14 |
+| Markdown           |          1 |          0 |          0 |          1 |          1 |
+| PostCSS            |          1 |          0 |          0 |          1 |          1 |
++--------------------+------------+------------+------------+------------+------------+
+
+Directories
++---------------------------------------------------------------------------------------------------------------------------------------------+------------+------------+------------+------------+------------+
+| path                                                                                                                                        | files      | code       | comment    | blank      | total      |
++---------------------------------------------------------------------------------------------------------------------------------------------+------------+------------+------------+------------+------------+
+| .                                                                                                                                           |        126 |     23,753 |         93 |        685 |     24,531 |
+| . (Files)                                                                                                                                   |          2 |         69 |          0 |          6 |         75 |
+| backend                                                                                                                                     |        109 |     20,052 |         88 |        655 |     20,795 |
+| backend (Files)                                                                                                                             |         11 |     16,572 |          3 |         15 |     16,590 |
+| backend\prisma                                                                                                                              |          4 |        341 |         85 |        147 |        573 |
+| backend\prisma (Files)                                                                                                                      |          1 |        173 |          3 |         72 |        248 |
+| backend\prisma\migrations                                                                                                                   |          3 |        168 |         82 |         75 |        325 |
+| backend\prisma\migrations\20260412172219_init_migration                                                                                     |          1 |         86 |         24 |         32 |        142 |
+| backend\prisma\migrations\20260418231805_migration_2                                                                                        |          1 |         74 |         56 |         41 |        171 |
+| backend\prisma\migrations\20260418231942_add_exclude_constraint                                                                             |          1 |          8 |          2 |          2 |         12 |
+| backend\src                                                                                                                                 |         94 |      3,139 |          0 |        493 |      3,632 |
+| backend\src (Files)                                                                                                                         |          2 |         74 |          0 |          7 |         81 |
+| backend\src\common                                                                                                                          |          8 |         88 |          0 |         20 |        108 |
+| backend\src\common\constants                                                                                                                |          2 |         27 |          0 |          8 |         35 |
+| backend\src\common\decorators                                                                                                               |          4 |         27 |          0 |          8 |         35 |
+| backend\src\common\events                                                                                                                   |          1 |          7 |          0 |          1 |          8 |
+| backend\src\common\guards                                                                                                                   |          1 |         27 |          0 |          3 |         30 |
+| backend\src\database                                                                                                                        |          2 |         20 |          0 |          4 |         24 |
+| backend\src\modules                                                                                                                         |         82 |      2,957 |          0 |        462 |      3,419 |
+| backend\src\modules\auth                                                                                                                    |          8 |        423 |          0 |         70 |        493 |
+| backend\src\modules\auth (Files)                                                                                                            |          4 |        222 |          0 |         25 |        247 |
+| backend\src\modules\auth\dto                                                                                                                |          2 |         26 |          0 |          7 |         33 |
+| backend\src\modules\auth\spec                                                                                                               |          1 |        152 |          0 |         35 |        187 |
+| backend\src\modules\auth\strategies                                                                                                         |          1 |         23 |          0 |          3 |         26 |
+| backend\src\modules\booking                                                                                                                 |         30 |      1,007 |          0 |        140 |      1,147 |
+| backend\src\modules\booking (Files)                                                                                                         |          2 |        123 |          0 |         12 |        135 |
+| backend\src\modules\booking\application                                                                                                     |         17 |        358 |          0 |         63 |        421 |
+| backend\src\modules\booking\application\commands                                                                                            |          8 |        200 |          0 |         30 |        230 |
+| backend\src\modules\booking\application\dto                                                                                                 |          2 |         50 |          0 |         13 |         63 |
+| backend\src\modules\booking\application\events                                                                                              |          1 |         16 |          0 |          3 |         19 |
+| backend\src\modules\booking\application\interfaces.ts                                                                                       |          1 |         15 |          0 |          2 |         17 |
+| backend\src\modules\booking\application\mappers                                                                                             |          1 |         10 |          0 |          2 |         12 |
+| backend\src\modules\booking\application\queries                                                                                             |          4 |         67 |          0 |         13 |         80 |
+| backend\src\modules\booking\domain                                                                                                          |          4 |        214 |          0 |         32 |        246 |
+| backend\src\modules\booking\domain\entities                                                                                                 |          1 |        128 |          0 |         19 |        147 |
+| backend\src\modules\booking\domain\events                                                                                                   |          1 |         22 |          0 |          4 |         26 |
+| backend\src\modules\booking\domain\repo-interfaces                                                                                          |          1 |         52 |          0 |          7 |         59 |
+| backend\src\modules\booking\domain\value-objects                                                                                            |          1 |         12 |          0 |          2 |         14 |
+| backend\src\modules\booking\infrastructure                                                                                                  |          6 |        262 |          0 |         25 |        287 |
+| backend\src\modules\booking\infrastructure\bullmq                                                                                           |          1 |         13 |          0 |          3 |         16 |
+| backend\src\modules\booking\infrastructure\repo                                                                                             |          4 |        226 |          0 |         18 |        244 |
+| backend\src\modules\booking\infrastructure\scheduller                                                                                       |          1 |         23 |          0 |          4 |         27 |
+| backend\src\modules\booking\spec                                                                                                            |          1 |         50 |          0 |          8 |         58 |
+| backend\src\modules\property                                                                                                                |         22 |        795 |          0 |        117 |        912 |
+| backend\src\modules\property (Files)                                                                                                        |          2 |        104 |          0 |          9 |        113 |
+| backend\src\modules\propertyType                                                                                                            |          7 |        256 |          0 |         54 |        310 |
+| backend\src\modules\propertyType (Files)                                                                                                    |          2 |         67 |          0 |         10 |         77 |
+| backend\src\modules\propertyType\application                                                                                                |          2 |         42 |          0 |         10 |         52 |
+| backend\src\modules\propertyType\application (Files)                                                                                        |          1 |         35 |          0 |          8 |         43 |
+| backend\src\modules\propertyType\application\dto                                                                                            |          1 |          7 |          0 |          2 |          9 |
+| backend\src\modules\propertyType\domain                                                                                                     |          1 |         11 |          0 |          2 |         13 |
+| backend\src\modules\propertyType\domain\repo-interface                                                                                      |          1 |         11 |          0 |          2 |         13 |
+| backend\src\modules\propertyType\infrastructure                                                                                             |          1 |         44 |          0 |          7 |         51 |
+| backend\src\modules\propertyType\infrastructure\repo                                                                                        |          1 |         44 |          0 |          7 |         51 |
+| backend\src\modules\propertyType\spec                                                                                                       |          1 |         92 |          0 |         25 |        117 |
+| backend\src\modules\property\application                                                                                                    |         12 |        288 |          0 |         57 |        345 |
+| backend\src\modules\property\application\commands                                                                                           |          4 |         92 |          0 |         14 |        106 |
+| backend\src\modules\property\application\dto                                                                                                |          4 |        142 |          0 |         31 |        173 |
+| backend\src\modules\property\application\mappers                                                                                            |          1 |         21 |          0 |          3 |         24 |
+| backend\src\modules\property\application\queries                                                                                            |          3 |         33 |          0 |          9 |         42 |
+| backend\src\modules\property\domain                                                                                                         |          4 |        193 |          0 |         33 |        226 |
+| backend\src\modules\property\domain\entities                                                                                                |          1 |        117 |          0 |         20 |        137 |
+| backend\src\modules\property\domain\events                                                                                                  |          1 |         27 |          0 |          5 |         32 |
+| backend\src\modules\property\domain\repo-interface                                                                                          |          1 |         40 |          0 |          7 |         47 |
+| backend\src\modules\property\domain\value-objects                                                                                           |          1 |          9 |          0 |          1 |         10 |
+| backend\src\modules\property\infrastructure                                                                                                 |          3 |        176 |          0 |         12 |        188 |
+| backend\src\modules\property\infrastructure\repo                                                                                            |          3 |        176 |          0 |         12 |        188 |
+| backend\src\modules\property\spec                                                                                                           |          1 |         34 |          0 |          6 |         40 |
+| backend\src\modules\review                                                                                                                  |          9 |        204 |          0 |         36 |        240 |
+| backend\src\modules\review (Files)                                                                                                          |          2 |         18 |          0 |          4 |         22 |
+| backend\src\modules\review\application                                                                                                      |          4 |        105 |          0 |         19 |        124 |
+| backend\src\modules\review\application (Files)                                                                                              |          1 |         41 |          0 |          8 |         49 |
+| backend\src\modules\review\application\dto                                                                                                  |          2 |         44 |          0 |          8 |         52 |
+| backend\src\modules\review\application\handlers                                                                                             |          1 |         20 |          0 |          3 |         23 |
+| backend\src\modules\review\domain                                                                                                           |          2 |         32 |          0 |          6 |         38 |
+| backend\src\modules\review\domain\interfaces                                                                                                |          2 |         32 |          0 |          6 |         38 |
+| backend\src\modules\review\infrastructure                                                                                                   |          1 |         49 |          0 |          7 |         56 |
+| backend\src\modules\review\infrastructure\repo                                                                                              |          1 |         49 |          0 |          7 |         56 |
+| backend\src\modules\user                                                                                                                    |          6 |        272 |          0 |         45 |        317 |
+| backend\src\modules\user (Files)                                                                                                            |          3 |        158 |          0 |         19 |        177 |
+| backend\src\modules\user\dto                                                                                                                |          2 |         20 |          0 |          6 |         26 |
+| backend\src\modules\user\spec                                                                                                               |          1 |         94 |          0 |         20 |        114 |
+| frontend                                                                                                                                    |         15 |      3,632 |          5 |         24 |      3,661 |
+| frontend (Files)                                                                                                                            |         10 |      3,591 |          5 |         17 |      3,613 |
+| frontend\public                                                                                                                             |          2 |         25 |          0 |          1 |         26 |
+| frontend\src                                                                                                                                |          3 |         16 |          0 |          6 |         22 |
++---------------------------------------------------------------------------------------------------------------------------------------------+------------+------------+------------+------------+------------+
+
+Files
++---------------------------------------------------------------------------------------------------------------------------------------------+--------------------+------------+------------+------------+------------+
+| filename                                                                                                                                    | language           | code       | comment    | blank      | total      |
++---------------------------------------------------------------------------------------------------------------------------------------------+--------------------+------------+------------+------------+------------+
+| c:\Users\Andriisav\Desktop\portfolio projects\booking\README.md                                                                             | Markdown           |          0 |          0 |          1 |          1 |
+| c:\Users\Andriisav\Desktop\portfolio projects\booking\backend\.dockerignore                                                                 | Ignore             |         11 |          0 |          3 |         14 |
+| c:\Users\Andriisav\Desktop\portfolio projects\booking\backend\.prettierrc                                                                   | JSON               |          4 |          0 |          1 |          5 |
+| c:\Users\Andriisav\Desktop\portfolio projects\booking\backend\Dockerfile                                                                    | Docker             |          7 |          0 |          0 |          7 |
+| c:\Users\Andriisav\Desktop\portfolio projects\booking\backend\eslint.config.mjs                                                             | JavaScript         |         37 |          1 |          3 |         41 |
+| c:\Users\Andriisav\Desktop\portfolio projects\booking\backend\jest.config.ts                                                                | TypeScript         |         12 |          0 |          1 |         13 |
+| c:\Users\Andriisav\Desktop\portfolio projects\booking\backend\nest-cli.json                                                                 | JSON               |          9 |          0 |          1 |         10 |
+| c:\Users\Andriisav\Desktop\portfolio projects\booking\backend\package-lock.json                                                             | JSON               |     16,356 |          0 |          1 |     16,357 |
+| c:\Users\Andriisav\Desktop\portfolio projects\booking\backend\package.json                                                                  | JSON               |         95 |          0 |          1 |         96 |
+| c:\Users\Andriisav\Desktop\portfolio projects\booking\backend\prisma.config.ts                                                              | TypeScript         |         11 |          2 |          2 |         15 |
+| c:\Users\Andriisav\Desktop\portfolio projects\booking\backend\prisma\migrations\20260412172219_init_migration\migration.sql                 | MS SQL             |         86 |         24 |         32 |        142 |
+| c:\Users\Andriisav\Desktop\portfolio projects\booking\backend\prisma\migrations\20260418231805_migration_2\migration.sql                    | MS SQL             |         74 |         56 |         41 |        171 |
+| c:\Users\Andriisav\Desktop\portfolio projects\booking\backend\prisma\migrations\20260418231942_add_exclude_constraint\migration.sql         | MS SQL             |          8 |          2 |          2 |         12 |
+| c:\Users\Andriisav\Desktop\portfolio projects\booking\backend\prisma\schema.prisma                                                          | Prisma             |        173 |          3 |         72 |        248 |
+| c:\Users\Andriisav\Desktop\portfolio projects\booking\backend\src\app.module.ts                                                             | TypeScript         |         62 |          0 |          2 |         64 |
+| c:\Users\Andriisav\Desktop\portfolio projects\booking\backend\src\common\constants\bookingStatuses.ts                                       | TypeScript         |         16 |          0 |          5 |         21 |
+| c:\Users\Andriisav\Desktop\portfolio projects\booking\backend\src\common\constants\roleLevels.ts                                            | TypeScript         |         11 |          0 |          3 |         14 |
+| c:\Users\Andriisav\Desktop\portfolio projects\booking\backend\src\common\decorators\accessInfo.decorator.ts                                 | TypeScript         |          9 |          0 |          2 |         11 |
+| c:\Users\Andriisav\Desktop\portfolio projects\booking\backend\src\common\decorators\authorization.decorator.ts                              | TypeScript         |          7 |          0 |          2 |          9 |
+| c:\Users\Andriisav\Desktop\portfolio projects\booking\backend\src\common\decorators\cookies.decorator.ts                                    | TypeScript         |          8 |          0 |          2 |         10 |
+| c:\Users\Andriisav\Desktop\portfolio projects\booking\backend\src\common\decorators\reqRole.decorator.ts                                    | TypeScript         |          3 |          0 |          2 |          5 |
+| c:\Users\Andriisav\Desktop\portfolio projects\booking\backend\src\common\events\globalCompleted.event.ts                                    | TypeScript         |          7 |          0 |          1 |          8 |
+| c:\Users\Andriisav\Desktop\portfolio projects\booking\backend\src\common\guards\MyAuthGuard.guard.ts                                        | TypeScript         |         27 |          0 |          3 |         30 |
+| c:\Users\Andriisav\Desktop\portfolio projects\booking\backend\src\database\prisma.module.ts                                                 | TypeScript         |          8 |          0 |          2 |         10 |
+| c:\Users\Andriisav\Desktop\portfolio projects\booking\backend\src\database\prisma.service.ts                                                | TypeScript         |         12 |          0 |          2 |         14 |
+| c:\Users\Andriisav\Desktop\portfolio projects\booking\backend\src\main.ts                                                                   | TypeScript         |         12 |          0 |          5 |         17 |
+| c:\Users\Andriisav\Desktop\portfolio projects\booking\backend\src\modules\auth\auth.controller.ts                                           | TypeScript         |         56 |          0 |          6 |         62 |
+| c:\Users\Andriisav\Desktop\portfolio projects\booking\backend\src\modules\auth\auth.module.ts                                               | TypeScript         |         23 |          0 |          2 |         25 |
+| c:\Users\Andriisav\Desktop\portfolio projects\booking\backend\src\modules\auth\auth.service.ts                                              | TypeScript         |        127 |          0 |         13 |        140 |
+| c:\Users\Andriisav\Desktop\portfolio projects\booking\backend\src\modules\auth\dto\login.dto.ts                                             | TypeScript         |          8 |          0 |          3 |         11 |
+| c:\Users\Andriisav\Desktop\portfolio projects\booking\backend\src\modules\auth\dto\register.dto.ts                                          | TypeScript         |         18 |          0 |          4 |         22 |
+| c:\Users\Andriisav\Desktop\portfolio projects\booking\backend\src\modules\auth\spec\auth.service.spec.ts                                    | TypeScript         |        152 |          0 |         35 |        187 |
+| c:\Users\Andriisav\Desktop\portfolio projects\booking\backend\src\modules\auth\strategies\jwt.strategy.ts                                   | TypeScript         |         23 |          0 |          3 |         26 |
+| c:\Users\Andriisav\Desktop\portfolio projects\booking\backend\src\modules\auth\types.ts                                                     | TypeScript         |         16 |          0 |          4 |         20 |
+| c:\Users\Andriisav\Desktop\portfolio projects\booking\backend\src\modules\booking\application\commands\booking.commands.ts                  | TypeScript         |         34 |          0 |          8 |         42 |
+| c:\Users\Andriisav\Desktop\portfolio projects\booking\backend\src\modules\booking\application\commands\cancel-status.handler.ts             | TypeScript         |         21 |          0 |          3 |         24 |
+| c:\Users\Andriisav\Desktop\portfolio projects\booking\backend\src\modules\booking\application\commands\complete-status.handler.ts           | TypeScript         |         22 |          0 |          4 |         26 |
+| c:\Users\Andriisav\Desktop\portfolio projects\booking\backend\src\modules\booking\application\commands\confirm-status.handler.ts            | TypeScript         |         21 |          0 |          3 |         24 |
+| c:\Users\Andriisav\Desktop\portfolio projects\booking\backend\src\modules\booking\application\commands\create-booking.handler.ts            | TypeScript         |         39 |          0 |          3 |         42 |
+| c:\Users\Andriisav\Desktop\portfolio projects\booking\backend\src\modules\booking\application\commands\expire-status.handler.ts             | TypeScript         |         21 |          0 |          3 |         24 |
+| c:\Users\Andriisav\Desktop\portfolio projects\booking\backend\src\modules\booking\application\commands\pay-status.handler.ts                | TypeScript         |         21 |          0 |          3 |         24 |
+| c:\Users\Andriisav\Desktop\portfolio projects\booking\backend\src\modules\booking\application\commands\reject-status.handler.ts             | TypeScript         |         21 |          0 |          3 |         24 |
+| c:\Users\Andriisav\Desktop\portfolio projects\booking\backend\src\modules\booking\application\dto\create-booking.dto.ts                     | TypeScript         |         19 |          0 |          6 |         25 |
+| c:\Users\Andriisav\Desktop\portfolio projects\booking\backend\src\modules\booking\application\dto\searchParams.dto.ts                       | TypeScript         |         31 |          0 |          7 |         38 |
+| c:\Users\Andriisav\Desktop\portfolio projects\booking\backend\src\modules\booking\application\events\completedEvent.handler.ts              | TypeScript         |         16 |          0 |          3 |         19 |
+| c:\Users\Andriisav\Desktop\portfolio projects\booking\backend\src\modules\booking\application\interfaces.ts\TransactionRepo.interface.ts    | TypeScript         |         15 |          0 |          2 |         17 |
+| c:\Users\Andriisav\Desktop\portfolio projects\booking\backend\src\modules\booking\application\mappers\booking.mapper.ts                     | TypeScript         |         10 |          0 |          2 |         12 |
+| c:\Users\Andriisav\Desktop\portfolio projects\booking\backend\src\modules\booking\application\queries\booking.query.ts                      | TypeScript         |         16 |          0 |          4 |         20 |
+| c:\Users\Andriisav\Desktop\portfolio projects\booking\backend\src\modules\booking\application\queries\getBookingById.query.ts               | TypeScript         |         16 |          0 |          3 |         19 |
+| c:\Users\Andriisav\Desktop\portfolio projects\booking\backend\src\modules\booking\application\queries\getBookingsByProperty.query.ts        | TypeScript         |         19 |          0 |          3 |         22 |
+| c:\Users\Andriisav\Desktop\portfolio projects\booking\backend\src\modules\booking\application\queries\getMyBookings.query.ts                | TypeScript         |         16 |          0 |          3 |         19 |
+| c:\Users\Andriisav\Desktop\portfolio projects\booking\backend\src\modules\booking\booking.controller.ts                                     | TypeScript         |         87 |          0 |         10 |         97 |
+| c:\Users\Andriisav\Desktop\portfolio projects\booking\backend\src\modules\booking\booking.module.ts                                         | TypeScript         |         36 |          0 |          2 |         38 |
+| c:\Users\Andriisav\Desktop\portfolio projects\booking\backend\src\modules\booking\domain\entities\booking.entity.ts                         | TypeScript         |        128 |          0 |         19 |        147 |
+| c:\Users\Andriisav\Desktop\portfolio projects\booking\backend\src\modules\booking\domain\events\booking.events.ts                           | TypeScript         |         22 |          0 |          4 |         26 |
+| c:\Users\Andriisav\Desktop\portfolio projects\booking\backend\src\modules\booking\domain\repo-interfaces\IBookingRepo.interface.ts          | TypeScript         |         52 |          0 |          7 |         59 |
+| c:\Users\Andriisav\Desktop\portfolio projects\booking\backend\src\modules\booking\domain\value-objects\domainDate.ts                        | TypeScript         |         12 |          0 |          2 |         14 |
+| c:\Users\Andriisav\Desktop\portfolio projects\booking\backend\src\modules\booking\infrastructure\bullmq\expired.worker.ts                   | TypeScript         |         13 |          0 |          3 |         16 |
+| c:\Users\Andriisav\Desktop\portfolio projects\booking\backend\src\modules\booking\infrastructure\repo\PrismaBooking.repository.ts           | TypeScript         |        107 |          0 |          8 |        115 |
+| c:\Users\Andriisav\Desktop\portfolio projects\booking\backend\src\modules\booking\infrastructure\repo\PrismaBooking.select.ts               | TypeScript         |         12 |          0 |          2 |         14 |
+| c:\Users\Andriisav\Desktop\portfolio projects\booking\backend\src\modules\booking\infrastructure\repo\PrismaBookingQuery.repository.ts      | TypeScript         |         89 |          0 |          5 |         94 |
+| c:\Users\Andriisav\Desktop\portfolio projects\booking\backend\src\modules\booking\infrastructure\repo\Transaction.repository.ts             | TypeScript         |         18 |          0 |          3 |         21 |
+| c:\Users\Andriisav\Desktop\portfolio projects\booking\backend\src\modules\booking\infrastructure\scheduller\complete-statuses.ts            | TypeScript         |         23 |          0 |          4 |         27 |
+| c:\Users\Andriisav\Desktop\portfolio projects\booking\backend\src\modules\booking\spec\bookingDomain.spec.ts                                | TypeScript         |         50 |          0 |          8 |         58 |
+| c:\Users\Andriisav\Desktop\portfolio projects\booking\backend\src\modules\propertyType\application\dto\propertyType.dto.ts                  | TypeScript         |          7 |          0 |          2 |          9 |
+| c:\Users\Andriisav\Desktop\portfolio projects\booking\backend\src\modules\propertyType\application\propertyType.service.ts                  | TypeScript         |         35 |          0 |          8 |         43 |
+| c:\Users\Andriisav\Desktop\portfolio projects\booking\backend\src\modules\propertyType\domain\repo-interface\IPropertyTypeRepo.interface.ts | TypeScript         |         11 |          0 |          2 |         13 |
+| c:\Users\Andriisav\Desktop\portfolio projects\booking\backend\src\modules\propertyType\infrastructure\repo\PrismaPropertyType.repository.ts | TypeScript         |         44 |          0 |          7 |         51 |
+| c:\Users\Andriisav\Desktop\portfolio projects\booking\backend\src\modules\propertyType\propertyType.controller.ts                           | TypeScript         |         53 |          0 |          8 |         61 |
+| c:\Users\Andriisav\Desktop\portfolio projects\booking\backend\src\modules\propertyType\propertyType.module.ts                               | TypeScript         |         14 |          0 |          2 |         16 |
+| c:\Users\Andriisav\Desktop\portfolio projects\booking\backend\src\modules\propertyType\spec\propertyType.service.spec.ts                    | TypeScript         |         92 |          0 |         25 |        117 |
+| c:\Users\Andriisav\Desktop\portfolio projects\booking\backend\src\modules\property\application\commands\create-property.handler.ts          | TypeScript         |         26 |          0 |          3 |         29 |
+| c:\Users\Andriisav\Desktop\portfolio projects\booking\backend\src\modules\property\application\commands\delete-property.handler.ts          | TypeScript         |         23 |          0 |          3 |         26 |
+| c:\Users\Andriisav\Desktop\portfolio projects\booking\backend\src\modules\property\application\commands\edit-property.handler.ts            | TypeScript         |         21 |          0 |          3 |         24 |
+| c:\Users\Andriisav\Desktop\portfolio projects\booking\backend\src\modules\property\application\commands\property.commands.ts                | TypeScript         |         22 |          0 |          5 |         27 |
+| c:\Users\Andriisav\Desktop\portfolio projects\booking\backend\src\modules\property\application\dto\changeProperty.dto.ts                    | TypeScript         |         36 |          0 |          7 |         43 |
+| c:\Users\Andriisav\Desktop\portfolio projects\booking\backend\src\modules\property\application\dto\createProperty.dto.ts                    | TypeScript         |         38 |          0 |          8 |         46 |
+| c:\Users\Andriisav\Desktop\portfolio projects\booking\backend\src\modules\property\application\dto\newAddress.dto.ts                        | TypeScript         |         12 |          0 |          4 |         16 |
+| c:\Users\Andriisav\Desktop\portfolio projects\booking\backend\src\modules\property\application\dto\searchParams.dto.ts                      | TypeScript         |         56 |          0 |         12 |         68 |
+| c:\Users\Andriisav\Desktop\portfolio projects\booking\backend\src\modules\property\application\mappers\property.mapper.ts                   | TypeScript         |         21 |          0 |          3 |         24 |
+| c:\Users\Andriisav\Desktop\portfolio projects\booking\backend\src\modules\property\application\queries\find-properties.handler.ts           | TypeScript         |         13 |          0 |          3 |         16 |
+| c:\Users\Andriisav\Desktop\portfolio projects\booking\backend\src\modules\property\application\queries\find-property.handler.ts             | TypeScript         |         13 |          0 |          3 |         16 |
+| c:\Users\Andriisav\Desktop\portfolio projects\booking\backend\src\modules\property\application\queries\property.queries.ts                  | TypeScript         |          7 |          0 |          3 |         10 |
+| c:\Users\Andriisav\Desktop\portfolio projects\booking\backend\src\modules\property\domain\entities\Property.entity.ts                       | TypeScript         |        117 |          0 |         20 |        137 |
+| c:\Users\Andriisav\Desktop\portfolio projects\booking\backend\src\modules\property\domain\events\property.events.ts                         | TypeScript         |         27 |          0 |          5 |         32 |
+| c:\Users\Andriisav\Desktop\portfolio projects\booking\backend\src\modules\property\domain\repo-interface\IPropertyRepo.interface.ts         | TypeScript         |         40 |          0 |          7 |         47 |
+| c:\Users\Andriisav\Desktop\portfolio projects\booking\backend\src\modules\property\domain\value-objects\address.value.ts                    | TypeScript         |          9 |          0 |          1 |         10 |
+| c:\Users\Andriisav\Desktop\portfolio projects\booking\backend\src\modules\property\infrastructure\repo\PrismaProperty.repository.ts         | TypeScript         |         77 |          0 |          5 |         82 |
+| c:\Users\Andriisav\Desktop\portfolio projects\booking\backend\src\modules\property\infrastructure\repo\PrismaPropertyQuery.repository.ts    | TypeScript         |         73 |          0 |          4 |         77 |
+| c:\Users\Andriisav\Desktop\portfolio projects\booking\backend\src\modules\property\infrastructure\repo\prisma.property.select.ts            | TypeScript         |         26 |          0 |          3 |         29 |
+| c:\Users\Andriisav\Desktop\portfolio projects\booking\backend\src\modules\property\property.controller.ts                                   | TypeScript         |         80 |          0 |          7 |         87 |
+| c:\Users\Andriisav\Desktop\portfolio projects\booking\backend\src\modules\property\property.module.ts                                       | TypeScript         |         24 |          0 |          2 |         26 |
+| c:\Users\Andriisav\Desktop\portfolio projects\booking\backend\src\modules\property\spec\propertyDomain.spec.ts                              | TypeScript         |         34 |          0 |          6 |         40 |
+| c:\Users\Andriisav\Desktop\portfolio projects\booking\backend\src\modules\review\application\dto\changeReview.dto.ts                        | TypeScript         |         22 |          0 |          4 |         26 |
+| c:\Users\Andriisav\Desktop\portfolio projects\booking\backend\src\modules\review\application\dto\createReview.dto.ts                        | TypeScript         |         22 |          0 |          4 |         26 |
+| c:\Users\Andriisav\Desktop\portfolio projects\booking\backend\src\modules\review\application\handlers\completedEvent.handler.ts             | TypeScript         |         20 |          0 |          3 |         23 |
+| c:\Users\Andriisav\Desktop\portfolio projects\booking\backend\src\modules\review\application\review.service.ts                              | TypeScript         |         41 |          0 |          8 |         49 |
+| c:\Users\Andriisav\Desktop\portfolio projects\booking\backend\src\modules\review\domain\interfaces\repo.interface.ts                        | TypeScript         |         12 |          0 |          2 |         14 |
+| c:\Users\Andriisav\Desktop\portfolio projects\booking\backend\src\modules\review\domain\interfaces\review.interfaces.ts                     | TypeScript         |         20 |          0 |          4 |         24 |
+| c:\Users\Andriisav\Desktop\portfolio projects\booking\backend\src\modules\review\infrastructure\repo\IReview.repository.ts                  | TypeScript         |         49 |          0 |          7 |         56 |
+| c:\Users\Andriisav\Desktop\portfolio projects\booking\backend\src\modules\review\review.controller.ts                                       | TypeScript         |          6 |          0 |          2 |          8 |
+| c:\Users\Andriisav\Desktop\portfolio projects\booking\backend\src\modules\review\review.module.ts                                           | TypeScript         |         12 |          0 |          2 |         14 |
+| c:\Users\Andriisav\Desktop\portfolio projects\booking\backend\src\modules\user\dto\password.dto.ts                                          | TypeScript         |         10 |          0 |          3 |         13 |
+| c:\Users\Andriisav\Desktop\portfolio projects\booking\backend\src\modules\user\dto\settings.dto.ts                                          | TypeScript         |         10 |          0 |          3 |         13 |
+| c:\Users\Andriisav\Desktop\portfolio projects\booking\backend\src\modules\user\spec\user.service.spec.ts                                    | TypeScript         |         94 |          0 |         20 |        114 |
+| c:\Users\Andriisav\Desktop\portfolio projects\booking\backend\src\modules\user\user.controller.ts                                           | TypeScript         |         67 |          0 |          9 |         76 |
+| c:\Users\Andriisav\Desktop\portfolio projects\booking\backend\src\modules\user\user.module.ts                                               | TypeScript         |         10 |          0 |          2 |         12 |
+| c:\Users\Andriisav\Desktop\portfolio projects\booking\backend\src\modules\user\user.service.ts                                              | TypeScript         |         81 |          0 |          8 |         89 |
+| c:\Users\Andriisav\Desktop\portfolio projects\booking\backend\tsconfig.build.json                                                           | JSON               |          4 |          0 |          1 |          5 |
+| c:\Users\Andriisav\Desktop\portfolio projects\booking\backend\tsconfig.json                                                                 | JSON with Comments |         26 |          0 |          1 |         27 |
+| c:\Users\Andriisav\Desktop\portfolio projects\booking\docker-compose.yml                                                                    | YAML               |         69 |          0 |          5 |         74 |
+| c:\Users\Andriisav\Desktop\portfolio projects\booking\frontend\.dockerignore                                                                | Ignore             |         11 |          0 |          3 |         14 |
+| c:\Users\Andriisav\Desktop\portfolio projects\booking\frontend\Dockerfile                                                                   | Docker             |          6 |          0 |          0 |          6 |
+| c:\Users\Andriisav\Desktop\portfolio projects\booking\frontend\eslint.config.js                                                             | JavaScript JSX     |         22 |          0 |          2 |         24 |
+| c:\Users\Andriisav\Desktop\portfolio projects\booking\frontend\index.html                                                                   | HTML               |         13 |          0 |          1 |         14 |
+| c:\Users\Andriisav\Desktop\portfolio projects\booking\frontend\package-lock.json                                                            | JSON               |      3,443 |          0 |          1 |      3,444 |
+| c:\Users\Andriisav\Desktop\portfolio projects\booking\frontend\package.json                                                                 | JSON               |         43 |          0 |          1 |         44 |
+| c:\Users\Andriisav\Desktop\portfolio projects\booking\frontend\public\favicon.svg                                                           | XML                |          1 |          0 |          0 |          1 |
+| c:\Users\Andriisav\Desktop\portfolio projects\booking\frontend\public\icons.svg                                                             | XML                |         24 |          0 |          1 |         25 |
+| c:\Users\Andriisav\Desktop\portfolio projects\booking\frontend\src\App.tsx                                                                  | TypeScript JSX     |          7 |          0 |          3 |         10 |
+| c:\Users\Andriisav\Desktop\portfolio projects\booking\frontend\src\index.css                                                                | PostCSS            |          0 |          0 |          1 |          1 |
+| c:\Users\Andriisav\Desktop\portfolio projects\booking\frontend\src\main.tsx                                                                 | TypeScript JSX     |          9 |          0 |          2 |         11 |
+| c:\Users\Andriisav\Desktop\portfolio projects\booking\frontend\tsconfig.app.json                                                            | JSON               |         21 |          2 |          3 |         26 |
+| c:\Users\Andriisav\Desktop\portfolio projects\booking\frontend\tsconfig.json                                                                | JSON with Comments |          7 |          0 |          1 |          8 |
+| c:\Users\Andriisav\Desktop\portfolio projects\booking\frontend\tsconfig.node.json                                                           | JSON               |         20 |          2 |          3 |         25 |
+| c:\Users\Andriisav\Desktop\portfolio projects\booking\frontend\vite.config.ts                                                               | TypeScript         |          5 |          1 |          2 |          8 |
+| Total                                                                                                                                       |                    |     23,753 |         93 |        685 |     24,531 |
++---------------------------------------------------------------------------------------------------------------------------------------------+--------------------+------------+------------+------------+------------+
