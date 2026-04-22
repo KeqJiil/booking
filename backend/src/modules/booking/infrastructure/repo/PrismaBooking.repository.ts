@@ -41,6 +41,32 @@ export class PrismaBookingRepo implements IBookingRepo {
     });
   }
 
+  async getOverlapping(
+    startDate: Date,
+    endDate: Date,
+    propertyId: string,
+    tx?: unknown,
+  ) {
+    const db = (tx ?? this.prisma) as Tx;
+    return !!(await db.booking.findFirst({
+      where: {
+        propertyId,
+        status: {
+          in: ['CONFIRMED', 'PAID', 'PENDING'],
+        },
+        startDate: {
+          lt: endDate,
+        },
+        endDate: {
+          gt: startDate,
+        },
+      },
+      select: {
+        id: true,
+      },
+    }));
+  }
+
   async save(entity: BookingEntity, tx?: Tx): Promise<void> {
     const db = (tx ?? this.prisma) as Tx;
     await db.booking.upsert({
@@ -57,9 +83,9 @@ export class PrismaBookingRepo implements IBookingRepo {
         priceAtMoment: entity.data.priceAtMoment,
         userId: entity.data.userId,
         propertyId: entity.data.propertyId,
-        startDate: entity.data.startDate,
-        endDate: entity.data.endDate,
-        days: entity.data.days,
+        startDate: entity.data.dateData.startDate,
+        endDate: entity.data.dateData.endDate,
+        days: entity.data.dateData.days,
       },
     });
   }

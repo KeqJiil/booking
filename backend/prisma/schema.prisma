@@ -68,7 +68,7 @@ model Property {
   hostId String @map("host_id")
   host   User   @relation(references: [id], fields: [hostId])
 
-  typeId       String? @map("type_id")
+  typeId       String?       @map("type_id")
   propertyType PropertyType? @relation(references: [id], fields: [typeId], onDelete: SetNull)
 
   bookings Booking[]
@@ -147,6 +147,7 @@ model Review {
 
   createdAt DateTime @default(now())
 
+  @@unique([reviewerId, bookingId, propertyId])
   @@index([propertyId])
 }
 

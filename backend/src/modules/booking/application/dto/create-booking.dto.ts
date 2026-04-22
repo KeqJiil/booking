@@ -6,11 +6,6 @@ export class CreateBookingDto {
   @Min(1)
   priceAtMoment: number;
 
-  @IsNumber()
-  @IsNotEmpty()
-  @Min(1)
-  days: number;
-
   @IsUUID()
   @IsNotEmpty()
   propertyId: string;

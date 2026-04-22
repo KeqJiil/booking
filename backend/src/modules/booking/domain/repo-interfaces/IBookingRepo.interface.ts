@@ -37,6 +37,12 @@ export interface IBookingRepo {
   getIdsToComplete(): Promise<{ id: string }[]>;
   getEntityById(id: string, tx?: unknown): Promise<BookingEntity | null>;
   save(entity: BookingEntity, tx?: unknown): Promise<void>;
+  getOverlapping(
+    startDate: Date,
+    endDate: Date,
+    propertyId: string,
+    tx: unknown,
+  ): Promise<boolean>;
 }
 
 export interface IBookingRepoQuery {

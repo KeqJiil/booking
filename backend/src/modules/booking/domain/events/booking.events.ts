@@ -15,3 +15,11 @@ export class BookingCreated {
     public readonly endDate: Date,
   ) {}
 }
+
+export class BookingCompletedStatus {
+  constructor(
+    public readonly userId: string,
+    public readonly propertyId: string,
+    public readonly bookingId: string,
+  ) {}
+}

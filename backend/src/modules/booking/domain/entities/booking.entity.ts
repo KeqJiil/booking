@@ -3,8 +3,13 @@ import {
   badStatuses,
   TBookingStatus,
 } from 'src/common/constants/bookingStatuses';
-import { BookingCreated, BookingStatusChanges } from '../events/booking.events';
+import {
+  BookingCompletedStatus,
+  BookingCreated,
+  BookingStatusChanges,
+} from '../events/booking.events';
 import { AggregateRoot } from '@nestjs/cqrs';
+import { BookingDate } from '../value-objects/domainDate';
 
 export interface IBookingDbData {
   priceAtMoment: number;
@@ -21,7 +26,6 @@ export interface IBookingDbData {
 
 export interface IBookingEntityCreateProps {
   priceAtMoment: number;
-  days: number;
   propertyId: string;
   userId: string;
   startDate: Date;
@@ -29,7 +33,15 @@ export interface IBookingEntityCreateProps {
   hostId: string;
 }
 
-export interface IBookingEntityData extends IBookingEntityCreateProps {
+export interface IBookingEntity {
+  priceAtMoment: number;
+  hostId: string;
+  propertyId: string;
+  userId: string;
+  dateData: BookingDate;
+}
+
+export interface IBookingEntityData extends IBookingEntity {
   totalPrice: number;
 }
 
@@ -43,10 +55,11 @@ export class BookingEntity extends AggregateRoot {
   }
 
   static create(rawData: IBookingEntityCreateProps) {
-    const totalPrice = rawData.days * rawData.priceAtMoment;
+    const dateData = new BookingDate(rawData.startDate, rawData.endDate);
+    const totalPrice = dateData.days * rawData.priceAtMoment;
     const entity = new BookingEntity(
       'PENDING',
-      { ...rawData, totalPrice },
+      { ...rawData, totalPrice, dateData },
       randomUUID(),
     );
     entity.apply(
@@ -62,10 +75,11 @@ export class BookingEntity extends AggregateRoot {
 
   static fromDB(rawData: IBookingDbData) {
     const { status, id, ...data } = rawData;
-    if (badStatuses[status] || data.startDate > data.endDate) {
-      throw new Error();
+    if (badStatuses[status]) {
+      throw new Error('Wrong data type');
     }
-    return new BookingEntity(status, data, id);
+    const dateData = new BookingDate(data.startDate, data.endDate);
+    return new BookingEntity(status, { ...data, dateData }, id);
   }
 
   public pay() {
@@ -100,7 +114,13 @@ export class BookingEntity extends AggregateRoot {
 
   public complete() {
     if (this._status !== 'CONFIRMED') throw new Error();
-    this.apply(new BookingStatusChanges(this._status, 'COMPLETED'));
+    this.apply(
+      new BookingCompletedStatus(
+        this._bookingData.userId,
+        this._bookingData.propertyId,
+        this._id,
+      ),
+    );
     this._status = 'COMPLETED';
   }
 

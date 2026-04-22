@@ -18,6 +18,15 @@ export class CreateBookingHandler implements ICommandHandler<CreateBookingComman
   async execute(command: CreateBookingCommand): Promise<void> {
     await this.transactions.startTransaction(async (tx) => {
       const entity = BookingEntity.create(command.data);
+      if (
+        await this.repo.getOverlapping(
+          entity.data.dateData.startDate,
+          entity.data.dateData.endDate,
+          entity.data.propertyId,
+          tx,
+        )
+      )
+        throw new Error('Overlap dates');
       await this.repo.save(entity, tx);
       await this.queue.add(
         'expire',

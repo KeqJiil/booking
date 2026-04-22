@@ -11,6 +11,7 @@ import { ChangeBookingHandler } from './application/commands/expire-status.handl
 import { BullModule } from '@nestjs/bullmq';
 import { PrismaModule } from 'src/database/prisma.module';
 import { BookingWorker } from './infrastructure/bullmq/expired.worker';
+import { CompletedBookingEventHandler } from './application/events/completedEvent.handler';
 
 @Module({
   imports: [
@@ -30,6 +31,7 @@ import { BookingWorker } from './infrastructure/bullmq/expired.worker';
     CreateBookingHandler,
     ChangeBookingHandler,
     BookingWorker,
+    CompletedBookingEventHandler,
   ],
 })
 export class BookingModule {}

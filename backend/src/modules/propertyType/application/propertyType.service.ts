@@ -1,4 +1,4 @@
-import { Inject, Injectable } from '@nestjs/common';
+import { Inject, Injectable, NotFoundException } from '@nestjs/common';
 import type {
   IPropertyType,
   IPropertyTypeRepo,
@@ -16,11 +16,15 @@ export class PropertyTypeService {
   }
 
   async getById(id: string) {
-    return await this.prisma.findById(id);
+    const result = await this.prisma.findById(id);
+    if (!result) throw new NotFoundException();
+    return result;
   }
 
   async getByName(name: string) {
-    return await this.prisma.findByName(name);
+    const result = await this.prisma.findByName(name);
+    if (!result) throw new NotFoundException();
+    return result;
   }
 
   async createType(name: string) {
