@@ -1,5 +1,8 @@
 import { ConflictException, Inject, Injectable } from '@nestjs/common';
-import type { IChatRepository } from '../domain/interfaces/chatRepository.interface';
+import type {
+  IChatRepository,
+  ICreateChatData,
+} from '../domain/interfaces/chatRepository.interface';
 
 @Injectable()
 export class ChatService {
@@ -7,6 +10,10 @@ export class ChatService {
 
   async getMessages(userId: string, chatId: string) {
     return await this.repo.getMessages(userId, chatId);
+  }
+
+  async createChat(data: ICreateChatData) {
+    await this.repo.createChatRoom(data);
   }
 
   async getChat(chatRoomId: string, userId: string) {

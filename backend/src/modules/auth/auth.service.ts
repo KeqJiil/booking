@@ -9,6 +9,8 @@ import type { Cache } from 'cache-manager';
 import { randomUUID } from 'crypto';
 import { IPayload, ISession } from './types';
 import { Roles } from 'src/common/constants/roleLevels';
+import { EventEmitter2 } from '@nestjs/event-emitter';
+import { eventNames } from 'src/common/constants/eventnames';
 
 @Injectable()
 export class AuthService {
@@ -17,6 +19,7 @@ export class AuthService {
     private readonly jwt: JwtService,
     private readonly prisma: PrismaService,
     @Inject(CACHE_MANAGER) private cache: Cache,
+    private eventEmitter: EventEmitter2,
   ) {}
 
   private async createSession(
@@ -93,6 +96,9 @@ export class AuthService {
     const sessionId = randomUUID();
     const tokens = await this.signTokens(newUser.id, newUser.role, sessionId);
     await this.createSession(newUser.id, tokens.refreshToken, sessionId);
+
+    this.eventEmitter.emit(eventNames.account_created, newUser);
+
     return tokens;
   }
 

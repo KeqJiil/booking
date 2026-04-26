@@ -7,10 +7,15 @@ import { PrismaService } from 'src/database/prisma.service';
 import { UserSettingsDto } from './dto/settings.dto';
 import bcrypt from 'bcrypt';
 import { Roles } from 'src/common/constants/roleLevels';
+import { EventEmitter2 } from '@nestjs/event-emitter';
+import { eventNames } from 'src/common/constants/eventnames';
 
 @Injectable()
 export class UserService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly eventEmmiter: EventEmitter2,
+  ) {}
 
   async getSettings(userId: string) {
     return await this.prisma.userSettings.findUnique({
@@ -29,12 +34,13 @@ export class UserService {
   }
 
   async changeRole(userId: string, role: Roles) {
-    return await this.prisma.user.update({
+    const user = await this.prisma.user.update({
       where: { id: userId },
       data: {
         role,
       },
     });
+    this.eventEmmiter.emit(eventNames.new_role_received, user);
   }
 
   async changePassword(userId: string, password: string, newPassword: string) {
@@ -46,10 +52,14 @@ export class UserService {
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) throw new UnauthorizedException();
     const newHashedPassword = await bcrypt.hash(newPassword, 10);
-    return await this.prisma.user.update({
+    const updatedUser = await this.prisma.user.update({
       where: { id: userId },
       data: { password: newHashedPassword },
     });
+
+    this.eventEmmiter.emit(eventNames.password_changed, updatedUser);
+
+    return updatedUser;
   }
 
   async deleteUser(userId: string) {

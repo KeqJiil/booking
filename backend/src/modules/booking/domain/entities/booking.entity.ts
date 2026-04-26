@@ -5,6 +5,7 @@ import {
 } from 'src/common/constants/bookingStatuses';
 import {
   BookingCompletedStatus,
+  BookingConfirmStatus,
   BookingCreated,
   BookingStatusChanges,
 } from '../events/booking.events';
@@ -108,7 +109,14 @@ export class BookingEntity extends AggregateRoot {
 
   public confirm() {
     if (this._status !== 'PENDING') throw new Error();
-    this.apply(new BookingStatusChanges(this._status, 'CONFIRMED'));
+    this.apply(
+      new BookingConfirmStatus(
+        this._bookingData.userId,
+        this._bookingData.hostId,
+        this._id,
+        this._bookingData.propertyId,
+      ),
+    );
     this._status = 'CONFIRMED';
   }
 

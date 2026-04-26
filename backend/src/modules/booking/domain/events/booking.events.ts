@@ -23,3 +23,12 @@ export class BookingCompletedStatus {
     public readonly bookingId: string,
   ) {}
 }
+
+export class BookingConfirmStatus {
+  constructor(
+    public readonly userId: string,
+    public readonly hostId: string,
+    public readonly bookingId: string,
+    public readonly name: string,
+  ) {}
+}

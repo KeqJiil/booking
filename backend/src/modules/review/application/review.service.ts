@@ -7,12 +7,15 @@ import type { IReviewRepo } from '../domain/interfaces/repo.interface';
 import { randomUUID } from 'crypto';
 import { ChangeReviewDto } from './dto/changeReview.dto';
 import { SearchParamsReviewsDto } from './dto/searchParams.dto';
+import { EventEmitter2 } from '@nestjs/event-emitter';
+import { eventNames } from 'src/common/constants/eventnames';
 
 @Injectable()
 export class ReviewService {
   constructor(
     @Inject(CACHE_MANAGER) private readonly cache: Cache,
     @Inject('ReviewRepo') private readonly repo: IReviewRepo,
+    private readonly eventEmmiter: EventEmitter2,
   ) {}
 
   private async dataInCache(userId: string) {
@@ -29,10 +32,13 @@ export class ReviewService {
       userId: userId,
       id: randomUUID(),
     });
+    this.eventEmmiter.emit(eventNames.new_review_created, { ...data, userId });
+    this.eventEmmiter.emit(eventNames.new_review_received, { ...data, userId });
   }
 
   public async changeReview(data: ChangeReviewDto, userId: string) {
     await this.repo.changeReveiew(data, userId);
+    this.eventEmmiter.emit(eventNames.review_edited, { ...data, userId });
   }
 
   public async deleteReview(id: string, userId: string) {

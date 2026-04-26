@@ -14,6 +14,7 @@ import { PassportModule } from '@nestjs/passport';
 import { MyJwtStrategy } from './modules/auth/strategies/jwt.strategy';
 import { BullModule } from '@nestjs/bullmq';
 import { ScheduleModule } from '@nestjs/schedule';
+import { EventEmitterModule } from '@nestjs/event-emitter';
 
 @Module({
   imports: [
@@ -60,6 +61,7 @@ import { ScheduleModule } from '@nestjs/schedule';
       }),
     }),
     ScheduleModule.forRoot(),
+    EventEmitterModule.forRoot(),
   ],
   providers: [MyJwtStrategy],
 })
