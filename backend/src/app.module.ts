@@ -50,11 +50,14 @@ import { ScheduleModule } from '@nestjs/schedule';
       defaultStrategy: 'myJwt',
       global: true,
     }),
-    BullModule.forRoot({
-      connection: {
-        host: 'localhost',
-        port: 6379,
-      },
+    BullModule.forRootAsync({
+      imports: [ConfigModule],
+      inject: [ConfigService],
+      useFactory: (config: ConfigService) => ({
+        connection: {
+          url: config.getOrThrow<string>('REDIS_URL'),
+        },
+      }),
     }),
     ScheduleModule.forRoot(),
   ],

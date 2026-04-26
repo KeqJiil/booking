@@ -4,51 +4,102 @@ import {
   MessageBody,
   OnGatewayConnection,
   OnGatewayDisconnect,
-  OnGatewayInit,
   SubscribeMessage,
   WebSocketGateway,
   WebSocketServer,
 } from '@nestjs/websockets';
 import { Socket, Server } from 'socket.io';
-import { Authorization } from 'src/common/decorators/authorization.decorator';
+import { ChatService } from './chat.service';
+import { WsAuthorization } from 'src/common/decorators/wsAuthorization.decorator';
+import { WsAccessInfo } from 'src/common/decorators/esAccessInfo.decorator';
+import { CreateMessageDto } from './dto/sentMessage.dto';
+import { EditMessageDto } from './dto/editMessage.dto';
+import { DeleteMessageDto } from './dto/deleteMessage.dto';
+import { DeleteChatDto } from './dto/leaveChat.dto';
 
-@Authorization('USER')
+@WsAuthorization('USER')
 @WebSocketGateway({ cors: true, namespace: 'chat' })
 export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
   private readonly logger = new Logger('Chat');
-  @WebSocketServer() server: Server;
+  constructor(private readonly chatService: ChatService) {}
+  @WebSocketServer() server!: Server;
 
-  handleConnection(client: Socket) {}
+  handleConnection(client: Socket) {
+    this.logger.log(`User ${client.id} connected`);
+  }
 
-  handleDisconnect(client: Socket) {}
+  handleDisconnect(client: Socket) {
+    this.logger.log(`User ${client.id} disconnected`);
+  }
 
-  @SubscribeMessage('sent_message')
-  async sentMessage(
+  @SubscribeMessage('join_room')
+  async joinRoom(
     @ConnectedSocket() client: Socket,
-    @MessageBody() text: string,
-  ) {}
-
-  @SubscribeMessage('get_room')
-  async getRoom(
-    @ConnectedSocket() client: Socket,
-    @MessageBody() text: string,
-  ) {}
-
-  @SubscribeMessage('edit_message')
-  async editMessage(
-    @ConnectedSocket() client: Socket,
-    @MessageBody() text: string,
-  ) {}
-
-  @SubscribeMessage('delete_message')
-  async deleteMessage(
-    @ConnectedSocket() client: Socket,
-    @MessageBody() text: string,
-  ) {}
+    @WsAccessInfo('id') id: string,
+    @MessageBody() chatUserId: string,
+  ) {
+    const data = await this.chatService.getChat(chatUserId, id);
+    await client.join(data.id);
+  }
 
   @SubscribeMessage('leave_room')
   async leaveRoom(
     @ConnectedSocket() client: Socket,
-    @MessageBody() text: string,
-  ) {}
+    @MessageBody() chatId: string,
+  ) {
+    await client.leave(chatId);
+  }
+
+  @SubscribeMessage('delete_room')
+  async deleteFromRoom(
+    @ConnectedSocket() client: Socket,
+    @WsAccessInfo('id') id: string,
+    @MessageBody() data: DeleteChatDto,
+  ) {
+    await this.chatService.leaveRoom(id, data.userChatId);
+    await client.leave(data.chatId);
+    client.emit('deleted_from_chat', data);
+  }
+
+  @SubscribeMessage('sent_message')
+  async sentMessage(
+    @ConnectedSocket() client: Socket,
+    @WsAccessInfo('id') id: string,
+    @MessageBody() data: CreateMessageDto,
+  ) {
+    const created = await this.chatService.sentMessage(
+      data.text,
+      id,
+      data.chatId,
+    );
+    this.server.to(data.chatId).emit('new_message', created);
+  }
+
+  @SubscribeMessage('edit_message')
+  async editMessage(
+    @ConnectedSocket() client: Socket,
+    @WsAccessInfo('id') id: string,
+    @MessageBody() data: EditMessageDto,
+  ) {
+    const edited = await this.chatService.editMessage(
+      data.text,
+      id,
+      data.messageId,
+      data.chatId,
+    );
+    this.server.to(data.chatId).emit('edited_message', edited);
+  }
+
+  @SubscribeMessage('delete_message')
+  async deleteMessage(
+    @ConnectedSocket() client: Socket,
+    @WsAccessInfo('id') id: string,
+    @MessageBody() data: DeleteMessageDto,
+  ) {
+    await this.chatService.deleteMessage(data.messageId, id);
+    this.server.to(data.chatId).emit('message_deleted', {
+      messageId: data.messageId,
+      chatId: data.chatId,
+    });
+  }
 }

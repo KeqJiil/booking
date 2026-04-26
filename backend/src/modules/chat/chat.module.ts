@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common';
 import { PrismaChatRepository } from './repo/chat.repository';
 import { ChatGateway } from './app/chat.gateway';
+import { ChatService } from './app/chat.service';
 
 @Module({
   controllers: [],
@@ -10,6 +11,7 @@ import { ChatGateway } from './app/chat.gateway';
       useClass: PrismaChatRepository,
     },
     ChatGateway,
+    ChatService,
   ],
 })
 export class ChatModule {}

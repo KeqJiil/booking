@@ -1,9 +1,11 @@
 import { PrismaService } from 'src/database/prisma.service';
 import {
   IChatRepository,
-  IChatRoom,
+  IChatRoomForClient,
   ICreateChatData,
+  IMessage,
   IMessageView,
+  IUserChats,
 } from '../domain/interfaces/chatRepository.interface';
 import { NotFoundException } from '@nestjs/common';
 
@@ -36,13 +38,9 @@ export class PrismaChatRepository implements IChatRepository {
     return messages.map((el) => ({ ...el, user: el.user.name }));
   }
 
-  async getMessage(
-    chatRoomId: string,
-    messageId: string,
-  ): Promise<IMessageView> {
+  async getMessage(messageId: string): Promise<IMessageView> {
     const message = await this.prisma.message.findFirst({
       where: {
-        chatId: chatRoomId,
         id: messageId,
       },
       select: {
@@ -60,9 +58,23 @@ export class PrismaChatRepository implements IChatRepository {
     return { ...message, user: message.user.name };
   }
 
+  async changeName(chatIds: string[], newName: string) {
+    await this.prisma.chat.updateMany({
+      where: {
+        id: {
+          in: chatIds,
+        },
+      },
+      data: {
+        name: newName,
+      },
+    });
+  }
+
   async createChatRoom(data: ICreateChatData): Promise<void> {
     await this.prisma.chat.create({
       data: {
+        name: data.name,
         bookingId: data.bookingId,
         chatUsers: {
           create: [{ userId: data.usersId[0] }, { userId: data.usersId[1] }],
@@ -75,15 +87,16 @@ export class PrismaChatRepository implements IChatRepository {
   async createMessage(
     chatRoomId: string,
     userId: string,
-    text: string,
-  ): Promise<void> {
-    await this.prisma.message.create({
+    newText: string,
+  ): Promise<IMessage> {
+    const { id, text, chatId } = await this.prisma.message.create({
       data: {
         userId,
         chatId: chatRoomId,
-        text,
+        text: newText,
       },
     });
+    return { id, text, chatId };
   }
 
   async leaveFromChat(chatRoomId: string, userId: string): Promise<void> {
@@ -101,33 +114,55 @@ export class PrismaChatRepository implements IChatRepository {
   async editMessage(
     chatRoomId: string,
     messageId: string,
-    text: string,
-  ): Promise<void> {
-    await this.prisma.message.update({
+    newText: string,
+    userId: string,
+  ): Promise<IMessage> {
+    const { id, text, chatId } = await this.prisma.message.update({
       where: {
         id: messageId,
         chatId: chatRoomId,
+        userId,
       },
       data: {
-        text,
+        text: newText,
       },
     });
+    return { id, text, chatId };
   }
 
-  async getChatRoom(chatRoomId: string): Promise<IChatRoom> {
-    const room = await this.prisma.chat.findUnique({
-      where: { id: chatRoomId },
+  async getRoomAsClient(
+    chatId: string,
+    userId: string,
+  ): Promise<IChatRoomForClient> {
+    const chatAsAUser = await this.prisma.chat.findFirst({
+      where: {
+        chatUsers: {
+          some: { userId, id: chatId },
+        },
+      },
       select: {
         id: true,
-        chatUsers: {
+        status: true,
+      },
+    });
+    if (!chatAsAUser || chatAsAUser.status === 'DELETED')
+      throw new NotFoundException();
+    return chatAsAUser;
+  }
+
+  async getUserChats(userId: string): Promise<IUserChats[]> {
+    return await this.prisma.chatUser.findMany({
+      where: {
+        userId,
+      },
+      select: {
+        id: true,
+        chat: {
           select: {
-            userId: true,
-            id: true,
+            name: true,
           },
         },
       },
     });
-    if (!room) throw new NotFoundException();
-    return { chatId: room.id, chatUser: room.chatUsers };
   }
 }

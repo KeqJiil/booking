@@ -8,28 +8,53 @@ export interface IMessageView {
 export interface ICreateChatData {
   bookingId: string;
   usersId: string[];
+  name: string;
 }
 
+export type IChatStatuses = 'DELETED' | 'ALIVE';
+
 export interface IChatRoom {
-  chatUser: { id: string; userId: string }[];
+  id: string;
+  status: IChatStatuses;
+  bookingId: string | null;
+}
+
+export interface IChatRoomForClient {
+  status: IChatStatuses;
+  id: string;
+}
+
+export interface IUserChats {
+  id: string;
+  chat: {
+    name: string;
+  };
+}
+
+export interface IMessage {
+  id: string;
+  text: string;
   chatId: string;
 }
 
 export interface IChatRepository {
+  changeName(chatIds: string[], newName: string): Promise<void>;
   getMessages(chatRoomId: string, cursor: string): Promise<IMessageView[]>;
   createChatRoom(data: ICreateChatData): Promise<void>;
   createMessage(
     chatRoomId: string,
     userId: string,
     text: string,
-  ): Promise<void>;
+  ): Promise<IMessage>;
   editMessage(
     chatRoomId: string,
     messageId: string,
     text: string,
-  ): Promise<void>;
+    userId: string,
+  ): Promise<IMessage>;
   deleteMessage(chatRoomId: string, messageId: string): Promise<void>;
-  getMessage(chatRoomId: string, messageId: string): Promise<IMessageView>;
+  getMessage(messageId: string): Promise<IMessageView>;
   leaveFromChat(chatRoomId: string, userId: string): Promise<void>;
-  getChatRoom(chatRoomId: string): Promise<IChatRoom>;
+  getRoomAsClient(chatId: string, userId: string): Promise<IChatRoomForClient>;
+  getUserChats(userId: string): Promise<IUserChats[]>;
 }

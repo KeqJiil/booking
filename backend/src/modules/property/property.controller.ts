@@ -36,7 +36,6 @@ export class PropertyController {
   @Get()
   @HttpCode(200)
   async getPropertyList(@Query() searchParams: PropertySearchParamsDto) {
-    console.log(searchParams);
     return await this.queryBus.execute(
       new FindPropertyBySearchParamsQuery(searchParams),
     );

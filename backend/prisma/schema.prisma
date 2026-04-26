@@ -154,6 +154,8 @@ model Review {
 model Chat {
   id String @id @default(uuid())
 
+  name String
+
   chatUsers ChatUser[]
   messages  Message[]
 
