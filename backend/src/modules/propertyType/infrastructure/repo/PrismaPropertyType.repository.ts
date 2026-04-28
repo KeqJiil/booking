@@ -1,6 +1,7 @@
 import { PrismaService } from 'src/database/prisma.service';
 import {
   IPropertyType,
+  IPropertyTypeAllData,
   IPropertyTypeRepo,
 } from '../../domain/repo-interface/IPropertyTypeRepo.interface';
 import { Injectable } from '@nestjs/common';
@@ -30,8 +31,8 @@ export class PrismaPropertyTypeRepository implements IPropertyTypeRepo {
     });
   }
 
-  async save(data: IPropertyType): Promise<void> {
-    await this.prisma.propertyType.upsert({
+  async save(data: IPropertyType): Promise<IPropertyTypeAllData> {
+    return await this.prisma.propertyType.upsert({
       where: {
         id: data.id,
       },
@@ -44,7 +45,7 @@ export class PrismaPropertyTypeRepository implements IPropertyTypeRepo {
     });
   }
 
-  async delete(id: string): Promise<void> {
-    await this.prisma.propertyType.delete({ where: { id } });
+  async delete(id: string): Promise<IPropertyTypeAllData> {
+    return await this.prisma.propertyType.delete({ where: { id } });
   }
 }

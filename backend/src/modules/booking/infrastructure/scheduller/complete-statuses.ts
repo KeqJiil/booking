@@ -1,16 +1,16 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { CommandBus } from '@nestjs/cqrs';
 import { Cron } from '@nestjs/schedule';
 import { CompleteBookingStatusCommand } from '../../application/commands/booking.commands';
 import type { IBookingRepo } from '../../domain/repo-interfaces/IBookingRepo.interface';
+import { Logger } from 'nestjs-pino';
 
 @Injectable()
 export class CompleteBookingCron {
-  private readonly logger = new Logger('Completed Bookings');
-
   constructor(
     private readonly commandBus: CommandBus,
     private readonly repo: IBookingRepo,
+    private readonly logger: Logger,
   ) {}
 
   @Cron('0 0 * * * *')

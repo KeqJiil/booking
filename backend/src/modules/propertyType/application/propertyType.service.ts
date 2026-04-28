@@ -4,11 +4,13 @@ import type {
   IPropertyTypeRepo,
 } from '../domain/repo-interface/IPropertyTypeRepo.interface';
 import { randomUUID } from 'crypto';
+import { Logger } from 'nestjs-pino';
 
 @Injectable()
 export class PropertyTypeService {
   constructor(
     @Inject('IPropertyTypeRepo') private readonly prisma: IPropertyTypeRepo,
+    private readonly logger: Logger,
   ) {}
 
   async getAll() {
@@ -29,7 +31,12 @@ export class PropertyTypeService {
 
   async createType(name: string) {
     const id = randomUUID();
-    return await this.prisma.save({ id, name });
+    const type = await this.prisma.save({ id, name });
+    this.logger.log(
+      type,
+      `New type ${type.name} with id: ${type.id} was created`,
+    );
+    return type;
   }
 
   async changeType(data: IPropertyType) {
@@ -37,6 +44,8 @@ export class PropertyTypeService {
   }
 
   async deleteType(id: string) {
-    return await this.prisma.delete(id);
+    const type = await this.prisma.delete(id);
+    this.logger.log(type, `Type ${type.name} with id: ${type.id} was deleted`);
+    return type;
   }
 }

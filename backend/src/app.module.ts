@@ -15,6 +15,7 @@ import { MyJwtStrategy } from './modules/auth/strategies/jwt.strategy';
 import { BullModule } from '@nestjs/bullmq';
 import { ScheduleModule } from '@nestjs/schedule';
 import { EventEmitterModule } from '@nestjs/event-emitter';
+import { LoggerModule } from 'nestjs-pino';
 
 @Module({
   imports: [
@@ -25,7 +26,7 @@ import { EventEmitterModule } from '@nestjs/event-emitter';
       throttlers: [
         {
           ttl: 60000,
-          limit: 5,
+          limit: 15,
         },
       ],
     }),
@@ -62,6 +63,7 @@ import { EventEmitterModule } from '@nestjs/event-emitter';
     }),
     ScheduleModule.forRoot(),
     EventEmitterModule.forRoot(),
+    LoggerModule.forRoot(),
   ],
   providers: [MyJwtStrategy],
 })

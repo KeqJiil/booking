@@ -1,4 +1,3 @@
-import { Logger } from '@nestjs/common';
 import {
   ConnectedSocket,
   MessageBody,
@@ -16,12 +15,15 @@ import { CreateMessageDto } from './dto/sentMessage.dto';
 import { EditMessageDto } from './dto/editMessage.dto';
 import { DeleteMessageDto } from './dto/deleteMessage.dto';
 import { DeleteChatDto } from './dto/leaveChat.dto';
+import { Logger } from 'nestjs-pino';
 
 @WsAuthorization('USER')
 @WebSocketGateway({ cors: true, namespace: 'chat' })
 export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
-  private readonly logger = new Logger('Chat');
-  constructor(private readonly chatService: ChatService) {}
+  constructor(
+    private readonly chatService: ChatService,
+    private readonly logger: Logger,
+  ) {}
   @WebSocketServer() server!: Server;
 
   handleConnection(client: Socket) {

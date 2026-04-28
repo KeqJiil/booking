@@ -9,12 +9,14 @@ import bcrypt from 'bcrypt';
 import { Roles } from 'src/common/constants/roleLevels';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { eventNames } from 'src/common/constants/eventnames';
+import { Logger } from 'nestjs-pino';
 
 @Injectable()
 export class UserService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly eventEmmiter: EventEmitter2,
+    private readonly logger: Logger,
   ) {}
 
   async getSettings(userId: string) {
@@ -69,7 +71,7 @@ export class UserService {
   }
 
   async deleteUser(userId: string) {
-    return await this.prisma.user.update({
+    const user = await this.prisma.user.update({
       where: {
         id: userId,
         role: {
@@ -83,10 +85,13 @@ export class UserService {
         status: 'DELETED',
       },
     });
+    this.logger.log(
+      `User ${user.name} ${user.email} id:${user.id} was deleted`,
+    );
   }
 
   async restoreUser(userId: string) {
-    return await this.prisma.user.update({
+    const user = await this.prisma.user.update({
       where: {
         id: userId,
         role: {
@@ -100,5 +105,8 @@ export class UserService {
         status: 'ALIVE',
       },
     });
+    this.logger.log(
+      `User ${user.name} ${user.email} id:${user.id} was restored`,
+    );
   }
 }

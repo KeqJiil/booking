@@ -1,3 +1,4 @@
+import { BadRequestException } from '@nestjs/common';
 import { differenceInCalendarDays, isBefore, isEqual } from 'date-fns';
 export class BookingDate {
   public readonly days: number;
@@ -7,7 +8,7 @@ export class BookingDate {
     public readonly endDate: Date,
   ) {
     if (isBefore(endDate, startDate) || isEqual(startDate, endDate))
-      throw new Error('Wrong dates');
+      throw new BadRequestException('Wrong dates');
     this.days = differenceInCalendarDays(endDate, startDate);
   }
 }

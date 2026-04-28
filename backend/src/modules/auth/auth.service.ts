@@ -11,6 +11,7 @@ import { IPayload, ISession } from './types';
 import { Roles } from 'src/common/constants/roleLevels';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { eventNames } from 'src/common/constants/eventnames';
+import { Logger } from 'nestjs-pino';
 
 @Injectable()
 export class AuthService {
@@ -20,6 +21,7 @@ export class AuthService {
     private readonly prisma: PrismaService,
     @Inject(CACHE_MANAGER) private cache: Cache,
     private eventEmitter: EventEmitter2,
+    private readonly logger: Logger,
   ) {}
 
   private async createSession(
@@ -101,6 +103,8 @@ export class AuthService {
       ...newUser,
       userId: newUser.id,
     });
+
+    this.logger.log(newUser, `New user created`);
 
     return tokens;
   }

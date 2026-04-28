@@ -1,6 +1,6 @@
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { CreateBookingCommand } from './booking.commands';
-import { Inject } from '@nestjs/common';
+import { ConflictException, Inject } from '@nestjs/common';
 import type { ITransactionRepo } from '../interfaces.ts/TransactionRepo.interface';
 import type { IBookingRepo } from '../../domain/repo-interfaces/IBookingRepo.interface';
 import { BookingEntity } from '../../domain/entities/booking.entity';
@@ -26,7 +26,7 @@ export class CreateBookingHandler implements ICommandHandler<CreateBookingComman
           tx,
         )
       )
-        throw new Error('Overlap dates');
+        throw new ConflictException('Overlap dates');
       await this.repo.save(entity, tx);
       await this.queue.add(
         'expire',

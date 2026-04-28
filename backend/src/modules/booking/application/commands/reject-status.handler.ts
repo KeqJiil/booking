@@ -1,4 +1,4 @@
-import { Inject } from '@nestjs/common';
+import { Inject, NotFoundException } from '@nestjs/common';
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import type { ITransactionRepo } from '../interfaces.ts/TransactionRepo.interface';
 import type { IBookingRepo } from '../../domain/repo-interfaces/IBookingRepo.interface';
@@ -14,7 +14,8 @@ export class RejectBookingStatusHandler implements ICommandHandler<RejectBooking
   async execute(command: RejectBookingStatusCommand): Promise<any> {
     await this.transactions.startTransaction(async (tx) => {
       const entity = await this.repo.getEntityById(command.bookingId, tx);
-      if (!entity || !entity.isOwner(command.hostId)) throw new Error();
+      if (!entity || !entity.isOwner(command.hostId))
+        throw new NotFoundException();
       entity.reject();
       await this.repo.save(entity, tx);
       entity.commit();

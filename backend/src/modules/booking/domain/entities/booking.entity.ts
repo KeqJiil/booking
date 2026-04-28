@@ -11,6 +11,7 @@ import {
 } from '../events/booking.events';
 import { AggregateRoot } from '@nestjs/cqrs';
 import { BookingDate } from '../value-objects/domainDate';
+import { BadRequestException } from '@nestjs/common';
 
 export interface IBookingDbData {
   priceAtMoment: number;
@@ -77,14 +78,14 @@ export class BookingEntity extends AggregateRoot {
   static fromDB(rawData: IBookingDbData) {
     const { status, id, ...data } = rawData;
     if (badStatuses[status]) {
-      throw new Error('Wrong data type');
+      throw new BadRequestException('Wrong data type');
     }
     const dateData = new BookingDate(data.startDate, data.endDate);
     return new BookingEntity(status, { ...data, dateData }, id);
   }
 
   public pay() {
-    if (this._status !== 'CONFIRMED') throw new Error();
+    if (this._status !== 'CONFIRMED') throw new BadRequestException();
     this.apply(
       new BookingStatusChanges(this._status, 'PAID', this._bookingData.hostId),
     );
@@ -92,7 +93,7 @@ export class BookingEntity extends AggregateRoot {
   }
 
   public reject() {
-    if (this._status !== 'PENDING') throw new Error();
+    if (this._status !== 'PENDING') throw new BadRequestException();
     this.apply(
       new BookingStatusChanges(
         this._status,
@@ -104,7 +105,7 @@ export class BookingEntity extends AggregateRoot {
   }
 
   public cancel() {
-    if (this._status !== 'PENDING') throw new Error();
+    if (this._status !== 'PENDING') throw new BadRequestException();
     this.apply(
       new BookingStatusChanges(
         this._status,
@@ -116,7 +117,7 @@ export class BookingEntity extends AggregateRoot {
   }
 
   public expire() {
-    if (this._status !== 'PENDING') throw new Error();
+    if (this._status !== 'PENDING') throw new BadRequestException();
     this.apply(
       new BookingStatusChanges(
         this._status,
@@ -128,7 +129,7 @@ export class BookingEntity extends AggregateRoot {
   }
 
   public confirm() {
-    if (this._status !== 'PENDING') throw new Error();
+    if (this._status !== 'PENDING') throw new BadRequestException();
     this.apply(
       new BookingConfirmStatus(
         this._bookingData.userId,
@@ -148,7 +149,7 @@ export class BookingEntity extends AggregateRoot {
   }
 
   public complete() {
-    if (this._status !== 'CONFIRMED') throw new Error();
+    if (this._status !== 'CONFIRMED') throw new BadRequestException();
     this.apply(
       new BookingCompletedStatus(
         this._bookingData.userId,

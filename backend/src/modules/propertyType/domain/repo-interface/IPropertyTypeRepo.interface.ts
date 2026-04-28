@@ -3,10 +3,17 @@ export interface IPropertyType {
   name: string;
 }
 
+export interface IPropertyTypeAllData {
+  id: string;
+  name: string;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
 export interface IPropertyTypeRepo {
   getAll(): Promise<IPropertyType[]>;
   findByName(name: string): Promise<IPropertyType | null>;
   findById(id: string): Promise<IPropertyType | null>;
-  save(data: IPropertyType): Promise<void>;
-  delete(id: string): Promise<void>;
+  save(data: IPropertyType): Promise<IPropertyTypeAllData>;
+  delete(id: string): Promise<IPropertyTypeAllData>;
 }
