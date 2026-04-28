@@ -40,7 +40,10 @@ export class UserService {
         role,
       },
     });
-    this.eventEmmiter.emit(eventNames.new_role_received, user);
+    this.eventEmmiter.emit(eventNames.new_role_received, {
+      ...user,
+      userId: user.id,
+    });
   }
 
   async changePassword(userId: string, password: string, newPassword: string) {
@@ -57,7 +60,10 @@ export class UserService {
       data: { password: newHashedPassword },
     });
 
-    this.eventEmmiter.emit(eventNames.password_changed, updatedUser);
+    this.eventEmmiter.emit(eventNames.password_changed, {
+      ...updatedUser,
+      userId: updatedUser.id,
+    });
 
     return updatedUser;
   }

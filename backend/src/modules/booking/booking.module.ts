@@ -12,6 +12,7 @@ import { BullModule } from '@nestjs/bullmq';
 import { PrismaModule } from 'src/database/prisma.module';
 import { BookingWorker } from './infrastructure/bullmq/expired.worker';
 import { CompletedBookingEventHandler } from './application/events/completedEvent.handler';
+import { BookingStatusChangedHandler } from './application/events/statusChanged.handler';
 
 @Module({
   imports: [
@@ -32,6 +33,7 @@ import { CompletedBookingEventHandler } from './application/events/completedEven
     ChangeBookingHandler,
     BookingWorker,
     CompletedBookingEventHandler,
+    BookingStatusChangedHandler,
   ],
 })
 export class BookingModule {}

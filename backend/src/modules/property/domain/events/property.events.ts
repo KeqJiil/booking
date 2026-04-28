@@ -1,4 +1,4 @@
-import { Address } from '../../domain/value-objects/address.value';
+import { IProperty } from '../entities/Property.entity';
 
 export class PropertyCreated {
   constructor(
@@ -7,22 +7,12 @@ export class PropertyCreated {
   ) {}
 }
 
-export class PropertyAddressChanged {
+export class PropertyChanged {
   constructor(
     public readonly id: string,
-    public readonly newAddress: Address,
-    public readonly hostId: string,
+    public readonly newData: IProperty,
   ) {}
 }
-
-export class PropertyPriceChanged {
-  constructor(
-    public readonly id: string,
-    public readonly newPrice: number,
-    public readonly hostId: string,
-  ) {}
-}
-
 export class PropertyDeleted {
   constructor(
     public readonly id: string,

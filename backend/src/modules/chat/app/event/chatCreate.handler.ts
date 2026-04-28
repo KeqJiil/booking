@@ -19,5 +19,9 @@ export class ChatEventConfirmBookHandler implements IEventHandler<GlobalBookConf
     };
     await this.chatService.createChat(data);
     this.eventEmmiter.emit(eventNames.chat_created, event);
+    this.eventEmmiter.emit(eventNames.chat_created, {
+      ...event,
+      userId: event.hostId,
+    });
   }
 }

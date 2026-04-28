@@ -1,10 +1,9 @@
 import { AggregateRoot } from '@nestjs/cqrs';
 import { Address } from '../value-objects/address.value';
 import {
-  PropertyAddressChanged,
+  PropertyChanged,
   PropertyCreated,
   PropertyDeleted,
-  PropertyPriceChanged,
 } from '../events/property.events';
 import { randomUUID } from 'crypto';
 import { BadRequestException, ConflictException } from '@nestjs/common';
@@ -84,35 +83,35 @@ export class PropertyEntity extends AggregateRoot {
   private changeName(newName: string) {
     if (newName.length < 4) throw new ConflictException();
     this._props.name = newName;
+    this.apply(new PropertyChanged(this.id, this._props));
   }
 
   private changeDescription(newDescription: string) {
     if (newDescription.length < 20) throw new BadRequestException();
     this._props.description = newDescription;
+    this.apply(new PropertyChanged(this.id, this._props));
   }
 
   private changeAddress(newAddress: Address) {
     this._props.address = newAddress;
-    this.apply(
-      new PropertyAddressChanged(this.id, newAddress, this._props.hostId),
-    );
+    this.apply(new PropertyChanged(this.id, this._props));
   }
 
   private changeMaxGuests(newNumber: number) {
     if (newNumber < 1) throw new BadRequestException();
     this._props.maxGuests = newNumber;
+    this.apply(new PropertyChanged(this.id, this._props));
   }
 
   private changePrice(newPrice: number) {
     if (newPrice < 1) throw new BadRequestException();
     this._props.price = newPrice;
-    this.apply(
-      new PropertyPriceChanged(this._id, newPrice, this._props.hostId),
-    );
+    this.apply(new PropertyChanged(this.id, this._props));
   }
 
   private changeType(type: string) {
     this._props.typeId = type;
+    this.apply(new PropertyChanged(this.id, this._props));
   }
 
   deleteProperty(userId: string, isAdmin: boolean) {

@@ -8,6 +8,9 @@ import { FindPropertyHandler } from './application/queries/find-property.handler
 import { FindPropertiesHandler } from './application/queries/find-properties.handler';
 import { PrismaPropertyQueryRepository } from './infrastructure/repo/PrismaPropertyQuery.repository';
 import { PrismaModule } from 'src/database/prisma.module';
+import { PropertyDeletedHandler } from './application/events/propertyDeleted.handler';
+import { PropertyCreatedHandler } from './application/events/propertyCreated.handler';
+import { PropertyChangedHandler } from './application/events/propertyChanged.handler';
 
 @Module({
   imports: [PrismaModule],
@@ -20,6 +23,9 @@ import { PrismaModule } from 'src/database/prisma.module';
     CreatePropertyHandler,
     FindPropertyHandler,
     FindPropertiesHandler,
+    PropertyDeletedHandler,
+    PropertyCreatedHandler,
+    PropertyChangedHandler,
   ],
 })
 export class PropertyModule {}

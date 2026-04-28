@@ -236,14 +236,22 @@ enum LiveStatus {
 }
 
 enum NotificationTypes {
-  BOOKING_REQUEST
-  BOOKING_CONFIRMED
-  BOOKING_REJECTED
-  BOOKING_CANCELLED
-  PAYMENT_SUCCESS
-  PAYMENT_FAILED
-  NEW_MESSAGE
-  REVIEW_RECEIVED
-  SYSTEM_INFO
-  SYSTEM_SECURITY
+  account_created
+  password_changed
+  new_role_received
+  property_created
+  property_changed
+  property_deleted
+  able_to_leave_review
+  new_review_received
+  new_review_created
+  review_edited
+  booking_created
+  booking_paid
+  booking_expired
+  booking_rejected
+  booking_cancelled
+  booking_confirmed
+  booking_completed
+  chat_created
 }

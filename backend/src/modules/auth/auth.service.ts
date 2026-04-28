@@ -97,7 +97,10 @@ export class AuthService {
     const tokens = await this.signTokens(newUser.id, newUser.role, sessionId);
     await this.createSession(newUser.id, tokens.refreshToken, sessionId);
 
-    this.eventEmitter.emit(eventNames.account_created, newUser);
+    this.eventEmitter.emit(eventNames.account_created, {
+      ...newUser,
+      userId: newUser.id,
+    });
 
     return tokens;
   }

@@ -25,6 +25,7 @@ import {
   FindPropertyByIdQuery,
   FindPropertyBySearchParamsQuery,
 } from './application/queries/property.queries';
+import { IdempotencyAccess } from 'src/common/decorators/idempotency.decorator';
 
 @Controller('property')
 export class PropertyController {
@@ -51,6 +52,7 @@ export class PropertyController {
   @Post('')
   @HttpCode(201)
   async createProperty(
+    @IdempotencyAccess() idempotencyKey: string | null,
     @Body() createProperty: CreatePropertyDTO,
     @AccessInfo('id') id: string,
   ) {

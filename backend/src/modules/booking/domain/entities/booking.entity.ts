@@ -85,25 +85,45 @@ export class BookingEntity extends AggregateRoot {
 
   public pay() {
     if (this._status !== 'CONFIRMED') throw new Error();
-    this.apply(new BookingStatusChanges(this._status, 'PAID'));
+    this.apply(
+      new BookingStatusChanges(this._status, 'PAID', this._bookingData.hostId),
+    );
     this._status = 'PAID';
   }
 
   public reject() {
     if (this._status !== 'PENDING') throw new Error();
-    this.apply(new BookingStatusChanges(this._status, 'REJECTED'));
+    this.apply(
+      new BookingStatusChanges(
+        this._status,
+        'REJECTED',
+        this._bookingData.hostId,
+      ),
+    );
     this._status = 'REJECTED';
   }
 
   public cancel() {
     if (this._status !== 'PENDING') throw new Error();
-    this.apply(new BookingStatusChanges(this._status, 'CANCELLED'));
+    this.apply(
+      new BookingStatusChanges(
+        this._status,
+        'CANCELLED',
+        this._bookingData.hostId,
+      ),
+    );
     this._status = 'CANCELLED';
   }
 
   public expire() {
     if (this._status !== 'PENDING') throw new Error();
-    this.apply(new BookingStatusChanges(this._status, 'EXPIRED'));
+    this.apply(
+      new BookingStatusChanges(
+        this._status,
+        'EXPIRED',
+        this._bookingData.hostId,
+      ),
+    );
     this._status = 'EXPIRED';
   }
 
@@ -117,6 +137,13 @@ export class BookingEntity extends AggregateRoot {
         this._bookingData.propertyId,
       ),
     );
+    this.apply(
+      new BookingStatusChanges(
+        this._status,
+        'CONFIRMED',
+        this._bookingData.hostId,
+      ),
+    );
     this._status = 'CONFIRMED';
   }
 
@@ -127,6 +154,13 @@ export class BookingEntity extends AggregateRoot {
         this._bookingData.userId,
         this._bookingData.propertyId,
         this._id,
+      ),
+    );
+    this.apply(
+      new BookingStatusChanges(
+        this._status,
+        'COMPLETED',
+        this._bookingData.hostId,
       ),
     );
     this._status = 'COMPLETED';

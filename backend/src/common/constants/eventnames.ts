@@ -19,4 +19,13 @@ export const eventNames = {
   chat_created: 'chat_created',
 } as const;
 
+export const eventBookingMap: Record<string, keyof typeof eventNames> = {
+  PAID: 'booking_paid',
+  EXPIRED: 'booking_expired',
+  REJECTED: 'booking_rejected',
+  CANCELLED: 'booking_cancelled',
+  CONFIRMED: 'booking_confirmed',
+  COMPLETED: 'booking_completed',
+};
+
 export type IEventNames = (typeof eventNames)[keyof typeof eventNames];

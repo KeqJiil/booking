@@ -4,6 +4,7 @@ export class BookingStatusChanges {
   constructor(
     public readonly oldStatus: TBookingStatus,
     public readonly newStatus: TBookingStatus,
+    public readonly userId: string,
   ) {}
 }
 
