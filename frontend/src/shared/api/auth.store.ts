@@ -6,7 +6,7 @@ export interface IAuthStore {
   clearToken: () => void;
 }
 
-export const authToken = create<IAuthStore>((set) => ({
+export const useAuthToken = create<IAuthStore>((set) => ({
   accessToken: null,
 
   setToken: (token) => set({ accessToken: token }),

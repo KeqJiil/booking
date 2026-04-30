@@ -7,6 +7,7 @@ import { LoggingInterceptor } from './common/interceptors/logging.interceptor';
 import { AllExceptionsFilter } from './common/exceptionFilters/general.filter';
 import helmet from 'helmet';
 import { Logger } from 'nestjs-pino';
+import { OutputInterceptor } from './common/interceptors/output.interceptor';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -14,7 +15,10 @@ async function bootstrap() {
   app.use(helmet());
 
   app.useLogger(app.get(Logger));
-  app.useGlobalInterceptors(new LoggingInterceptor(app.get(Logger)));
+  app.useGlobalInterceptors(
+    new LoggingInterceptor(app.get(Logger)),
+    new OutputInterceptor(),
+  );
   app.useGlobalFilters(new AllExceptionsFilter(app.get(Logger)));
 
   const config = new DocumentBuilder()
