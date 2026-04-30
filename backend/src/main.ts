@@ -4,7 +4,7 @@ import { ValidationPipe } from '@nestjs/common';
 import cookieParser from 'cookie-parser';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 import { LoggingInterceptor } from './common/interceptors/logging.interceptor';
-import { AllExceptionsFilter } from './common/exception.filters.ts/general.filter';
+import { AllExceptionsFilter } from './common/exceptionFilters/general.filter';
 import helmet from 'helmet';
 import { Logger } from 'nestjs-pino';
 
@@ -28,7 +28,13 @@ async function bootstrap() {
     jsonDocumentUrl: 'swagger/json',
   });
 
-  app.useGlobalPipes(new ValidationPipe({ transform: true }));
+  app.useGlobalPipes(
+    new ValidationPipe({
+      transform: true,
+      whitelist: true,
+      forbidNonWhitelisted: true,
+    }),
+  );
   app.use(cookieParser());
 
   await app.listen(3000);

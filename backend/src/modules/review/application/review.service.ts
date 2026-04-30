@@ -36,8 +36,8 @@ export class ReviewService {
     this.eventEmmiter.emit(eventNames.new_review_received, { ...data, userId });
   }
 
-  public async changeReview(data: ChangeReviewDto, userId: string) {
-    await this.repo.changeReveiew(data, userId);
+  public async changeReview(id: string, data: ChangeReviewDto, userId: string) {
+    await this.repo.changeReveiew({ id, ...data }, userId);
     this.eventEmmiter.emit(eventNames.review_edited, { ...data, userId });
   }
 

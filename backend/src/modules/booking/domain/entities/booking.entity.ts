@@ -47,6 +47,11 @@ export interface IBookingEntityData extends IBookingEntity {
   totalPrice: number;
 }
 
+export type IBookingEntryData = Omit<
+  IBookingEntityCreateProps,
+  'priceAtMoment' | 'hostId'
+>;
+
 export class BookingEntity extends AggregateRoot {
   constructor(
     private _status: TBookingStatus,

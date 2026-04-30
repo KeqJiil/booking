@@ -6,6 +6,7 @@ import type { IBookingRepo } from '../../domain/repo-interfaces/IBookingRepo.int
 import { BookingEntity } from '../../domain/entities/booking.entity';
 import { InjectQueue } from '@nestjs/bullmq';
 import { Queue } from 'bullmq';
+import type { IPropertyAdapterToBooking } from '../../domain/repo-interfaces/IPropertyAdapter.interface';
 
 @CommandHandler(CreateBookingCommand)
 export class CreateBookingHandler implements ICommandHandler<CreateBookingCommand> {
@@ -13,11 +14,20 @@ export class CreateBookingHandler implements ICommandHandler<CreateBookingComman
     @Inject('TransactionRepo') private readonly transactions: ITransactionRepo,
     @Inject('BookingRepo') private readonly repo: IBookingRepo,
     @InjectQueue('booking') private queue: Queue,
+    @Inject('PropertyAdapter')
+    private readonly PropertyProviderAdapter: IPropertyAdapterToBooking,
   ) {}
 
   async execute(command: CreateBookingCommand): Promise<void> {
     await this.transactions.startTransaction(async (tx) => {
-      const entity = BookingEntity.create(command.data);
+      const additionalData = await this.PropertyProviderAdapter.getData(
+        command.data.propertyId,
+      );
+      const entity = BookingEntity.create({
+        ...command.data,
+        priceAtMoment: additionalData.price,
+        hostId: additionalData.hostId,
+      });
       if (
         await this.repo.getOverlapping(
           entity.data.dateData.startDate,

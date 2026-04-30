@@ -13,7 +13,9 @@ import { UserSettingsDto } from './dto/settings.dto';
 import { AccessInfo } from 'src/common/decorators/accessInfo.decorator';
 import { ChangePasswordDto } from './dto/password.dto';
 import type { Roles } from 'src/common/constants/roleLevels';
+import { ApiTags } from '@nestjs/swagger';
 
+@ApiTags('User')
 @Controller('user')
 export class UserController {
   constructor(private readonly userService: UserService) {}
@@ -53,7 +55,7 @@ export class UserController {
   }
 
   @Authorization('USER')
-  @HttpCode(200)
+  @HttpCode(2001)
   @Delete('my/delete')
   async deleteMyAccount(@AccessInfo('id') id: string) {
     return await this.userService.deleteUser(id);

@@ -4,7 +4,9 @@ import { LoginDto } from './dto/login.dto';
 import { Cookies } from 'src/common/decorators/cookies.decorator';
 import { RegisterDto } from './dto/register.dto';
 import type { Response } from 'express';
+import { ApiTags } from '@nestjs/swagger';
 
+@ApiTags('Auth')
 @Controller('auth')
 export class AuthController {
   private refreshConfig = {

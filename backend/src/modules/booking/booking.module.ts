@@ -13,6 +13,7 @@ import { PrismaModule } from 'src/database/prisma.module';
 import { BookingWorker } from './infrastructure/bullmq/expired.worker';
 import { CompletedBookingEventHandler } from './application/events/completedEvent.handler';
 import { BookingStatusChangedHandler } from './application/events/statusChanged.handler';
+import { PropertyProviderAdapter } from './infrastructure/adapters/propertyProvider.adapter';
 
 @Module({
   imports: [
@@ -34,6 +35,7 @@ import { BookingStatusChangedHandler } from './application/events/statusChanged.
     BookingWorker,
     CompletedBookingEventHandler,
     BookingStatusChangedHandler,
+    { provide: 'PropertyAdapter', useClass: PropertyProviderAdapter },
   ],
 })
 export class BookingModule {}

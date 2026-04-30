@@ -11,7 +11,9 @@ import {
 import { Authorization } from 'src/common/decorators/authorization.decorator';
 import { PropertyTypeDto } from './application/dto/propertyType.dto';
 import { PropertyTypeService } from './application/propertyType.service';
+import { ApiTags } from '@nestjs/swagger';
 
+@ApiTags('Property Types')
 @Controller('property-type')
 export class PropertyTypeController {
   constructor(private readonly propertyTypeService: PropertyTypeService) {}

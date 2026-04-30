@@ -9,6 +9,7 @@ export const propertyViewSelect = Prisma.validator<Prisma.PropertySelect>()({
   price: true,
   address: true,
   maxGuests: true,
+  hostId: true,
   host: { select: { name: true } },
   propertyType: { select: { name: true } },
 });

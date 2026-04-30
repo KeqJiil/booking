@@ -1,12 +1,18 @@
-import { IsString, MinLength, MaxLength, Matches } from 'class-validator';
+import { ApiProperty } from '@nestjs/swagger';
+import { IsString, IsStrongPassword } from 'class-validator';
 
 export class ChangePasswordDto {
+  @ApiProperty({
+    example: '12345678qweRTY!',
+    description: `User's previous password`,
+  })
   @IsString()
   password: string;
 
-  @IsString()
-  @MinLength(8)
-  @MaxLength(32)
-  @Matches(/((?=.*\d)|(?=.*\W+))(?![.\n])(?=.*[A-Z])(?=.*[a-z]).*$/)
+  @ApiProperty({
+    example: '4568762AsdfgH!',
+    description: `User's new password`,
+  })
+  @IsStrongPassword()
   newPassword: string;
 }

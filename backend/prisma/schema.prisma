@@ -20,7 +20,7 @@ model User {
 
   status LiveStatus @default(ALIVE)
 
-  password String
+  password String?
 
   chatUsers     ChatUser[]
   properties    Property[]

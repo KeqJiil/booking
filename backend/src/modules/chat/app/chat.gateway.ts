@@ -16,7 +16,9 @@ import { EditMessageDto } from './dto/editMessage.dto';
 import { DeleteMessageDto } from './dto/deleteMessage.dto';
 import { DeleteChatDto } from './dto/leaveChat.dto';
 import { Logger } from 'nestjs-pino';
+import { Injectable } from '@nestjs/common';
 
+@Injectable()
 @WsAuthorization('USER')
 @WebSocketGateway({ cors: true, namespace: 'chat' })
 export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {

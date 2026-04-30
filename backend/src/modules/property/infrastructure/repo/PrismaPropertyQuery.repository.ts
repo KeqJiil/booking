@@ -19,6 +19,7 @@ export class PrismaPropertyQueryRepository implements IPropertyQueryRepo {
     if (!raw) throw new NotFoundException();
     return {
       ...raw,
+      hostId: raw.hostId,
       host: raw.host.name,
       types: raw.propertyType?.name,
       price: Number(raw.price),

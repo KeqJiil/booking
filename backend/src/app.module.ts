@@ -16,6 +16,9 @@ import { BullModule } from '@nestjs/bullmq';
 import { ScheduleModule } from '@nestjs/schedule';
 import { EventEmitterModule } from '@nestjs/event-emitter';
 import { LoggerModule } from 'nestjs-pino';
+import { ChatModule } from './modules/chat/chat.module';
+import { NotificationsModule } from './modules/notifications/notifications.module';
+import { BillingModule } from './modules/billing/billing.module';
 
 @Module({
   imports: [
@@ -63,7 +66,21 @@ import { LoggerModule } from 'nestjs-pino';
     }),
     ScheduleModule.forRoot(),
     EventEmitterModule.forRoot(),
-    LoggerModule.forRoot(),
+    LoggerModule.forRoot({
+      pinoHttp: {
+        transport: {
+          target: 'pino-pretty',
+          options: {
+            colorize: true,
+            translateTime: 'SYS:standard',
+            ignore: 'pid,hostname',
+          },
+        },
+      },
+    }),
+    ChatModule,
+    NotificationsModule,
+    BillingModule,
   ],
   providers: [MyJwtStrategy],
 })

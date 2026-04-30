@@ -26,7 +26,9 @@ import {
   FindPropertyBySearchParamsQuery,
 } from './application/queries/property.queries';
 import { IdempotencyAccess } from 'src/common/decorators/idempotency.decorator';
+import { ApiTags } from '@nestjs/swagger';
 
+@ApiTags('Property')
 @Controller('property')
 export class PropertyController {
   constructor(

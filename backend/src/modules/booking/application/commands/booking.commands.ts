@@ -1,7 +1,7 @@
-import { IBookingEntityCreateProps } from '../../domain/entities/booking.entity';
+import { IBookingEntryData } from '../../domain/entities/booking.entity';
 
 export class CreateBookingCommand {
-  constructor(public readonly data: IBookingEntityCreateProps) {}
+  constructor(public readonly data: IBookingEntryData) {}
 }
 
 export class CancelBookingStatusCommand {

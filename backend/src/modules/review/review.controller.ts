@@ -7,6 +7,7 @@ import {
   Param,
   Patch,
   Post,
+  Query,
 } from '@nestjs/common';
 import { ReviewService } from './application/review.service';
 import { AccessInfo } from 'src/common/decorators/accessInfo.decorator';
@@ -14,7 +15,9 @@ import { Authorization } from 'src/common/decorators/authorization.decorator';
 import { CreateReviewDto } from './application/dto/createReview.dto';
 import { ChangeReviewDto } from './application/dto/changeReview.dto';
 import { SearchParamsReviewsDto } from './application/dto/searchParams.dto';
+import { ApiTags } from '@nestjs/swagger';
 
+@ApiTags('Reviews')
 @Controller('review')
 export class ReviewController {
   constructor(private readonly reviewService: ReviewService) {}
@@ -30,19 +33,23 @@ export class ReviewController {
   }
 
   @Authorization('USER')
-  @Patch()
-  @HttpCode(201)
+  @Patch(':id')
+  @HttpCode(200)
   async changeReview(
     @AccessInfo('id') userId: string,
     @Body() dto: ChangeReviewDto,
+    @Param('id') id: string,
   ) {
-    await this.reviewService.changeReview(dto, userId);
+    await this.reviewService.changeReview(id, dto, userId);
   }
 
   @Authorization('USER')
-  @Delete()
+  @Delete(':id')
   @HttpCode(204)
-  async deleteReview(@AccessInfo('id') userId: string, @Body() id: string) {
+  async deleteReview(
+    @AccessInfo('id') userId: string,
+    @Param('id') id: string,
+  ) {
     await this.reviewService.deleteReview(id, userId);
   }
 
@@ -51,7 +58,7 @@ export class ReviewController {
   @HttpCode(200)
   async getMyReviews(
     @AccessInfo('id') userId: string,
-    @Body() searchParams: SearchParamsReviewsDto,
+    @Query() searchParams: SearchParamsReviewsDto,
   ) {
     return await this.reviewService.getMyReviews(userId, searchParams);
   }

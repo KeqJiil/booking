@@ -32,6 +32,7 @@ export interface IPropertyView {
   country: string;
   host: string;
   types?: string;
+  hostId: string;
 }
 
 export interface IPropertyRepo {

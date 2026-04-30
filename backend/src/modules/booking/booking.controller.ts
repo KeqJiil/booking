@@ -1,4 +1,12 @@
-import { Body, Controller, Get, Param, Post } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  HttpCode,
+  Param,
+  Post,
+  Query,
+} from '@nestjs/common';
 import { Authorization } from 'src/common/decorators/authorization.decorator';
 import { CreateBookingDto } from './application/dto/create-booking.dto';
 import { AccessInfo } from 'src/common/decorators/accessInfo.decorator';
@@ -16,7 +24,9 @@ import {
   PayBookingStatusCommand,
   RejectBookingStatusCommand,
 } from './application/commands/booking.commands';
+import { ApiTags } from '@nestjs/swagger';
 
+@ApiTags('Bookings')
 @Controller('bookings')
 export class BookingController {
   constructor(
@@ -25,32 +35,38 @@ export class BookingController {
   ) {}
 
   @Get()
+  @HttpCode(200)
   @Authorization('USER')
   async getMyBookings(
     @AccessInfo('id') id: string,
     @Body() searchParams: SearchParamsBookingsDto,
   ) {
-    await this.queryBus.execute(new GetMyBookingsQuery(id, searchParams));
+    return await this.queryBus.execute(
+      new GetMyBookingsQuery(id, searchParams),
+    );
   }
 
   @Get(':id')
+  @HttpCode(200)
   @Authorization('ADMIN')
   async getBookingById(@Param('id') id: string) {
-    await this.queryBus.execute(new GetBookingByIdQuery(id));
+    return await this.queryBus.execute(new GetBookingByIdQuery(id));
   }
 
   @Get('/property/:id')
+  @HttpCode(200)
   @Authorization('USER')
   async getBookingByProperty(
     @Param('id') id: string,
-    @Body() searchParams: SearchParamsBookingsDto,
+    @Query() searchParams: SearchParamsBookingsDto,
   ) {
-    await this.queryBus.execute(
+    return await this.queryBus.execute(
       new GetBookingsByPropertyQuery(id, searchParams),
     );
   }
 
   @Post()
+  @HttpCode(201)
   @Authorization('USER')
   async createBooking(
     @Body() data: CreateBookingDto,
@@ -62,6 +78,7 @@ export class BookingController {
   }
 
   @Post('reject/:id')
+  @HttpCode(201)
   @Authorization('HOST')
   async rejectBooking(
     @Param('id') id: string,
@@ -71,12 +88,14 @@ export class BookingController {
   }
 
   @Post('pay/:id')
+  @HttpCode(201)
   @Authorization('USER')
   async payBooking(@Param('id') id: string, @AccessInfo('id') userId: string) {
     await this.commandBus.execute(new PayBookingStatusCommand(userId, id));
   }
 
   @Post('pay/:id')
+  @HttpCode(201)
   @Authorization('HOST')
   async confirmBooking(
     @Param('id') id: string,
@@ -86,6 +105,7 @@ export class BookingController {
   }
 
   @Post('cancel/:id')
+  @HttpCode(201)
   @Authorization('USER')
   async cancelBooking(
     @Param('id') id: string,
