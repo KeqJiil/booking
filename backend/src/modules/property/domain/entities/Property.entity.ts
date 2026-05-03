@@ -24,6 +24,7 @@ export interface IPlainProperty {
   city: string;
   country: string;
   address: string;
+  idempotencyKey: string;
 }
 
 export const LiveStatus = {
@@ -41,6 +42,7 @@ export interface IProperty {
   hostId: string;
   typeId: string;
   address: Address;
+  idempotencyKey: string;
 }
 
 export class PropertyEntity extends AggregateRoot {

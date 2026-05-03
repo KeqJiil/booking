@@ -17,19 +17,19 @@ export function LoginForm() {
 
   return (
     <div>
-      <form onSubmit={onSubmit}>
+      <form onSubmit={onSubmit} className="flex flex-col">
         <Input placeholder="Enter email" {...register("email")} />
-        <i
-          className={`${formState.errors.email?.message ? "opacity-100" : "opacity-0"}`}
+        <span
+          className={`${formState.errors.email?.message ? "opacity-100" : "opacity-0"} text-red-500`}
         >
           {formState.errors.email?.message}
-        </i>
+        </span>
         <Input placeholder="Enter password" {...register("password")} />
-        <i
-          className={`${formState.errors.password?.message ? "opacity-100" : "opacity-0"}`}
+        <span
+          className={`${formState.errors.password?.message ? "opacity-100" : "opacity-0"} text-red-500`}
         >
           {formState.errors.password?.message}
-        </i>
+        </span>
         <Button disabled={isPending}>Login</Button>
       </form>
     </div>

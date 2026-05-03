@@ -50,16 +50,30 @@ export class PropertyController {
     return await this.queryBus.execute(new FindPropertyByIdQuery(id));
   }
 
+  @Get('my')
+  @Authorization('HOST')
+  @HttpCode(200)
+  async getMyProperties(@AccessInfo('id') userId: string) {}
+
+  @Get('my/booked')
+  @Authorization('HOST')
+  @HttpCode(200)
+  async getMyPropertiesBooked(@AccessInfo('id') userId: string) {}
+
   @Authorization('HOST')
   @Post('')
   @HttpCode(201)
   async createProperty(
-    @IdempotencyAccess() idempotencyKey: string | null,
+    @IdempotencyAccess() idempotencyKey: string,
     @Body() createProperty: CreatePropertyDTO,
     @AccessInfo('id') id: string,
   ) {
     await this.commandBus.execute(
-      new CreatePropertyCommand({ ...createProperty, hostId: id }),
+      new CreatePropertyCommand({
+        ...createProperty,
+        hostId: id,
+        idempotencyKey,
+      }),
     );
   }
 
@@ -87,3 +101,5 @@ export class PropertyController {
     await this.commandBus.execute(new DeletePropertyCommand(id, userId, role));
   }
 }
+
+//todo get my property/get my property that is booked

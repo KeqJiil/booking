@@ -1,4 +1,9 @@
-import { Inject, Injectable, UnauthorizedException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Inject,
+  Injectable,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { PrismaService } from 'src/database/prisma.service';
 import { RegisterDto } from './dto/register.dto';
@@ -75,6 +80,7 @@ export class AuthService {
       },
     });
     if (!user || user.status === 'DELETED') throw new UnauthorizedException();
+    if (!user.password) throw new BadRequestException();
     const password = await bcrypt.compare(data.password, user.password);
     if (!password) throw new UnauthorizedException();
     const sessionId = randomUUID();

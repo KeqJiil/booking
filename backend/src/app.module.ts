@@ -19,6 +19,7 @@ import { LoggerModule } from 'nestjs-pino';
 import { ChatModule } from './modules/chat/chat.module';
 import { NotificationsModule } from './modules/notifications/notifications.module';
 import { BillingModule } from './modules/billing/billing.module';
+import { MailModule } from './modules/mail/mail.module';
 
 @Module({
   imports: [
@@ -81,6 +82,7 @@ import { BillingModule } from './modules/billing/billing.module';
     ChatModule,
     NotificationsModule,
     BillingModule,
+    MailModule,
   ],
   providers: [MyJwtStrategy],
 })

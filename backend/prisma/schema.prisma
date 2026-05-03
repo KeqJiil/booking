@@ -63,6 +63,8 @@ model Property {
   maxGuests   Int
   status      LiveStatus @default(ALIVE)
 
+  idempotencyKey String @unique @map("idempotency_key")
+
   images Image[]
 
   hostId String @map("host_id")

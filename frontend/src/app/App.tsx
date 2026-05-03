@@ -7,7 +7,6 @@ export function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <div className="min-h-screen">
-
         <Toaster richColors position="top-right" />
       </div>
     </QueryClientProvider>

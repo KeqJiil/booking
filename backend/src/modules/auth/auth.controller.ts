@@ -48,6 +48,10 @@ export class AuthController {
     return accessToken;
   }
 
+  @Post('verify')
+  @HttpCode(201)
+  async verify() {}
+
   @Post('logout')
   @HttpCode(204)
   async logout(
