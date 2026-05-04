@@ -1,7 +1,7 @@
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { CreateBookingCommand } from './booking.commands';
 import { ConflictException, Inject } from '@nestjs/common';
-import type { ITransactionRepo } from '../interfaces.ts/TransactionRepo.interface';
+import type { ITransactionRepo } from '../../../../infrastructure/repo/transactions/interfaces/TransactionRepo.interface';
 import type { IBookingRepo } from '../../domain/repo-interfaces/IBookingRepo.interface';
 import { BookingEntity } from '../../domain/entities/booking.entity';
 import { InjectQueue } from '@nestjs/bullmq';

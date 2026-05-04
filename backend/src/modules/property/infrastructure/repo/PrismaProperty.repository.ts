@@ -62,7 +62,6 @@ export class PrismaPropertyRepository implements IPropertyRepo {
             id: property.props.hostId,
           },
         },
-        idempotencyKey: property.props.idempotencyKey,
       },
       update: {
         name: property.props.name,

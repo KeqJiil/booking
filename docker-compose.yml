@@ -8,6 +8,8 @@ services:
         condition: service_healthy
       redis:
         condition: service_started
+      minio:
+        condition: service_started
     environment:
       WATCHPACK_POLLING: true
       CHOKIDAR_USEPOLLING: true
@@ -80,6 +82,7 @@ services:
     volumes:
       - minio_storage:/minio/data
     command: server /data --console-address ":9001"
+    restart: always
 
 volumes:
   db_data:

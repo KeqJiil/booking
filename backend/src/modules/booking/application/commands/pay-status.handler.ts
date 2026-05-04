@@ -1,7 +1,7 @@
 import { Inject, NotFoundException } from '@nestjs/common';
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { PayBookingStatusCommand } from './booking.commands';
-import type { ITransactionRepo } from '../interfaces.ts/TransactionRepo.interface';
+import type { ITransactionRepo } from '../../../../infrastructure/repo/transactions/interfaces/TransactionRepo.interface';
 import type { IBookingRepo } from '../../domain/repo-interfaces/IBookingRepo.interface';
 
 @CommandHandler(PayBookingStatusCommand)

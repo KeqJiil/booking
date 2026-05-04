@@ -3,7 +3,7 @@ import { PrismaService } from 'src/database/prisma.service';
 import {
   ITransactionRepo,
   TOptionsTransaction,
-} from '../../application/interfaces.ts/TransactionRepo.interface';
+} from '../interfaces/TransactionRepo.interface';
 
 @Injectable()
 export class TransactionRepo implements ITransactionRepo {

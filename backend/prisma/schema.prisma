@@ -14,9 +14,10 @@ datasource db {
 model User {
   id String @id @default(uuid())
 
-  name  String
-  email String @unique
-  role  Roles  @default(USER)
+  name             String
+  email            String  @unique
+  role             Roles   @default(USER)
+  paymentAccountId String? @map("payment_account_id")
 
   status LiveStatus @default(ALIVE)
 
@@ -29,12 +30,12 @@ model User {
   reviews         Review[]
   notifications   Notification[]
   idempotencyKeys IdempotencyKey[]
-  payments  Payment[]
+  payments        Payment[]
 
   userSettings UserSettings?
 
-  createdAt DateTime  @default(now()) @map("created_at")
-  updatedAt DateTime  @updatedAt() @map("updated_at")
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt() @map("updated_at")
 }
 
 model UserSettings {
@@ -64,8 +65,6 @@ model Property {
   address     String
   maxGuests   Int
   status      LiveStatus @default(ALIVE)
-
-  idempotencyKey String @unique @map("idempotency_key")
 
   images Image[]
 
@@ -221,8 +220,10 @@ model IdempotencyKey {
 
   user   User   @relation(fields: [userId], references: [id])
   userId String @map("user_id")
-
-  createdAt DateTime @default(now()) @map("created_at")
+  
+  expiredAt  DateTime @map("expired_at")
+  createdAt  DateTime @default(now()) @map("created_at")
+  propertyId String?
 
   @@unique([key, userId])
   @@index([userId])
@@ -232,10 +233,10 @@ model IdempotencyKey {
 model Payment {
   id String @id @default(uuid())
 
-  userId String @map("user_id")
-  user   User @relation(references: [id], fields: [userId])
-  status PaymentStatuses
-  amount Int
+  userId   String          @map("user_id")
+  user     User            @relation(references: [id], fields: [userId])
+  status   PaymentStatuses
+  amount   Int
   currency Currency
 
   providerPaymentId String?

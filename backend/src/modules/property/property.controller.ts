@@ -8,6 +8,7 @@ import {
   Patch,
   Post,
   Query,
+  UseGuards,
 } from '@nestjs/common';
 import { PropertySearchParamsDto } from './application/dto/searchParams.dto';
 import { CreatePropertyDTO } from './application/dto/createProperty.dto';
@@ -27,6 +28,7 @@ import {
 } from './application/queries/property.queries';
 import { IdempotencyAccess } from 'src/common/decorators/idempotency.decorator';
 import { ApiTags } from '@nestjs/swagger';
+import { IdempotencyGuard } from 'src/common/guards/Idempotency.guard';
 
 @ApiTags('Property')
 @Controller('property')
@@ -50,17 +52,8 @@ export class PropertyController {
     return await this.queryBus.execute(new FindPropertyByIdQuery(id));
   }
 
-  @Get('my')
   @Authorization('HOST')
-  @HttpCode(200)
-  async getMyProperties(@AccessInfo('id') userId: string) {}
-
-  @Get('my/booked')
-  @Authorization('HOST')
-  @HttpCode(200)
-  async getMyPropertiesBooked(@AccessInfo('id') userId: string) {}
-
-  @Authorization('HOST')
+  @UseGuards(IdempotencyGuard)
   @Post('')
   @HttpCode(201)
   async createProperty(
@@ -72,7 +65,6 @@ export class PropertyController {
       new CreatePropertyCommand({
         ...createProperty,
         hostId: id,
-        idempotencyKey,
       }),
     );
   }
@@ -101,5 +93,3 @@ export class PropertyController {
     await this.commandBus.execute(new DeletePropertyCommand(id, userId, role));
   }
 }
-
-//todo get my property/get my property that is booked

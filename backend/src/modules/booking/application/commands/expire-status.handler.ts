@@ -1,7 +1,7 @@
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { ExpireBookingStatusCommand } from './booking.commands';
 import { Inject, NotFoundException } from '@nestjs/common';
-import type { ITransactionRepo } from '../interfaces.ts/TransactionRepo.interface';
+import type { ITransactionRepo } from '../../../../infrastructure/repo/transactions/interfaces/TransactionRepo.interface';
 import type { IBookingRepo } from '../../domain/repo-interfaces/IBookingRepo.interface';
 
 @CommandHandler(ExpireBookingStatusCommand)

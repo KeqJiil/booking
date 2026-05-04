@@ -1,6 +1,6 @@
 import { Module } from '@nestjs/common';
 import { BookingController } from './booking.controller';
-import { TransactionRepo } from './infrastructure/repo/Transaction.repository';
+import { TransactionRepo } from '../../infrastructure/repo/transactions/repo/Transaction.repository';
 import { PrismaBookingRepo } from './infrastructure/repo/PrismaBooking.repository';
 import { PrismaBookingQueryRepo } from './infrastructure/repo/PrismaBookingQuery.repository';
 import { GetMyBookingsQueryHandler } from './application/queries/getMyBookings.query';
