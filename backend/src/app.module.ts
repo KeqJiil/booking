@@ -20,6 +20,7 @@ import { ChatModule } from './modules/chat/chat.module';
 import { NotificationsModule } from './modules/notifications/notifications.module';
 import { BillingModule } from './modules/billing/billing.module';
 import { MailModule } from './modules/mail/mail.module';
+import { StripeModule } from './infrastructure/payments/stripe/stripe.module';
 
 @Module({
   imports: [
@@ -83,6 +84,7 @@ import { MailModule } from './modules/mail/mail.module';
     NotificationsModule,
     BillingModule,
     MailModule,
+    StripeModule.forRootAsync(),
   ],
   providers: [MyJwtStrategy],
 })

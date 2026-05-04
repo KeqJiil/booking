@@ -8,9 +8,13 @@ import { AllExceptionsFilter } from './common/exceptionFilters/general.filter';
 import helmet from 'helmet';
 import { Logger } from 'nestjs-pino';
 import { OutputInterceptor } from './common/interceptors/output.interceptor';
+import bodyParser from 'body-parser';
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule);
+  const app = await NestFactory.create(AppModule, {
+    rawBody: true,
+    bodyParser: true,
+  });
   app.enableCors();
   app.use(helmet());
 
@@ -40,6 +44,7 @@ async function bootstrap() {
     }),
   );
   app.use(cookieParser());
+  app.use('/stripe/webhook', bodyParser.raw({ type: 'application/json' }));
 
   await app.listen(3000);
 }

@@ -26,4 +26,5 @@ export const propertyPlainSelect = Prisma.validator<Prisma.PropertySelect>()({
   maxGuests: true,
   hostId: true,
   typeId: true,
+  idempotencyKey: true,
 });
