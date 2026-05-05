@@ -271,6 +271,7 @@ enum Themes {
 enum LiveStatus {
   DELETED
   ALIVE
+  NOT_CONFIRMED
 }
 
 enum NotificationTypes {

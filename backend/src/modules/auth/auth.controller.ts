@@ -1,10 +1,12 @@
-import { Body, Controller, HttpCode, Post, Res } from '@nestjs/common';
+import { Body, Controller, HttpCode, Param, Post, Res } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { LoginDto } from './dto/login.dto';
 import { Cookies } from 'src/common/decorators/cookies.decorator';
 import { RegisterDto } from './dto/register.dto';
 import type { Response } from 'express';
 import { ApiTags } from '@nestjs/swagger';
+import { ForgotPasswordDto } from './dto/forgotPassword.dto';
+import { ForgotNewPasswordDto } from './dto/newPassword.dto';
 
 @ApiTags('Auth')
 @Controller('auth')
@@ -42,15 +44,32 @@ export class AuthController {
 
   @Post('register')
   @HttpCode(201)
-  async register(@Body() data: RegisterDto, @Res() res: Response) {
-    const { accessToken, refreshToken } = await this.authService.register(data);
+  async register(@Body() data: RegisterDto) {
+    await this.authService.register(data);
+  }
+
+  @Post('verify/:id')
+  @HttpCode(201)
+  async verify(@Res() res: Response, @Param('id') uuid: string) {
+    const { accessToken, refreshToken } = await this.authService.verify(uuid);
     res.cookie('refreshtoken', refreshToken, this.refreshConfig);
     return accessToken;
   }
 
-  @Post('verify')
-  @HttpCode(201)
-  async verify() {}
+  @Post('forgot-password')
+  @HttpCode(200)
+  async forgotPassword(@Body() email: ForgotPasswordDto) {
+    await this.authService.forgotPassword(email.email);
+  }
+
+  @Post('new-password/:id')
+  @HttpCode(200)
+  async newForgotPassword(
+    @Param('id') uuid: string,
+    @Body() newPassword: ForgotNewPasswordDto,
+  ) {
+    await this.authService.newPassword(newPassword.password, uuid);
+  }
 
   @Post('logout')
   @HttpCode(204)

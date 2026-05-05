@@ -1,5 +1,6 @@
 import {
   BadRequestException,
+  ForbiddenException,
   Inject,
   Injectable,
   UnauthorizedException,
@@ -12,11 +13,14 @@ import * as bcrypt from 'bcrypt';
 import { CACHE_MANAGER } from '@nestjs/cache-manager';
 import type { Cache } from 'cache-manager';
 import { randomUUID } from 'crypto';
-import { IPayload, ISession } from './types';
+import { IPayload, IRegisterData, ISession } from './types';
 import { Roles } from 'src/common/constants/roleLevels';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { eventNames } from 'src/common/constants/eventnames';
 import { Logger } from 'nestjs-pino';
+import { InjectQueue } from '@nestjs/bullmq';
+import { Queue } from 'bullmq';
+import { IRegisterQueue } from 'src/infrastructure/bullmq/interfaces/IRegisterData.interface';
 
 @Injectable()
 export class AuthService {
@@ -27,6 +31,7 @@ export class AuthService {
     @Inject(CACHE_MANAGER) private cache: Cache,
     private eventEmitter: EventEmitter2,
     private readonly logger: Logger,
+    @InjectQueue('auth') private readonly queue: Queue,
   ) {}
 
   private async createSession(
@@ -95,24 +100,25 @@ export class AuthService {
       data: {
         name: data.name,
         email: data.email,
+        status: 'NOT_CONFIRMED',
         password,
         userSettings: {
           create: {},
         },
       },
     });
-    const sessionId = randomUUID();
-    const tokens = await this.signTokens(newUser.id, newUser.role, sessionId);
-    await this.createSession(newUser.id, tokens.refreshToken, sessionId);
-
-    this.eventEmitter.emit(eventNames.account_created, {
-      ...newUser,
+    const uuid = randomUUID();
+    const cacheData: IRegisterData = {
+      uuid,
       userId: newUser.id,
-    });
-
-    this.logger.log(newUser, `New user created`);
-
-    return tokens;
+    };
+    await this.cache.set(`user:${uuid}`, cacheData, this.TTL);
+    const queueData: IRegisterQueue = {
+      uuid,
+      name: newUser.name,
+      email: newUser.email,
+    };
+    await this.queue.add(eventNames.accound_need_confirmation, queueData);
   }
 
   public async refreshTokens(refreshToken: string) {
@@ -149,10 +155,63 @@ export class AuthService {
     return tokens;
   }
 
+  public async verify(uuid: string) {
+    const cache = await this.cache.get<IRegisterData>(`user:${uuid}`);
+    if (!cache) throw new BadRequestException();
+    const user = await this.prisma.user.update({
+      where: {
+        id: cache.userId,
+      },
+      data: {
+        status: 'ALIVE',
+      },
+    });
+    const sessionId = randomUUID();
+    const tokens = await this.signTokens(user.id, user.role, sessionId);
+    await this.createSession(user.id, tokens.refreshToken, sessionId);
+
+    this.eventEmitter.emit(eventNames.account_created, {
+      ...user,
+      userId: user.id,
+    });
+
+    this.logger.log(user, `New user created`);
+    await this.cache.del(`user:${uuid}`);
+    return tokens;
+  }
+
   public async logout(refresh: string) {
     const payload = await this.jwt.decode(refresh);
     if (!payload) throw new UnauthorizedException();
     await this.cache.del(`session:${payload.sessionId}`);
     return true;
+  }
+
+  async forgotPassword(email: string) {
+    const uuid = randomUUID();
+    const user = await this.prisma.user.findUnique({ where: { email } });
+    if (!user) return;
+    await this.cache.set(`reset:${uuid}`, user.id, this.TTL);
+    const queueData = {
+      username: user.name,
+      email,
+      uuid,
+    };
+    await this.queue.add(eventNames.forgot_password, queueData);
+  }
+
+  async newPassword(newPassword: string, uuid: string) {
+    const cache = await this.cache.get<string>(`reset:${uuid}`);
+    if (!cache) throw new ForbiddenException();
+    const hashed = await bcrypt.hash(newPassword, 10);
+    await this.prisma.user.update({
+      where: {
+        id: cache,
+      },
+      data: {
+        password: hashed,
+      },
+    });
+    await this.cache.del(`reset:${uuid}`);
   }
 }

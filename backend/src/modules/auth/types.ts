@@ -17,3 +17,8 @@ export interface IJwtAccess {
   role: Roles;
   id: string;
 }
+
+export interface IRegisterData {
+  uuid: string;
+  userId: string;
+}

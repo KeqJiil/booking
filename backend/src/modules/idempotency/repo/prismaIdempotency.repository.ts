@@ -9,9 +9,40 @@ type Tx = Prisma.TransactionClient;
 export class PrismaIdempotencyRepo implements IIdempotencyRepo {
   constructor(private readonly prisma: PrismaService) {}
 
-  create(key: string, userId: string, tx: Tx): Promise<void> {}
+  async find(key: string, tx: Tx): Promise<any> {
+    const { userId, response } = await tx.idempotencyKey.findFirstOrThrow({
+      where: {
+        key,
+      },
+    });
+    return { userId, response };
+  }
 
-  addInfo(statusCode: number, data: any, tx: Tx): Promise<void> {}
+  async create(key: string, userId: string, tx: Tx): Promise<string> {
+    const { id } = await tx.idempotencyKey.create({
+      data: {
+        key,
+        userId,
+        expiredAt: new Date(Date.now() + 24 * 60 * 60 * 1000),
+      },
+    });
+    return id;
+  }
+
+  async addInfo(
+    key: string,
+    statusCode: number,
+    data: any,
+    tx: Tx,
+  ): Promise<void> {
+    await tx.idempotencyKey.updateMany({
+      where: { key },
+      data: {
+        statusCode,
+        response: data,
+      },
+    });
+  }
 
   async delete(): Promise<void> {
     await this.prisma.idempotencyKey.deleteMany({

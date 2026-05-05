@@ -4,6 +4,7 @@ import { JwtModule } from '@nestjs/jwt';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { AuthService } from './auth.service';
 import { PrismaModule } from 'src/database/prisma.module';
+import { BullModule } from '@nestjs/bullmq';
 
 @Module({
   controllers: [AuthController],
@@ -17,6 +18,9 @@ import { PrismaModule } from 'src/database/prisma.module';
       }),
     }),
     PrismaModule,
+    BullModule.registerQueue({
+      name: 'auth',
+    }),
   ],
   providers: [AuthService],
   exports: [AuthService],

@@ -4,7 +4,15 @@ export interface IMailer {
     userEmail: string,
     data: Record<string, string>,
   ): Promise<void>;
-  sendForgotPassword(userEmail: string): Promise<void>;
+  sendForgotPassword(
+    userEmail: string,
+    username: string,
+    uuid: string,
+  ): Promise<void>;
   sendCheckOfAction(userEmail: string, actionName: string): Promise<void>;
-  sendRegister(userEmail: string): Promise<void>;
+  sendRegister(
+    userEmail: string,
+    username: string,
+    uuid: string,
+  ): Promise<void>;
 }

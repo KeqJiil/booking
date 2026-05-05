@@ -1,4 +1,6 @@
 export const eventNames = {
+  forgot_password: 'forgot_password',
+  accound_need_confirmation: 'accound_need_confirmation',
   account_created: 'account_created',
   password_changed: 'password_changed',
   new_role_received: 'new_role_received',

@@ -22,6 +22,7 @@ import { BillingModule } from './modules/billing/billing.module';
 import { MailModule } from './modules/mail/mail.module';
 import { StripeModule } from './infrastructure/payments/stripe/stripe.module';
 import { IdempotencyModule } from './modules/idempotency/idempotency.module';
+import { UploadModule } from './modules/upload/upload.module';
 
 @Module({
   imports: [
@@ -87,6 +88,7 @@ import { IdempotencyModule } from './modules/idempotency/idempotency.module';
     MailModule,
     StripeModule.forRootAsync(),
     IdempotencyModule,
+    UploadModule,
   ],
   providers: [MyJwtStrategy],
 })

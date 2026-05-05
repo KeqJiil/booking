@@ -23,6 +23,12 @@ import { Resend } from 'resend';
       useFactory: (config: ConfigService) =>
         config.getOrThrow<string>('RESEND_EMAIL'),
     },
+    {
+      provide: 'BACKEND_URL',
+      inject: [ConfigService],
+      useFactory: (config: ConfigService) =>
+        config.getOrThrow<string>('VITE_BACKEND_URL'),
+    },
   ],
 })
 export class MailModule {}
