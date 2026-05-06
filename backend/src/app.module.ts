@@ -23,6 +23,10 @@ import { MailModule } from './modules/mail/mail.module';
 import { StripeModule } from './infrastructure/payments/stripe/stripe.module';
 import { IdempotencyModule } from './modules/idempotency/idempotency.module';
 import { UploadModule } from './modules/upload/upload.module';
+import { MinioModule } from './infrastructure/minio/minio.module';
+import { RedisModule } from './infrastructure/redis/redis.module';
+import { IdempotencyInterceptor } from './common/interceptors/idempotency.interceptor';
+import { RedisService } from './infrastructure/redis/redis.service';
 
 @Module({
   imports: [
@@ -38,7 +42,7 @@ import { UploadModule } from './modules/upload/upload.module';
       ],
     }),
     CqrsModule.forRoot(),
-    CacheModule.registerAsync({
+    /* CacheModule.registerAsync({
       imports: [ConfigModule],
       inject: [ConfigService],
       isGlobal: true,
@@ -48,7 +52,7 @@ import { UploadModule } from './modules/upload/upload.module';
           stores: [createKeyv(redisUrl)],
         };
       },
-    }),
+    }), */
     AuthModule,
     UserModule,
     BookingModule,
@@ -89,7 +93,16 @@ import { UploadModule } from './modules/upload/upload.module';
     StripeModule.forRootAsync(),
     IdempotencyModule,
     UploadModule,
+    MinioModule,
+    RedisModule,
   ],
-  providers: [MyJwtStrategy],
+  providers: [
+    MyJwtStrategy,
+    IdempotencyInterceptor,
+    {
+      provide: 'REDIS',
+      useClass: RedisService,
+    },
+  ],
 })
 export class AppModule {}

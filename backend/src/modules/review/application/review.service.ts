@@ -1,6 +1,4 @@
-import { CACHE_MANAGER } from '@nestjs/cache-manager';
 import { Inject, Injectable, NotFoundException } from '@nestjs/common';
-import type { Cache } from 'cache-manager';
 import { ICacheReturnValue } from '../domain/interfaces/review.interfaces';
 import { CreateReviewDto } from './dto/createReview.dto';
 import type { IReviewRepo } from '../domain/interfaces/repo.interface';
@@ -9,11 +7,12 @@ import { ChangeReviewDto } from './dto/changeReview.dto';
 import { SearchParamsReviewsDto } from './dto/searchParams.dto';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { eventNames } from 'src/common/constants/eventnames';
+import { RedisService } from 'src/infrastructure/redis/redis.service';
 
 @Injectable()
 export class ReviewService {
   constructor(
-    @Inject(CACHE_MANAGER) private readonly cache: Cache,
+    @Inject('REDIS') private readonly cache: RedisService,
     @Inject('ReviewRepo') private readonly repo: IReviewRepo,
     private readonly eventEmmiter: EventEmitter2,
   ) {}

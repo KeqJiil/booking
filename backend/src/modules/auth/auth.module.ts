@@ -5,6 +5,8 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { AuthService } from './auth.service';
 import { PrismaModule } from 'src/database/prisma.module';
 import { BullModule } from '@nestjs/bullmq';
+import { RedisModule } from 'src/infrastructure/redis/redis.module';
+import { RedisService } from 'src/infrastructure/redis/redis.service';
 
 @Module({
   controllers: [AuthController],
@@ -21,8 +23,9 @@ import { BullModule } from '@nestjs/bullmq';
     BullModule.registerQueue({
       name: 'auth',
     }),
+    RedisModule,
   ],
-  providers: [AuthService],
+  providers: [AuthService, { provide: 'REDIS', useClass: RedisService }],
   exports: [AuthService],
 })
 export class AuthModule {}

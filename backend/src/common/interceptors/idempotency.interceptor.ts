@@ -1,4 +1,3 @@
-import { CACHE_MANAGER } from '@nestjs/cache-manager';
 import {
   CallHandler,
   ConflictException,
@@ -6,12 +5,12 @@ import {
   Inject,
   NestInterceptor,
 } from '@nestjs/common';
-import type { Cache } from 'cache-manager';
 import { catchError, from, mergeMap, Observable, of, tap } from 'rxjs';
 import { idempotencyStatuses } from '../constants/idempotencyStatuses';
+import { RedisService } from 'src/infrastructure/redis/redis.service';
 
 export class IdempotencyInterceptor implements NestInterceptor {
-  constructor(@Inject(CACHE_MANAGER) private cache: Cache) {}
+  constructor(@Inject('REDIS') private cache: RedisService) {}
 
   intercept(context: ExecutionContext, next: CallHandler): Observable<any> {
     const idempotency = context.switchToHttp().getRequest().headers[

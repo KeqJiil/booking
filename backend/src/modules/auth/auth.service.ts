@@ -10,8 +10,6 @@ import { PrismaService } from 'src/database/prisma.service';
 import { RegisterDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
 import * as bcrypt from 'bcrypt';
-import { CACHE_MANAGER } from '@nestjs/cache-manager';
-import type { Cache } from 'cache-manager';
 import { randomUUID } from 'crypto';
 import { IPayload, IRegisterData, ISession } from './types';
 import { Roles } from 'src/common/constants/roleLevels';
@@ -21,6 +19,7 @@ import { Logger } from 'nestjs-pino';
 import { InjectQueue } from '@nestjs/bullmq';
 import { Queue } from 'bullmq';
 import { IRegisterQueue } from 'src/infrastructure/bullmq/interfaces/IRegisterData.interface';
+import { RedisService } from 'src/infrastructure/redis/redis.service';
 
 @Injectable()
 export class AuthService {
@@ -28,7 +27,7 @@ export class AuthService {
   constructor(
     private readonly jwt: JwtService,
     private readonly prisma: PrismaService,
-    @Inject(CACHE_MANAGER) private cache: Cache,
+    @Inject('REDIS') private cache: RedisService,
     private eventEmitter: EventEmitter2,
     private readonly logger: Logger,
     @InjectQueue('auth') private readonly queue: Queue,
@@ -84,13 +83,16 @@ export class AuthService {
         status: true,
       },
     });
+
     if (!user || user.status === 'DELETED') throw new UnauthorizedException();
     if (!user.password) throw new BadRequestException();
     const password = await bcrypt.compare(data.password, user.password);
     if (!password) throw new UnauthorizedException();
+
     const sessionId = randomUUID();
     const tokens = await this.signTokens(user.id, user.role, sessionId);
     await this.createSession(user.id, tokens.refreshToken, sessionId);
+
     return tokens;
   }
 
@@ -118,16 +120,19 @@ export class AuthService {
       name: newUser.name,
       email: newUser.email,
     };
-    await this.queue.add(eventNames.accound_need_confirmation, queueData);
+    await this.queue.add(eventNames.accound_need_confirmation, queueData, {
+      attempts: 5,
+      backoff: { type: 'exponential', delay: 500 },
+    });
   }
 
   public async refreshTokens(refreshToken: string) {
     const payload = await this.jwt.verifyAsync<IPayload>(refreshToken);
     if (!payload) throw new UnauthorizedException('No payload inside token');
 
-    const cache = (await this.cache.get(
+    const cache = await this.cache.get<ISession>(
       `session:${payload.sessionId}`,
-    )) as ISession;
+    );
     if (!cache || cache.expiresAt < Date.now())
       throw new UnauthorizedException('No cache or cache expired');
 
@@ -181,7 +186,7 @@ export class AuthService {
   }
 
   public async logout(refresh: string) {
-    const payload = await this.jwt.decode(refresh);
+    const payload = await this.jwt.verifyAsync(refresh);
     if (!payload) throw new UnauthorizedException();
     await this.cache.del(`session:${payload.sessionId}`);
     return true;
@@ -197,7 +202,10 @@ export class AuthService {
       email,
       uuid,
     };
-    await this.queue.add(eventNames.forgot_password, queueData);
+    await this.queue.add(eventNames.forgot_password, queueData, {
+      attempts: 5,
+      backoff: { type: 'exponential', delay: 500 },
+    });
   }
 
   async newPassword(newPassword: string, uuid: string) {

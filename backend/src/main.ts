@@ -9,8 +9,6 @@ import helmet from 'helmet';
 import { Logger } from 'nestjs-pino';
 import { OutputInterceptor } from './common/interceptors/output.interceptor';
 import bodyParser from 'body-parser';
-import { IdempotencyInterceptor } from './common/interceptors/idempotency.interceptor';
-import { CACHE_MANAGER } from '@nestjs/cache-manager';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule, {
@@ -24,7 +22,6 @@ async function bootstrap() {
   app.useGlobalInterceptors(
     new LoggingInterceptor(app.get(Logger)),
     new OutputInterceptor(),
-    new IdempotencyInterceptor(app.get(CACHE_MANAGER)),
   );
   app.useGlobalFilters(new AllExceptionsFilter(app.get(Logger)));
 
