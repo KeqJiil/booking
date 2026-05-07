@@ -7,9 +7,10 @@ import {
 } from '../events/property.events';
 import { randomUUID } from 'crypto';
 import { BadRequestException, ConflictException } from '@nestjs/common';
+import { IImage, ImageEntity } from './Image.entity';
 
 export type IChangeProperty = Readonly<
-  Partial<Omit<IPlainProperty, 'status' | 'id'>>
+  Partial<Omit<IPlainProperty, 'status' | 'id' | 'images'>>
 > & { id: string };
 
 export interface IPlainProperty {
@@ -24,11 +25,13 @@ export interface IPlainProperty {
   city: string;
   country: string;
   address: string;
+  images: IImage[];
 }
 
 export const LiveStatus = {
   ALIVE: 'ALIVE',
   DELETED: 'DELETED',
+  NOT_CONFIRMED: 'NOT_CONFIRMED',
 } as const;
 
 export type ILiveStatus = keyof typeof LiveStatus;
@@ -48,17 +51,26 @@ export class PropertyEntity extends AggregateRoot {
     private _props: IProperty,
     private _status: ILiveStatus,
     private readonly _id: string,
+    private _images: ImageEntity[],
   ) {
     super();
   }
 
-  static create(data: IProperty, id?: string, status?: ILiveStatus) {
+  static create(
+    data: IProperty,
+    images: IImage[],
+    id?: string,
+    status?: ILiveStatus,
+  ) {
     if (data.name.length < 4 || data.description.length < 20)
       throw new BadRequestException();
+    if (images.length > 20) throw new BadRequestException();
+    const imageEntities = this.createImages(images);
     const entity = new PropertyEntity(
       data,
       status ? status : 'ALIVE',
       id ? id : randomUUID(),
+      imageEntities,
     );
     entity.apply(new PropertyCreated(entity._props.hostId, entity._id));
     return entity;
@@ -78,6 +90,10 @@ export class PropertyEntity extends AggregateRoot {
     if (data.name) this.changeName(data.name);
     if (data.price) this.changePrice(data.price);
     if (data.typeId) this.changeType(data.typeId);
+  }
+
+  private static createImages(data: IImage[]) {
+    return data.map((el) => ImageEntity.createImage({ url: el.url }, el.id));
   }
 
   private changeName(newName: string) {
@@ -114,6 +130,14 @@ export class PropertyEntity extends AggregateRoot {
     this.apply(new PropertyChanged(this.id, this._props));
   }
 
+  updateImages(data: IImage[]) {
+    if (data.length > 20) throw new BadRequestException();
+    const images = data.map((el) =>
+      ImageEntity.createImage({ url: el.url }, el.id),
+    );
+    this._images = images;
+  }
+
   deleteProperty(userId: string, isAdmin: boolean) {
     if (userId === this._props.hostId || isAdmin) {
       this._status = 'DELETED';
@@ -131,5 +155,9 @@ export class PropertyEntity extends AggregateRoot {
 
   get status() {
     return this._status;
+  }
+
+  get images() {
+    return this._images;
   }
 }

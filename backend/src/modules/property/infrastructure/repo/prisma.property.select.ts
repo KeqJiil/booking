@@ -26,4 +26,10 @@ export const propertyPlainSelect = Prisma.validator<Prisma.PropertySelect>()({
   maxGuests: true,
   hostId: true,
   typeId: true,
+  images: {
+    select: {
+      url: true,
+      id: true,
+    },
+  },
 });

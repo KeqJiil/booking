@@ -24,3 +24,11 @@ export class DeletePropertyCommand {
     public readonly role: Roles,
   ) {}
 }
+
+export class DeleteImagesCommand {
+  constructor(
+    public readonly urls: string[],
+    public readonly propertyId: string,
+    public readonly userId: string,
+  ) {}
+}

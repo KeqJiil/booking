@@ -20,7 +20,7 @@ export class CreatePropertyHandler implements ICommandHandler<CreatePropertyComm
       ...restData,
       address: { address, city, country },
     };
-    const property = PropertyEntity.create(createObj);
+    const property = PropertyEntity.create(createObj, []);
     const propertyWithEvents = this.publisher.mergeObjectContext(property);
     await this.repository.save(property);
     propertyWithEvents.commit();

@@ -11,9 +11,15 @@ import { PrismaModule } from 'src/database/prisma.module';
 import { PropertyDeletedHandler } from './application/events/propertyDeleted.handler';
 import { PropertyCreatedHandler } from './application/events/propertyCreated.handler';
 import { PropertyChangedHandler } from './application/events/propertyChanged.handler';
+import { BullModule } from '@nestjs/bullmq';
 
 @Module({
-  imports: [PrismaModule],
+  imports: [
+    PrismaModule,
+    BullModule.registerQueue({
+      name: 'property',
+    }),
+  ],
   controllers: [PropertyController],
   providers: [
     { provide: 'IPropertyRepo', useClass: PrismaPropertyRepository },

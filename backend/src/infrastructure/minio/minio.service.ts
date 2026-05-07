@@ -9,16 +9,18 @@ import {
   HttpException,
   HttpStatus,
   Injectable,
-  Logger,
   OnModuleInit,
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { createReadStream } from 'fs';
+import { Logger } from 'nestjs-pino';
 
 @Injectable()
 export class MinioService implements OnModuleInit {
-  private logger = new Logger(MinioService.name);
-  constructor(private configService: ConfigService) {}
+  constructor(
+    private configService: ConfigService,
+    private readonly logger: Logger,
+  ) {}
   private s3: S3Client;
 
   async onModuleInit() {
@@ -118,6 +120,7 @@ export class MinioService implements OnModuleInit {
     if (!fileName || typeof fileName !== 'string') {
       throw new HttpException('Invalid file name', HttpStatus.BAD_REQUEST);
     }
+
     try {
       const command = new DeleteObjectCommand({
         Bucket: 'my-public-bucket',

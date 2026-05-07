@@ -18,6 +18,7 @@ import { ChangePropertyDTO } from './application/dto/changeProperty.dto';
 import { CommandBus, QueryBus } from '@nestjs/cqrs';
 import {
   CreatePropertyCommand,
+  DeleteImagesCommand,
   DeletePropertyCommand,
   EditPropertyCommand,
 } from './application/commands/property.commands';
@@ -29,6 +30,7 @@ import {
 import { IdempotencyAccess } from 'src/common/decorators/idempotency.decorator';
 import { ApiTags } from '@nestjs/swagger';
 import { IdempotencyGuard } from 'src/common/guards/Idempotency.guard';
+import { DeleteImagesDto } from './application/dto/deleteImages.dto';
 
 @ApiTags('Property')
 @Controller('property')
@@ -91,5 +93,18 @@ export class PropertyController {
     @AccessInfo('id') userId: string,
   ) {
     await this.commandBus.execute(new DeletePropertyCommand(id, userId, role));
+  }
+
+  @Authorization('HOST')
+  @Delete('images/:id')
+  @HttpCode(200)
+  async deleteImages(
+    @Body() data: DeleteImagesDto,
+    @Param('id') propertyId: string,
+    @AccessInfo('id') userId: string,
+  ) {
+    await this.commandBus.execute(
+      new DeleteImagesCommand(data.urls, propertyId, userId),
+    );
   }
 }

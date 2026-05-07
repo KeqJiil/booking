@@ -7,6 +7,7 @@ export const eventNames = {
   property_created: 'property_created',
   property_changed: 'property_changed',
   property_deleted: 'property_deleted',
+  property_images_updated: 'property_images_updated',
   able_to_leave_review: 'able_to_leave_review',
   new_review_received: 'new_review_received',
   new_review_created: 'new_review_created',

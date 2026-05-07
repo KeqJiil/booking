@@ -38,6 +38,7 @@ export class PrismaPropertyRepository implements IPropertyRepo {
       price: Number(property.price),
       hostId: property.hostId,
       typeId: property.typeId ?? '',
+      images: property.images ?? [],
     });
   }
 
@@ -62,6 +63,12 @@ export class PrismaPropertyRepository implements IPropertyRepo {
             id: property.props.hostId,
           },
         },
+        images: {
+          create: property.images.map((img) => ({
+            id: img.id,
+            url: img.data.url,
+          })),
+        },
       },
       update: {
         name: property.props.name,
@@ -72,6 +79,16 @@ export class PrismaPropertyRepository implements IPropertyRepo {
         address: property.props.address.address,
         maxGuests: property.props.maxGuests,
         status: property.status,
+        images: {
+          deleteMany: {
+            id: { notIn: property.images.map((img) => img.id) },
+          },
+          upsert: property.images.map((img) => ({
+            where: { id: img.id },
+            create: { id: img.id, url: img.data.url },
+            update: { url: img.data.url },
+          })),
+        },
       },
       where: {
         id: property.id,
