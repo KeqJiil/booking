@@ -25,6 +25,14 @@ export class DeletePropertyCommand {
   ) {}
 }
 
+export class AddImagesCommand {
+  constructor(
+    public readonly urls: string[],
+    public readonly propertyId: string,
+    public readonly userId: string,
+  ) {}
+}
+
 export class DeleteImagesCommand {
   constructor(
     public readonly urls: string[],

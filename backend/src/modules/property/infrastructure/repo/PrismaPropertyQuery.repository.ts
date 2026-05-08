@@ -1,7 +1,6 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import {
   IPropertyQueryRepo,
-  IPropertySearchParams,
   IPropertyView,
 } from '../../domain/repo-interface/IPropertyRepo.interface';
 import { PrismaService } from 'src/database/prisma.service';

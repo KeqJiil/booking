@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   Controller,
   Headers,
   Post,
@@ -17,7 +18,8 @@ export class StripeController {
     @Req() req: RawBodyRequest<Request>,
     @Headers('stripe-signature') sig: string,
   ) {
-    const data = req.body;
+    const data = req.rawBody;
+    if (!data) throw new BadRequestException();
     await this.service.verifyWebhook(data, sig);
   }
 }

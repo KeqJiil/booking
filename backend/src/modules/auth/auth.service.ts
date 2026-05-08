@@ -20,6 +20,7 @@ import { InjectQueue } from '@nestjs/bullmq';
 import { Queue } from 'bullmq';
 import { IRegisterQueue } from 'src/infrastructure/bullmq/interfaces/IRegisterData.interface';
 import { RedisService } from 'src/infrastructure/redis/redis.service';
+import { UserService } from '../user/user.service';
 
 @Injectable()
 export class AuthService {
@@ -31,6 +32,7 @@ export class AuthService {
     private eventEmitter: EventEmitter2,
     private readonly logger: Logger,
     @InjectQueue('auth') private readonly queue: Queue,
+    private readonly userService: UserService,
   ) {}
 
   private async createSession(
@@ -98,16 +100,10 @@ export class AuthService {
 
   public async register(data: RegisterDto) {
     const password = await bcrypt.hash(data.password, 10);
-    const newUser = await this.prisma.user.create({
-      data: {
-        name: data.name,
-        email: data.email,
-        status: 'NOT_CONFIRMED',
-        password,
-        userSettings: {
-          create: {},
-        },
-      },
+    const newUser = await this.userService.createUser({
+      password,
+      email: data.email,
+      name: data.name,
     });
     const uuid = randomUUID();
     const cacheData: IRegisterData = {
@@ -140,10 +136,7 @@ export class AuthService {
     if (!refreshCheck && cache.createdAt < Date.now() - 15_000)
       throw new UnauthorizedException('Bad token');
 
-    const user = await this.prisma.user.findUnique({
-      where: { id: payload.id },
-      select: { role: true, status: true },
-    });
+    const user = await this.userService.getUserById(payload.id);
     if (!user || user.status === 'DELETED')
       throw new UnauthorizedException('No such user');
 
@@ -163,14 +156,7 @@ export class AuthService {
   public async verify(uuid: string) {
     const cache = await this.cache.get<IRegisterData>(`user:${uuid}`);
     if (!cache) throw new BadRequestException();
-    const user = await this.prisma.user.update({
-      where: {
-        id: cache.userId,
-      },
-      data: {
-        status: 'ALIVE',
-      },
-    });
+    const user = await this.userService.verifyUser(cache.userId);
     const sessionId = randomUUID();
     const tokens = await this.signTokens(user.id, user.role, sessionId);
     await this.createSession(user.id, tokens.refreshToken, sessionId);
@@ -194,7 +180,7 @@ export class AuthService {
 
   async forgotPassword(email: string) {
     const uuid = randomUUID();
-    const user = await this.prisma.user.findUnique({ where: { email } });
+    const user = await this.userService.getUserByEmail(email);
     if (!user) return;
     await this.cache.set(`reset:${uuid}`, user.id, this.TTL);
     const queueData = {

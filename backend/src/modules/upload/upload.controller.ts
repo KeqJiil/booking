@@ -1,7 +1,5 @@
 import {
-  Body,
   Controller,
-  Delete,
   FileTypeValidator,
   MaxFileSizeValidator,
   Param,
@@ -16,11 +14,14 @@ import { UploadService } from './upload.service';
 import { diskStorage } from 'multer';
 import { extname } from 'path';
 import { unlink } from 'fs/promises';
+import { Authorization } from 'src/common/decorators/authorization.decorator';
+import { AccessInfo } from 'src/common/decorators/accessInfo.decorator';
 
 @Controller('upload')
 export class UploadController {
   constructor(private readonly uploadService: UploadService) {}
 
+  @Authorization('HOST')
   @Post('property/:id')
   @UseInterceptors(
     FilesInterceptor('files', 20, {
@@ -45,6 +46,7 @@ export class UploadController {
     )
     files: Express.Multer.File[],
     @Param('id') id: string,
+    @AccessInfo('id') userId: string,
   ) {
     try {
     } finally {
@@ -54,8 +56,20 @@ export class UploadController {
     }
   }
 
+  @Authorization('USER')
   @Post('user/avatar/:id')
-  @UseInterceptors(FileInterceptor('file'))
+  @UseInterceptors(
+    FileInterceptor('file', {
+      storage: diskStorage({
+        destination: './temp',
+        filename: (req, file, cb) => {
+          const uniqueSuffix =
+            Date.now() + '-' + Math.round(Math.random() * 1e9);
+          cb(null, `${uniqueSuffix}${extname(file.originalname)}`);
+        },
+      }),
+    }),
+  )
   async uploadUserAvatar(
     @UploadedFile(
       new ParseFilePipe({
@@ -67,8 +81,10 @@ export class UploadController {
     )
     file: Express.Multer.File,
     @Param('id') id: string,
+    @AccessInfo('id') userId: string,
   ) {
     try {
+      await this.uploadService.uploadUserAvatar(file, userId, id);
     } finally {
       await unlink(file.path);
     }

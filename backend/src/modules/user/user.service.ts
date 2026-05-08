@@ -10,6 +10,7 @@ import { Roles } from 'src/common/constants/roleLevels';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { eventNames } from 'src/common/constants/eventnames';
 import { Logger } from 'nestjs-pino';
+import { IUserCreate } from './types';
 
 @Injectable()
 export class UserService {
@@ -18,6 +19,46 @@ export class UserService {
     private readonly eventEmmiter: EventEmitter2,
     private readonly logger: Logger,
   ) {}
+
+  async createUser(user: IUserCreate) {
+    return await this.prisma.user.create({
+      data: {
+        name: user.name,
+        email: user.email,
+        status: 'NOT_CONFIRMED',
+        password: user.password,
+        userSettings: {
+          create: {},
+        },
+      },
+    });
+  }
+
+  async getUserById(id: string) {
+    return await this.prisma.user.findUnique({ where: { id } });
+  }
+
+  async getUserByEmail(email: string) {
+    return await this.prisma.user.findUnique({ where: { email } });
+  }
+
+  async updateAvatar(id: string, url: string) {
+    return await this.prisma.user.update({
+      where: { id },
+      data: { avatarUrl: url },
+    });
+  }
+
+  async verifyUser(id: string) {
+    return await this.prisma.user.update({
+      where: {
+        id,
+      },
+      data: {
+        status: 'ALIVE',
+      },
+    });
+  }
 
   async getSettings(userId: string) {
     return await this.prisma.userSettings.findUnique({
@@ -54,7 +95,7 @@ export class UserService {
       select: { password: true },
     });
     if (!user) throw new NotFoundException();
-    const isMatch = await bcrypt.compare(password, user.password);
+    const isMatch = await bcrypt.compare(password, user.password!);
     if (!isMatch) throw new UnauthorizedException();
     const newHashedPassword = await bcrypt.hash(newPassword, 10);
     const updatedUser = await this.prisma.user.update({

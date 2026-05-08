@@ -67,42 +67,39 @@ export class StripeService implements IPaymentService {
     };
   }
 
-  async verifyWebhook(rawBody: Buffer, signature: string): Promise<void> {
+  async verifyWebhook(rawBody: Buffer, signature: string) {
     const event = this.stripe.webhooks.constructEvent(
       rawBody,
       signature,
       this.config.getOrThrow('STRIPE_WH'),
     );
+
+    const session = event.data.object as any;
+    const metadata = session.metadata as IPaymentMetadata;
+
+    if (!metadata?.bookingId) return event;
+
+    const jobData = {
+      userId: metadata.userId,
+      bookingId: metadata.bookingId,
+    };
+
     switch (event.type) {
       case 'checkout.session.completed': {
-        const metadata = event.data.object
-          .metadata as unknown as IPaymentMetadata;
-        await this.queue.add(paymentConsts.payment_success, {
-          userId: metadata.userId,
-          bookingId: metadata.bookingId,
-        });
+        await this.queue.add(paymentConsts.payment_success, jobData);
         break;
       }
 
       case 'payment_intent.payment_failed': {
-        const metadata = event.data.object
-          .metadata as unknown as IPaymentMetadata;
-        await this.queue.add(paymentConsts.payment_failed, {
-          userId: metadata.userId,
-          bookingId: metadata.bookingId,
-        });
+        await this.queue.add(paymentConsts.payment_failed, jobData);
         break;
       }
 
       case 'checkout.session.expired': {
-        const metadata = event.data.object
-          .metadata as unknown as IPaymentMetadata;
-        await this.queue.add(paymentConsts.payment_failed, {
-          userId: metadata.userId,
-          bookingId: metadata.bookingId,
-        });
+        await this.queue.add(paymentConsts.payment_failed, jobData);
       }
     }
+    return event;
   }
 
   async handleRefund(paymentIntendId: string): Promise<void> {

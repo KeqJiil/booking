@@ -7,6 +7,7 @@ import { PrismaModule } from 'src/database/prisma.module';
 import { BullModule } from '@nestjs/bullmq';
 import { RedisModule } from 'src/infrastructure/redis/redis.module';
 import { RedisService } from 'src/infrastructure/redis/redis.service';
+import { UserModule } from '../user/user.module';
 
 @Module({
   controllers: [AuthController],
@@ -24,6 +25,7 @@ import { RedisService } from 'src/infrastructure/redis/redis.service';
       name: 'auth',
     }),
     RedisModule,
+    UserModule,
   ],
   providers: [AuthService, { provide: 'REDIS', useClass: RedisService }],
   exports: [AuthService],

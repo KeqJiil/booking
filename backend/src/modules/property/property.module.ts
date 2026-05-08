@@ -12,6 +12,8 @@ import { PropertyDeletedHandler } from './application/events/propertyDeleted.han
 import { PropertyCreatedHandler } from './application/events/propertyCreated.handler';
 import { PropertyChangedHandler } from './application/events/propertyChanged.handler';
 import { BullModule } from '@nestjs/bullmq';
+import { IdempotencyModule } from '../idempotency/idempotency.module';
+import { TransactionRepo } from 'src/infrastructure/repo/transactions/repo/Transaction.repository';
 
 @Module({
   imports: [
@@ -19,6 +21,7 @@ import { BullModule } from '@nestjs/bullmq';
     BullModule.registerQueue({
       name: 'property',
     }),
+    IdempotencyModule,
   ],
   controllers: [PropertyController],
   providers: [
@@ -32,6 +35,7 @@ import { BullModule } from '@nestjs/bullmq';
     PropertyDeletedHandler,
     PropertyCreatedHandler,
     PropertyChangedHandler,
+    { provide: 'ITransactionRepo', useClass: TransactionRepo },
   ],
 })
 export class PropertyModule {}

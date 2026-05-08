@@ -12,15 +12,20 @@ import {
   OnModuleInit,
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
+import { randomUUID } from 'crypto';
 import { createReadStream } from 'fs';
 import { Logger } from 'nestjs-pino';
+import { extname } from 'path';
 
 @Injectable()
 export class MinioService implements OnModuleInit {
+  private readonly bucketName: string;
   constructor(
     private configService: ConfigService,
     private readonly logger: Logger,
-  ) {}
+  ) {
+    this.bucketName = this.configService.getOrThrow('MINIO_BUCKET_NAME');
+  }
   private s3: S3Client;
 
   async onModuleInit() {
@@ -48,15 +53,15 @@ export class MinioService implements OnModuleInit {
   async createBucketIfNotExists(bucketName: string) {
     try {
       await this.s3.send(new CreateBucketCommand({ Bucket: bucketName }));
-      console.log(`Bucket '${bucketName}' created or already exists.`);
+      this.logger.log(`Bucket '${bucketName}' created or already exists.`);
     } catch (err) {
       if (
         err?.name === 'BucketAlreadyOwnedByYou' ||
         err?.name === 'BucketAlreadyExists'
       ) {
-        console.log(`Bucket '${bucketName}' already exists.`);
+        this.logger.log(`Bucket '${bucketName}' already exists.`);
       } else {
-        console.error('Error creating bucket:', err);
+        this.logger.error('Error creating bucket:', err);
         throw err;
       }
     }
@@ -83,9 +88,9 @@ export class MinioService implements OnModuleInit {
 
     try {
       await this.s3.send(command);
-      console.log(`Bucket '${bucketName}' is now public.`);
+      this.logger.log(`Bucket '${bucketName}' is now public.`);
     } catch (err) {
-      console.error('Error setting bucket policy:', err);
+      this.logger.error('Error setting bucket policy:', err);
       throw err;
     }
   }
@@ -93,10 +98,12 @@ export class MinioService implements OnModuleInit {
   async uploadFile(filePath: Express.Multer.File) {
     try {
       const fileContent = createReadStream(filePath.path);
+      const fileExtension = extname(filePath.originalname);
+      const fileName = `${randomUUID()}${fileExtension}`;
 
       const command = new PutObjectCommand({
-        Bucket: 'my-public-bucket',
-        Key: filePath.filename,
+        Bucket: this.bucketName,
+        Key: fileName,
         Body: fileContent,
         ContentType: filePath.mimetype,
       });
@@ -104,11 +111,11 @@ export class MinioService implements OnModuleInit {
       const s = await this.s3.send(command);
       this.logger.debug(s);
       this.logger.debug(
-        `${this.configService.getOrThrow('MINIO_URL')}/my-public-bucket/${filePath.filename}`,
+        `${this.configService.getOrThrow('MINIO_URL')}/${this.bucketName}/${fileName}`,
       );
-      return `${this.configService.getOrThrow('MINIO_URL')}/my-public-bucket/${filePath.filename}`;
+      return `${this.configService.getOrThrow('MINIO_URL')}/${this.bucketName}/${fileName}`;
     } catch (err) {
-      console.error('Error uploading file:', err);
+      this.logger.error('Error uploading file:', err);
       throw new HttpException(
         'Failed to upload file',
         HttpStatus.INTERNAL_SERVER_ERROR,
@@ -123,14 +130,14 @@ export class MinioService implements OnModuleInit {
 
     try {
       const command = new DeleteObjectCommand({
-        Bucket: 'my-public-bucket',
+        Bucket: this.bucketName,
         Key: fileName,
       });
       await this.s3.send(command);
       this.logger.debug('file deleted', fileName);
       return true;
     } catch (err) {
-      console.error('Error Delete file:', err);
+      this.logger.error('Error Delete file:', err);
       throw new HttpException(
         'Can not Delete File',
         HttpStatus.INTERNAL_SERVER_ERROR,

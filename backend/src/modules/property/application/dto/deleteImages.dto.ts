@@ -1,6 +1,6 @@
 import { IsArray } from 'class-validator';
 
-export class DeleteImagesDto {
+export class UpdateImagesDto {
   @IsArray()
   urls: string[];
 }
