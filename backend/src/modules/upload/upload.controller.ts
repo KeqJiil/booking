@@ -1,5 +1,7 @@
 import {
+  Body,
   Controller,
+  Delete,
   FileTypeValidator,
   MaxFileSizeValidator,
   Param,
@@ -16,6 +18,7 @@ import { extname } from 'path';
 import { unlink } from 'fs/promises';
 import { Authorization } from 'src/common/decorators/authorization.decorator';
 import { AccessInfo } from 'src/common/decorators/accessInfo.decorator';
+import { DeleteImagesDto } from './dto/deleteImages.dto';
 
 @Controller('upload')
 export class UploadController {
@@ -35,7 +38,7 @@ export class UploadController {
       }),
     }),
   )
-  async uploadPropertyImages(
+  async addPropertyImages(
     @UploadedFiles(
       new ParseFilePipe({
         validators: [
@@ -49,11 +52,31 @@ export class UploadController {
     @AccessInfo('id') userId: string,
   ) {
     try {
+      await this.uploadService.uploadPropertyImages(files, userId, id);
     } finally {
       for (const file of files) {
         await unlink(file.path);
       }
     }
+  }
+
+  @Authorization('HOST')
+  @Delete('property/:id')
+  async deletePropertyImages(
+    @UploadedFiles(
+      new ParseFilePipe({
+        validators: [
+          new MaxFileSizeValidator({ maxSize: 1024 * 1024 * 10 }),
+          new FileTypeValidator({ fileType: 'image/(jpeg|png|webp)' }),
+        ],
+      }),
+    )
+    @Body()
+    urls: DeleteImagesDto,
+    @Param('id') id: string,
+    @AccessInfo('id') userId: string,
+  ) {
+    await this.uploadService.deletePropertyImages(urls.urls, userId, id);
   }
 
   @Authorization('USER')

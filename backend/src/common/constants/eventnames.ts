@@ -8,6 +8,8 @@ export const eventNames = {
   property_changed: 'property_changed',
   property_deleted: 'property_deleted',
   property_images_updated: 'property_images_updated',
+  property_images_added: 'property_images_added',
+  property_images_deleted: 'property_images_deleted',
   able_to_leave_review: 'able_to_leave_review',
   new_review_received: 'new_review_received',
   new_review_created: 'new_review_created',
