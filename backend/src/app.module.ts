@@ -3,12 +3,10 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { ThrottlerModule } from '@nestjs/throttler';
 import { AuthModule } from './modules/auth/auth.module';
 import { CqrsModule } from '@nestjs/cqrs';
-import { CacheModule } from '@nestjs/cache-manager';
 import { UserModule } from './modules/user/user.module';
 import { BookingModule } from './modules/booking/booking.module';
 import { PropertyModule } from './modules/property/property.module';
 import { ReviewModule } from './modules/review/review.module';
-import { createKeyv } from '@keyv/redis';
 import { PropertyTypeModule } from './modules/propertyType/propertyType.module';
 import { PassportModule } from '@nestjs/passport';
 import { MyJwtStrategy } from './modules/auth/strategies/jwt.strategy';
@@ -27,6 +25,7 @@ import { MinioModule } from './infrastructure/minio/minio.module';
 import { RedisModule } from './infrastructure/redis/redis.module';
 import { IdempotencyInterceptor } from './common/interceptors/idempotency.interceptor';
 import { RedisService } from './infrastructure/redis/redis.service';
+import { EventModule } from './infrastructure/bullmq/bull.module';
 
 @Module({
   imports: [
@@ -42,17 +41,6 @@ import { RedisService } from './infrastructure/redis/redis.service';
       ],
     }),
     CqrsModule.forRoot(),
-    /* CacheModule.registerAsync({
-      imports: [ConfigModule],
-      inject: [ConfigService],
-      isGlobal: true,
-      useFactory: (config: ConfigService) => {
-        const redisUrl = config.getOrThrow<string>('REDIS_URL');
-        return {
-          stores: [createKeyv(redisUrl)],
-        };
-      },
-    }), */
     AuthModule,
     UserModule,
     BookingModule,
@@ -95,6 +83,7 @@ import { RedisService } from './infrastructure/redis/redis.service';
     UploadModule,
     MinioModule,
     RedisModule,
+    EventModule,
   ],
   providers: [
     MyJwtStrategy,

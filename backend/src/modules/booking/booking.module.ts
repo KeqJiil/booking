@@ -8,7 +8,6 @@ import { GetBookingByIdHandler } from './application/queries/getBookingById.quer
 import { GetBookingsByPropertyHandler } from './application/queries/getBookingsByProperty.query';
 import { CreateBookingHandler } from './application/commands/create-booking.handler';
 import { ChangeBookingHandler } from './application/commands/expire-status.handler';
-import { BullModule } from '@nestjs/bullmq';
 import { PrismaModule } from 'src/database/prisma.module';
 import { BookingWorker } from './infrastructure/bullmq/expired.worker';
 import { CompletedBookingEventHandler } from './application/events/completedEvent.handler';
@@ -16,12 +15,7 @@ import { BookingStatusChangedHandler } from './application/events/statusChanged.
 import { PropertyProviderAdapter } from './infrastructure/adapters/propertyProvider.adapter';
 
 @Module({
-  imports: [
-    PrismaModule,
-    BullModule.registerQueue({
-      name: 'booking',
-    }),
-  ],
+  imports: [PrismaModule],
   controllers: [BookingController],
   providers: [
     { provide: 'TransactionRepo', useClass: TransactionRepo },

@@ -4,7 +4,6 @@ import { JwtModule } from '@nestjs/jwt';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { AuthService } from './auth.service';
 import { PrismaModule } from 'src/database/prisma.module';
-import { BullModule } from '@nestjs/bullmq';
 import { RedisModule } from 'src/infrastructure/redis/redis.module';
 import { RedisService } from 'src/infrastructure/redis/redis.service';
 import { UserModule } from '../user/user.module';
@@ -21,9 +20,6 @@ import { UserModule } from '../user/user.module';
       }),
     }),
     PrismaModule,
-    BullModule.registerQueue({
-      name: 'auth',
-    }),
     RedisModule,
     UserModule,
   ],

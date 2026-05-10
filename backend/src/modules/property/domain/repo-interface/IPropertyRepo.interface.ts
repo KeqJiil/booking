@@ -36,9 +36,9 @@ export interface IPropertyView {
 }
 
 export interface IPropertyRepo {
-  checkBookings(id: string, date: Date): Promise<boolean>;
-  getEntityById(id: string): Promise<PropertyEntity>;
-  save(property: PropertyEntity): Promise<void>;
+  checkBookings(id: string, date: Date, tx?: unknown): Promise<boolean>;
+  getEntityById(id: string, tx?: unknown): Promise<PropertyEntity>;
+  save(property: PropertyEntity, tx?: unknown): Promise<void>;
 }
 
 export interface IPropertyQueryRepo {

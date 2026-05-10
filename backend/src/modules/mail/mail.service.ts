@@ -13,9 +13,14 @@ export class MailService implements IMailer {
     @Inject('BACKEND_URL') private readonly url: string,
   ) {}
 
-  private async send() {}
-
-  async sendWelcome(): Promise<void> {}
+  async sendWelcome(userEmail: string, username: string): Promise<void> {
+    await this.resend.emails.send({
+      from: this.mailName,
+      to: userEmail,
+      subject: 'Welcome',
+      html: (() => welcomeTemplate(username))(),
+    });
+  }
 
   async sendNotification(
     userEmail: string,
@@ -24,7 +29,7 @@ export class MailService implements IMailer {
     console.log('started');
     await this.resend.emails.send({
       from: this.mailName,
-      to: '',
+      to: userEmail,
       subject: 'Hello World',
       html: (() => welcomeTemplate('123'))(),
     });
@@ -39,7 +44,7 @@ export class MailService implements IMailer {
       from: this.mailName,
       to: email,
       subject: 'Reset Password',
-      html: resetPasswordTemplate(username, uuid),
+      html: resetPasswordTemplate(username, uuid, this.url),
     });
   }
 

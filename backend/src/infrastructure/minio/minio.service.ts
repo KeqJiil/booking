@@ -113,7 +113,7 @@ export class MinioService implements OnModuleInit {
       this.logger.debug(
         `${this.configService.getOrThrow('MINIO_URL')}/${this.bucketName}/${fileName}`,
       );
-      return `${this.configService.getOrThrow('MINIO_URL')}/${this.bucketName}/${fileName}`;
+      return fileName;
     } catch (err) {
       this.logger.error('Error uploading file:', err);
       throw new HttpException(
@@ -135,7 +135,7 @@ export class MinioService implements OnModuleInit {
       });
       await this.s3.send(command);
       this.logger.debug('file deleted', fileName);
-      return true;
+      return fileName;
     } catch (err) {
       this.logger.error('Error Delete file:', err);
       throw new HttpException(

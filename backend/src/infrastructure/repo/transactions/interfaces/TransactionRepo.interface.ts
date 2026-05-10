@@ -1,3 +1,5 @@
+import { Prisma, PrismaClient } from '@prisma/client';
+
 export type TOptionsTransaction = {
   maxWait?: number;
   timeout?: number;
@@ -14,3 +16,5 @@ export interface ITransactionRepo {
     options?: TOptionsTransaction,
   ): Promise<void>;
 }
+
+export type Tx = Prisma.TransactionClient | PrismaClient;

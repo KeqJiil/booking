@@ -4,13 +4,19 @@ import { PropertyEntity } from '../../domain/entities/Property.entity';
 import { PrismaService } from 'src/database/prisma.service';
 import { PropertyMapper } from '../../application/mappers/property.mapper';
 import { propertyPlainSelect } from './prisma.property.select';
+import { Tx } from 'src/infrastructure/repo/transactions/interfaces/TransactionRepo.interface';
 
 @Injectable()
 export class PrismaPropertyRepository implements IPropertyRepo {
   constructor(private readonly prisma: PrismaService) {}
 
-  async checkBookings(id: string, date: Date): Promise<boolean> {
-    const bookings = await this.prisma.booking.findMany({
+  private getDb(tx?: unknown) {
+    return (tx ? tx : this.prisma) as Tx;
+  }
+
+  async checkBookings(id: string, date: Date, tx?: unknown): Promise<boolean> {
+    const db = this.getDb(tx);
+    const bookings = await db.booking.findMany({
       where: {
         propertyId: id,
         status: {
@@ -27,8 +33,9 @@ export class PrismaPropertyRepository implements IPropertyRepo {
     return bookings.length > 0;
   }
 
-  async getEntityById(id: string): Promise<PropertyEntity> {
-    const property = await this.prisma.property.findUnique({
+  async getEntityById(id: string, tx?: unknown): Promise<PropertyEntity> {
+    const db = this.getDb(tx);
+    const property = await db.property.findUnique({
       where: { id },
       select: propertyPlainSelect,
     });
@@ -42,8 +49,9 @@ export class PrismaPropertyRepository implements IPropertyRepo {
     });
   }
 
-  async save(property: PropertyEntity): Promise<void> {
-    await this.prisma.property.upsert({
+  async save(property: PropertyEntity, tx?: unknown): Promise<void> {
+    const db = this.getDb(tx);
+    await db.property.upsert({
       create: {
         id: property.id,
         name: property.props.name,

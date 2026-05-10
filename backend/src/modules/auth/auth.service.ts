@@ -16,11 +16,13 @@ import { Roles } from 'src/common/constants/roleLevels';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { eventNames } from 'src/common/constants/eventnames';
 import { Logger } from 'nestjs-pino';
-import { InjectQueue } from '@nestjs/bullmq';
-import { Queue } from 'bullmq';
-import { IRegisterQueue } from 'src/infrastructure/bullmq/interfaces/IRegisterData.interface';
+import { IRegisterQueue } from 'src/infrastructure/bullmq/proccessors/auth/interfaces/IRegisterData.interface';
 import { RedisService } from 'src/infrastructure/redis/redis.service';
 import { UserService } from '../user/user.service';
+import {
+  IForgotData,
+  IWelcomeData,
+} from 'src/infrastructure/bullmq/proccessors/auth/interfaces/IForgotPasswordData.interface';
 
 @Injectable()
 export class AuthService {
@@ -31,7 +33,6 @@ export class AuthService {
     @Inject('REDIS') private cache: RedisService,
     private eventEmitter: EventEmitter2,
     private readonly logger: Logger,
-    @InjectQueue('auth') private readonly queue: Queue,
     private readonly userService: UserService,
   ) {}
 
@@ -115,11 +116,9 @@ export class AuthService {
       uuid,
       name: newUser.name,
       email: newUser.email,
+      userId: newUser.id,
     };
-    await this.queue.add(eventNames.accound_need_confirmation, queueData, {
-      attempts: 5,
-      backoff: { type: 'exponential', delay: 500 },
-    });
+    this.eventEmitter.emit(eventNames.accound_need_confirmation, queueData);
   }
 
   public async refreshTokens(refreshToken: string) {
@@ -161,10 +160,12 @@ export class AuthService {
     const tokens = await this.signTokens(user.id, user.role, sessionId);
     await this.createSession(user.id, tokens.refreshToken, sessionId);
 
-    this.eventEmitter.emit(eventNames.account_created, {
-      ...user,
+    const eventData: IWelcomeData = {
+      email: user.email,
+      username: user.name,
       userId: user.id,
-    });
+    };
+    this.eventEmitter.emit(eventNames.account_created, eventData);
 
     this.logger.log(user, `New user created`);
     await this.cache.del(`user:${uuid}`);
@@ -183,15 +184,13 @@ export class AuthService {
     const user = await this.userService.getUserByEmail(email);
     if (!user) return;
     await this.cache.set(`reset:${uuid}`, user.id, this.TTL);
-    const queueData = {
+    const queueData: IForgotData = {
       username: user.name,
       email,
       uuid,
+      userId: user.id,
     };
-    await this.queue.add(eventNames.forgot_password, queueData, {
-      attempts: 5,
-      backoff: { type: 'exponential', delay: 500 },
-    });
+    this.eventEmitter.emit(eventNames.forgot_password, queueData);
   }
 
   async newPassword(newPassword: string, uuid: string) {

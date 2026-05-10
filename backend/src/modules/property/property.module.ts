@@ -11,19 +11,12 @@ import { PrismaModule } from 'src/database/prisma.module';
 import { PropertyDeletedHandler } from './application/events/propertyDeleted.handler';
 import { PropertyCreatedHandler } from './application/events/propertyCreated.handler';
 import { PropertyChangedHandler } from './application/events/propertyChanged.handler';
-import { BullModule } from '@nestjs/bullmq';
 import { IdempotencyModule } from '../idempotency/idempotency.module';
 import { TransactionRepo } from 'src/infrastructure/repo/transactions/repo/Transaction.repository';
 import { PropertyUploadProcessor } from './infrastructure/queueHandlers/queue.handler';
 
 @Module({
-  imports: [
-    PrismaModule,
-    BullModule.registerQueue({
-      name: 'property',
-    }),
-    IdempotencyModule,
-  ],
+  imports: [PrismaModule, IdempotencyModule],
   controllers: [PropertyController],
   providers: [
     { provide: 'IPropertyRepo', useClass: PrismaPropertyRepository },

@@ -3,11 +3,9 @@ import { PrismaService } from 'src/database/prisma.service';
 import { IBookingRepo } from '../../domain/repo-interfaces/IBookingRepo.interface';
 import { BookingEntity } from '../../domain/entities/booking.entity';
 import { BookingMapper } from '../../application/mappers/booking.mapper';
-import { Prisma } from 'generated/prisma/browser';
 import { Decimal } from '@prisma/client/runtime/index-browser';
 import { TBookingStatus } from 'src/common/constants/bookingStatuses';
-
-type Tx = Prisma.TransactionClient;
+import { Tx } from 'src/infrastructure/repo/transactions/interfaces/TransactionRepo.interface';
 
 type IDataReturnType = {
   id: string;
@@ -25,6 +23,10 @@ type IDataReturnType = {
 @Injectable()
 export class PrismaBookingRepo implements IBookingRepo {
   constructor(private readonly prisma: PrismaService) {}
+
+  private getDb(tx?: unknown) {
+    return (tx ? tx : this.prisma) as Tx;
+  }
 
   async getIdsToComplete(): Promise<{ id: string }[]> {
     return await this.prisma.booking.findMany({
@@ -47,7 +49,7 @@ export class PrismaBookingRepo implements IBookingRepo {
     propertyId: string,
     tx?: unknown,
   ) {
-    const db = (tx ?? this.prisma) as Tx;
+    const db = this.getDb(tx);
     return !!(await db.booking.findFirst({
       where: {
         propertyId,
@@ -67,8 +69,8 @@ export class PrismaBookingRepo implements IBookingRepo {
     }));
   }
 
-  async save(entity: BookingEntity, tx?: Tx): Promise<void> {
-    const db = (tx ?? this.prisma) as Tx;
+  async save(entity: BookingEntity, tx?: unknown): Promise<void> {
+    const db = this.getDb(tx);
     await db.booking.upsert({
       update: {
         status: entity.status,
@@ -90,8 +92,8 @@ export class PrismaBookingRepo implements IBookingRepo {
     });
   }
 
-  async getEntityById(id: string, tx?: Tx): Promise<BookingEntity | null> {
-    const db = (tx ?? this.prisma) as Tx;
+  async getEntityById(id: string, tx?: unknown): Promise<BookingEntity | null> {
+    const db = this.getDb(tx);
     const data = (await db.$queryRaw`
     SELECT 
       Booking.id, Booking.user_id, 

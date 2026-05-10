@@ -3,9 +3,9 @@ import { MinioService } from 'src/infrastructure/minio/minio.service';
 import { UserService } from '../user/user.service';
 import { QueryBus } from '@nestjs/cqrs';
 import { FindPropertyByIdQuery } from '../property/application/queries/property.queries';
-import { InjectQueue } from '@nestjs/bullmq';
-import { Queue } from 'bullmq';
 import { eventNames } from 'src/common/constants/eventnames';
+import { IPropertyImageChange } from 'src/infrastructure/bullmq/proccessors/property/interfaces/IPropertyImageCreated.interface';
+import { EventEmitter2 } from '@nestjs/event-emitter';
 
 @Injectable()
 export class UploadService {
@@ -13,7 +13,7 @@ export class UploadService {
     private readonly minio: MinioService,
     private readonly userService: UserService,
     private readonly queryBus: QueryBus,
-    @InjectQueue('upload') private readonly queue: Queue,
+    private readonly eventEmitter: EventEmitter2,
   ) {}
 
   async uploadUserAvatar(
@@ -40,11 +40,13 @@ export class UploadService {
       files.map((el) => this.minio.uploadFile(el)),
     );
 
-    await this.queue.add(eventNames.property_images_added, {
+    const queueData: IPropertyImageChange = {
       urls,
       propertyId: id,
       userId: hostId,
-    });
+    };
+
+    this.eventEmitter.emit(eventNames.property_images_added, queueData);
   }
 
   async deletePropertyImages(
@@ -61,10 +63,11 @@ export class UploadService {
       urlsToDelete.map((el) => this.minio.deleteService(el)),
     );
 
-    await this.queue.add(eventNames.property_images_deleted, {
+    const queueData: IPropertyImageChange = {
       urls,
       userId: hostId,
       propertyId: id,
-    });
+    };
+    this.eventEmitter.emit(eventNames.property_images_deleted, queueData);
   }
 }

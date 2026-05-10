@@ -18,7 +18,7 @@ export class ReviewService {
   ) {}
 
   private async dataInCache(userId: string) {
-    const data = await this.cache.get<ICacheReturnValue>(userId);
+    const data = await this.cache.get<ICacheReturnValue>(`review:${userId}`);
     if (!data) throw new NotFoundException();
     return data;
   }
@@ -28,7 +28,7 @@ export class ReviewService {
     await this.repo.save({
       ...data,
       bookingId: cache.bookingId,
-      userId: userId,
+      userId,
       id: randomUUID(),
     });
     this.eventEmmiter.emit(eventNames.new_review_created, { ...data, userId });

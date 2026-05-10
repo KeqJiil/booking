@@ -1,5 +1,5 @@
 export interface IMailer {
-  sendWelcome(userEmail: string): Promise<void>;
+  sendWelcome(userEmail: string, username: string): Promise<void>;
   sendNotification(
     userEmail: string,
     data: Record<string, string>,

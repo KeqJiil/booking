@@ -8,7 +8,7 @@ import {
 } from '../../application/commands/property.commands';
 import { IUpdateImagesData } from '../../application/types/IAddImagesData.interface';
 
-@Processor('upload')
+@Processor('property')
 export class PropertyUploadProcessor {
   constructor(private readonly commandBus: CommandBus) {}
 

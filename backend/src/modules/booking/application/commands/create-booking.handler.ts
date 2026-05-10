@@ -4,16 +4,16 @@ import { ConflictException, Inject } from '@nestjs/common';
 import type { ITransactionRepo } from '../../../../infrastructure/repo/transactions/interfaces/TransactionRepo.interface';
 import type { IBookingRepo } from '../../domain/repo-interfaces/IBookingRepo.interface';
 import { BookingEntity } from '../../domain/entities/booking.entity';
-import { InjectQueue } from '@nestjs/bullmq';
-import { Queue } from 'bullmq';
 import type { IPropertyAdapterToBooking } from '../../domain/repo-interfaces/IPropertyAdapter.interface';
+import { EventEmitter2 } from '@nestjs/event-emitter';
+import { eventNames } from 'src/common/constants/eventnames';
 
 @CommandHandler(CreateBookingCommand)
 export class CreateBookingHandler implements ICommandHandler<CreateBookingCommand> {
   constructor(
     @Inject('TransactionRepo') private readonly transactions: ITransactionRepo,
     @Inject('BookingRepo') private readonly repo: IBookingRepo,
-    @InjectQueue('booking') private queue: Queue,
+    private readonly eventEmitter: EventEmitter2,
     @Inject('PropertyAdapter')
     private readonly PropertyProviderAdapter: IPropertyAdapterToBooking,
   ) {}
@@ -38,13 +38,7 @@ export class CreateBookingHandler implements ICommandHandler<CreateBookingComman
       )
         throw new ConflictException('Overlap dates');
       await this.repo.save(entity, tx);
-      await this.queue.add(
-        'expire',
-        { id: entity.id },
-        {
-          delay: 10 * 60 * 1000,
-        },
-      );
+      this.eventEmitter.emit(eventNames.booking_created, { id: entity.id });
       entity.commit();
     });
   }
