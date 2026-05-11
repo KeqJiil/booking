@@ -1,11 +1,15 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { UserService } from '../user.service';
 import { PrismaService } from 'src/database/prisma.service';
+import { Logger } from 'nestjs-pino';
+import { createMock, DeepMocked } from '@golevelup/ts-jest';
+import { EventEmitter2 } from '@nestjs/event-emitter';
 
 jest.mock('bcrypt');
 
 describe('user service', () => {
   let service: UserService;
+  let eventEmitterMock: DeepMocked<EventEmitter2>;
   let prisma: PrismaService;
 
   const mockPrismaService = {
@@ -24,6 +28,11 @@ describe('user service', () => {
       providers: [
         { provide: PrismaService, useValue: mockPrismaService },
         UserService,
+        { provide: EventEmitter2, useValue: createMock<EventEmitter2>() },
+        {
+          provide: Logger,
+          useValue: { log: jest.fn(), error: jest.fn() },
+        },
       ],
     }).compile();
 

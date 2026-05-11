@@ -3,6 +3,7 @@ import {
   ForbiddenException,
   Inject,
   Injectable,
+  Optional,
   UnauthorizedException,
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
@@ -32,7 +33,7 @@ export class AuthService {
     private readonly prisma: PrismaService,
     @Inject('REDIS') private cache: RedisService,
     private eventEmitter: EventEmitter2,
-    private readonly logger: Logger,
+    @Optional() private readonly logger: Logger,
     private readonly userService: UserService,
   ) {}
 

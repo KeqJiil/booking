@@ -3,6 +3,7 @@ import { PropertyTypeService } from '../application/propertyType.service';
 import { Test, TestingModule } from '@nestjs/testing';
 import { PrismaPropertyTypeRepository } from '../infrastructure/repo/PrismaPropertyType.repository';
 import { randomUUID } from 'crypto';
+import { Logger } from 'nestjs-pino';
 
 jest.mock('crypto', () => ({
   ...jest.requireActual('crypto'),
@@ -33,6 +34,10 @@ describe('property type', () => {
         {
           provide: PrismaService,
           useValue: mockPrisma,
+        },
+        {
+          provide: Logger,
+          useValue: { log: jest.fn(), error: jest.fn() },
         },
       ],
     }).compile();

@@ -129,6 +129,7 @@ export class UserService {
     this.logger.log(
       `User ${user.name} ${user.email} id:${user.id} was deleted`,
     );
+    return { id: user.id, status: user.status };
   }
 
   async restoreUser(userId: string) {
@@ -149,5 +150,6 @@ export class UserService {
     this.logger.log(
       `User ${user.name} ${user.email} id:${user.id} was restored`,
     );
+    return { id: user.id, status: user.status };
   }
 }

@@ -1,38 +1,39 @@
+/* eslint-disable @typescript-eslint/unbound-method */
 import { ReviewService } from '../application/review.service';
 import { Test, TestingModule } from '@nestjs/testing';
-import { CACHE_MANAGER } from '@nestjs/cache-manager';
 import { NotFoundException } from '@nestjs/common';
+import { RedisService } from 'src/infrastructure/redis/redis.service';
+import { createMock } from '@golevelup/ts-jest';
+import { EventEmitter2 } from '@nestjs/event-emitter';
+import { PrismaReviewRepository } from '../infrastructure/repo/IReview.repository';
 
 jest.mock('crypto', () => ({
   randomUUID: jest.fn().mockReturnValue('fake-uuid-123'),
 }));
 
-describe('review', () => {
+describe('review service', () => {
   let service: ReviewService;
-
-  const mockCache = {
-    get: jest.fn(),
-  };
-
-  const mockRepo = {
-    save: jest.fn(),
-    changeReveiew: jest.fn(),
-    deleteReview: jest.fn(),
-  };
+  let cache: RedisService;
+  let repo: PrismaReviewRepository;
+  let eventEmitter: EventEmitter2;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
+        { provide: 'REDIS', useValue: createMock<RedisService>() },
+        { provide: EventEmitter2, useValue: createMock<EventEmitter2>() },
         ReviewService,
-        { provide: CACHE_MANAGER, useValue: mockCache },
         {
           provide: 'ReviewRepo',
-          useValue: mockRepo,
+          useValue: createMock<PrismaReviewRepository>(),
         },
       ],
     }).compile();
 
     service = module.get<ReviewService>(ReviewService);
+    cache = module.get<RedisService>('REDIS');
+    repo = module.get<PrismaReviewRepository>('ReviewRepo');
+    eventEmitter = module.get<EventEmitter2>(EventEmitter2);
     jest.clearAllMocks();
   });
 
@@ -41,42 +42,54 @@ describe('review', () => {
     const userId = 'user-1';
 
     it('should throw NotFoundException', async () => {
-      mockCache.get.mockResolvedValue(null);
+      cache.get.mockResolvedValue(null);
 
       await expect(service.createReview(dto, userId)).rejects.toThrow(
         NotFoundException,
       );
-      expect(mockRepo.save).not.toHaveBeenCalled();
+
+      expect(repo.save).not.toHaveBeenCalled();
+      expect(eventEmitter.emit).not.toHaveBeenCalled();
     });
 
-    it('should create review', async () => {
+    it('should create a review', async () => {
       const fakeCacheData = { bookingId: 'booking-777' };
-      mockCache.get.mockResolvedValue(fakeCacheData);
-
+      cache.get.mockResolvedValue(fakeCacheData);
+      repo.save.mockResolvedValue(undefined);
       await service.createReview(dto, userId);
 
-      expect(mockCache.get).toHaveBeenCalledWith(userId);
+      expect(cache.get).toHaveBeenCalledWith(`review:${userId}`);
 
-      expect(mockRepo.save).toHaveBeenCalledWith({
+      expect(repo.save).toHaveBeenCalledWith({
         ...dto,
-        bookingId: 'booking-777',
-        userId: 'user-1',
-        id: 'fake-uuid-123',
+        bookingId: fakeCacheData.bookingId,
+        userId: userId,
+        id: expect.any(String),
       });
+
+      expect(eventEmitter.emit).toHaveBeenCalledTimes(2);
     });
   });
 
   describe('changeReview', () => {
-    const dto = { text: 'Good place!', rate: 4, id: '412412341312' };
+    const reviewId = 'rev-412';
+    const dto = { text: 'Updated text', rate: 4 };
     const userId = 'user-1';
 
-    it('should change sucsesfully', async () => {
-      await service.changeReview(dto, userId);
-      expect(mockRepo.changeReveiew).toHaveBeenCalledWith(dto, userId);
-      expect(mockRepo.changeReveiew).toHaveBeenCalledTimes(1);
-    });
+    it('should edit review', async () => {
+      repo.changeReveiew.mockResolvedValue(undefined);
 
-    it('should throw an error', async () => {});
+      await service.changeReview(reviewId, dto, userId);
+
+      expect(repo.changeReveiew).toHaveBeenCalledWith(
+        { id: reviewId, ...dto },
+        userId,
+      );
+      expect(eventEmitter.emit).toHaveBeenCalledWith(expect.any(String), {
+        ...dto,
+        userId,
+      });
+    });
   });
 
   describe('deleteReview', () => {
@@ -86,7 +99,27 @@ describe('review', () => {
 
       await service.deleteReview(reviewId, userId);
 
-      expect(mockRepo.deleteReview).toHaveBeenCalledWith(reviewId, userId);
+      expect(repo.deleteReview).toHaveBeenCalledWith(reviewId, userId);
+    });
+
+    it('should not delete review', async () => {
+      repo.deleteReview.mockRejectedValue(new NotFoundException());
+
+      await expect(service.deleteReview('invalid', 'userId')).rejects.toThrow(
+        NotFoundException,
+      );
+    });
+  });
+
+  describe('getReviewsByProperty', () => {
+    it('should return reviews', async () => {
+      const mockResult = [{ id: '1', text: 'nice' }];
+      repo.getReviewsByProperty.mockResolvedValue(mockResult);
+
+      const result = await service.getReviewsByProperty('prop-1', {});
+
+      expect(result).toEqual(mockResult);
+      expect(repo.getReviewsByProperty).toHaveBeenCalledWith('prop-1', {});
     });
   });
 });

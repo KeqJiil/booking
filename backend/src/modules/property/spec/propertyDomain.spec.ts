@@ -14,25 +14,25 @@ describe('PropertyEntity', () => {
   };
 
   it('should create entity', () => {
-    const entity = PropertyEntity.create(validData);
+    const entity = PropertyEntity.create(validData, []);
     expect(entity.props.name).toBe('Test Property');
   });
 
   it('should throw an error', () => {
     const invalidData = { ...validData, description: 'short' };
-    expect(() => PropertyEntity.create(invalidData)).toThrow(
+    expect(() => PropertyEntity.create(invalidData, [])).toThrow(
       BadRequestException,
     );
   });
 
   it('should let be deleted', () => {
-    const entity = PropertyEntity.create(validData, 'id1');
+    const entity = PropertyEntity.create(validData, [], 'id1');
     entity.deleteProperty('user1', false);
     expect(entity.status).toBe('DELETED');
   });
 
   it('shouldnt let someone else change', () => {
-    const entity = PropertyEntity.create(validData, 'id1');
+    const entity = PropertyEntity.create(validData, [], 'id1');
     entity.deleteProperty('hacker', false);
     expect(entity.status).toBe('ALIVE');
   });
