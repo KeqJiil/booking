@@ -10,9 +10,9 @@ export type TOptionsTransaction = {
     | 'Serializable';
 };
 
-export interface ITransactionRepo {
+export interface ITransactionRepo<T = any> {
   startTransaction(
-    fn: (tx: unknown) => Promise<void>,
+    fn: (tx: T) => Promise<void>,
     options?: TOptionsTransaction,
   ): Promise<void>;
 }

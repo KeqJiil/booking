@@ -11,6 +11,7 @@ import { EventEmitter2 } from '@nestjs/event-emitter';
 import { eventNames } from 'src/common/constants/eventnames';
 import { Logger } from 'nestjs-pino';
 import { IUserCreate } from './types';
+import { Tx } from 'src/infrastructure/repo/transactions/interfaces/TransactionRepo.interface';
 
 @Injectable()
 export class UserService {
@@ -151,5 +152,15 @@ export class UserService {
       `User ${user.name} ${user.email} id:${user.id} was restored`,
     );
     return { id: user.id, status: user.status };
+  }
+
+  async addPaymentAccount(userId: string, paymentAccountId: string, tx?: Tx) {
+    const db = tx ?? this.prisma;
+    await db.user.update({
+      where: { id: userId },
+      data: {
+        paymentAccountId,
+      },
+    });
   }
 }

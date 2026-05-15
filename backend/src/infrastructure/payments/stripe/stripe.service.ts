@@ -20,13 +20,16 @@ export class StripeService implements IPaymentService {
     private readonly config: ConfigService,
   ) {}
 
-  async createUser(email: string, userId: string) {
-    const res = await this.stripe.customers.create({
-      email,
-      metadata: {
-        userId,
+  async createUser(email: string, userId: string, idempotencyKey: string) {
+    const res = await this.stripe.customers.create(
+      {
+        email,
+        metadata: {
+          userId,
+        },
       },
-    });
+      { idempotencyKey },
+    );
     return res.id;
   }
 
@@ -82,6 +85,7 @@ export class StripeService implements IPaymentService {
     const jobData = {
       userId: metadata.userId,
       bookingId: metadata.bookingId,
+      paymentIntentId: session.payment_intent as string,
     };
 
     switch (event.type) {

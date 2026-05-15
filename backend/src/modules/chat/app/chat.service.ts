@@ -40,7 +40,7 @@ export class ChatService {
   }
 
   async deleteMessage(messageId: string, userId: string) {
-    await this.deleteMessage(messageId, userId);
+    await this.repo.deleteMessage(messageId, userId);
   }
 
   async leaveRoom(userId: string, chatUserId: string) {

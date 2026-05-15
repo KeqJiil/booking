@@ -125,6 +125,8 @@ model Booking {
   review Review?
   chats  Chat[]
 
+  payment   Payment?
+
   startDate DateTime @map("start_date")
   endDate   DateTime @map("end_date")
 
@@ -236,9 +238,13 @@ model Payment {
 
   userId   String          @map("user_id")
   user     User            @relation(references: [id], fields: [userId])
-  status   PaymentStatuses
+
+  bookingId         String  @unique
+  booking Booking @relation(fields: [bookingId], references: [id])
+
+  status   PaymentStatuses @default(PENDING)
   amount   Int
-  currency Currency
+  currency Currency @default(usd)
 
   providerPaymentId String?
 
@@ -298,11 +304,9 @@ enum NotificationTypes {
 
 enum PaymentStatuses {
   PENDING
-  PROCESSING
   SUCCEEDED
   FAILED
   REFUNDED
-  CANCELED
 }
 
 enum Currency {
