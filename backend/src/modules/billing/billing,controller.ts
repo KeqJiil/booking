@@ -1,4 +1,4 @@
-import { Controller, Get, Param, Post, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Param, Post, UseGuards } from '@nestjs/common';
 import { Authorization } from 'src/common/decorators/authorization.decorator';
 import { BillingService } from './billing,service';
 import { IdempotencyAccess } from 'src/common/decorators/idempotency.decorator';
@@ -30,7 +30,14 @@ export class BillingController {
   async createAccount(
     @IdempotencyAccess() idempotencyKey: string,
     @AccessInfo('id') id: string,
-  ) {}
+    @Body() email: { email: string },
+  ) {
+    return await this.billingService.createPaymentAccount(
+      email.email,
+      id,
+      idempotencyKey,
+    );
+  }
 
   @Post('payment')
   @Authorization('USER')

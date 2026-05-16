@@ -20,7 +20,7 @@ export class StripeService implements IPaymentService {
     private readonly config: ConfigService,
   ) {}
 
-  async createUser(email: string, userId: string, idempotencyKey: string) {
+  async createUser(email: string, userId: string) {
     const res = await this.stripe.customers.create(
       {
         email,
@@ -28,7 +28,7 @@ export class StripeService implements IPaymentService {
           userId,
         },
       },
-      { idempotencyKey },
+      { idempotencyKey: userId },
     );
     return res.id;
   }

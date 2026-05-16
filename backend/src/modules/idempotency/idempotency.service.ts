@@ -22,6 +22,7 @@ export class IdempotencyService {
         }
         throw new ConflictException();
       }
+      throw new Error();
     }
   }
 
