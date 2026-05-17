@@ -252,6 +252,21 @@ model Payment {
   createdAt DateTime @default(now()) @map("created_at")
 }
 
+model Outbox {
+  id String @id @default(uuid())
+
+  itemId String
+  type OutboxEvents
+  payload Json
+  status OutboxStatuses @default(PENDING)
+
+  retries Int @default(0)
+
+  processingAt DateTime? @map("processing_at")
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+}
+
 enum Roles {
   USER
   HOST
@@ -307,6 +322,17 @@ enum PaymentStatuses {
   SUCCEEDED
   FAILED
   REFUNDED
+}
+
+enum OutboxEvents {
+  REFUND_REQUEST
+}
+
+enum OutboxStatuses {
+  PENDING
+  PROCESSING
+  SUCCEEDED
+  FAILED
 }
 
 enum Currency {

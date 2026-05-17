@@ -98,16 +98,24 @@ export class BillingService {
   }
 
   async refundPayment(
+    userId: string,
     bookingId: string,
     paymentId: string,
     providerPaymentId: string,
     idempotencyKey: string,
   ) {
     await this.transaction.startTransaction(async (tx: Tx) => {
+      const idempotencyId = await this.idempotency.createOrGet(
+        idempotencyKey,
+        tx,
+        userId,
+      );
+      if (idempotencyId.isDuplicate) return idempotencyId.response;
       const data = await this.billingRepo.getPaymentById(paymentId, tx);
       if (!data) throw new NotFoundException();
-      await this.billingRepo.paymentRefund(bookingId, tx);
+      const refundData = await this.billingRepo.paymentRefund(bookingId, tx);
       await this.paymentService.handleRefund(providerPaymentId, idempotencyKey);
+      await this.idempotency.complete(idempotencyKey, tx, refundData, 200);
     });
   }
 }
