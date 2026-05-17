@@ -7,7 +7,10 @@ import type {
 import { Inject } from '@nestjs/common';
 
 @QueryHandler(GetBookingByIdQuery)
-export class GetBookingByIdHandler implements IQueryHandler<GetBookingByIdQuery> {
+export class GetBookingByIdHandler implements IQueryHandler<
+  GetBookingByIdQuery,
+  IQueryBookings | null
+> {
   constructor(
     @Inject('BookingRepoQuery') private readonly repo: IBookingRepoQuery,
   ) {}

@@ -6,6 +6,6 @@ import {
 export interface IPaymentService {
   createSession(data: ICreateSessionPayment): Promise<IPaymentSessionResult>;
   verifyWebhook(rawBody: Buffer | string, signature: string): unknown;
-  handleRefund(paymentId: string, amount: number): Promise<void>;
+  handleRefund(paymentId: string, idempotencyKey: string): Promise<void>;
   createUser(email: string, userId: string): Promise<string>;
 }

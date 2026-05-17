@@ -106,9 +106,15 @@ export class StripeService implements IPaymentService {
     return event;
   }
 
-  async handleRefund(paymentIntendId: string): Promise<void> {
-    await this.stripe.refunds.create({
-      payment_intent: paymentIntendId,
-    });
+  async handleRefund(
+    paymentIntendId: string,
+    idempotencyKey: string,
+  ): Promise<void> {
+    await this.stripe.refunds.create(
+      {
+        payment_intent: paymentIntendId,
+      },
+      { idempotencyKey },
+    );
   }
 }

@@ -10,6 +10,7 @@ import type {
   ITransactionRepo,
   Tx,
 } from 'src/infrastructure/repo/transactions/interfaces/TransactionRepo.interface';
+import { BookingProviderAdapter } from './infrastructure/adapters/booking.adapter';
 
 @Injectable()
 export class BillingService {
@@ -19,6 +20,7 @@ export class BillingService {
     private readonly userService: UserService,
     private readonly idempotency: IdempotencyService,
     private readonly transaction: ITransactionRepo,
+    private readonly bookingAdapter: BookingProviderAdapter,
   ) {}
 
   async getPayments(userId: string) {
@@ -53,10 +55,10 @@ export class BillingService {
   async createPayment(
     bookingId: string,
     userId: string,
-    amount: number,
     clientId: string,
     idempotencyKey: string,
   ) {
+    const { amount } = await this.bookingAdapter.getData(bookingId);
     const payment = await this.paymentService.createSession({
       amount,
       customerId: clientId,
@@ -81,5 +83,31 @@ export class BillingService {
       await this.idempotency.complete(idempotencyKey, tx, paymentDb, 200);
     });
     return payment;
+  }
+
+  async failPayment(bookingId: string) {
+    await this.transaction.startTransaction(async (tx: Tx) => {
+      await this.billingRepo.paymentFail(bookingId, tx);
+    });
+  }
+
+  async successPayment(bookingId: string, providerAccountId: string) {
+    await this.transaction.startTransaction(async (tx: Tx) => {
+      await this.billingRepo.paymentSuccess(bookingId, providerAccountId, tx);
+    });
+  }
+
+  async refundPayment(
+    bookingId: string,
+    paymentId: string,
+    providerPaymentId: string,
+    idempotencyKey: string,
+  ) {
+    await this.transaction.startTransaction(async (tx: Tx) => {
+      const data = await this.billingRepo.getPaymentById(paymentId, tx);
+      if (!data) throw new NotFoundException();
+      await this.billingRepo.paymentRefund(bookingId, tx);
+      await this.paymentService.handleRefund(providerPaymentId, idempotencyKey);
+    });
   }
 }

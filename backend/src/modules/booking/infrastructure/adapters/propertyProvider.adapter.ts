@@ -12,10 +12,9 @@ export class PropertyProviderAdapter implements IPropertyAdapterToBooking {
   constructor(private readonly queryBus: QueryBus) {}
 
   async getData(propertyId: string): Promise<IPropertyDataForBook> {
-    const property = await this.queryBus.execute<
-      FindPropertyByIdQuery,
-      IPropertyView
-    >(new FindPropertyByIdQuery(propertyId));
+    const property: IPropertyView | null = await this.queryBus.execute(
+      new FindPropertyByIdQuery(propertyId),
+    );
     if (!property) throw new NotFoundException('Property not found');
     return {
       price: property.price,

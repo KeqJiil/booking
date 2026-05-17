@@ -39,11 +39,20 @@ export class BillingController {
     );
   }
 
-  @Post('payment')
+  @Post('payment/:id')
   @Authorization('USER')
   @UseGuards(IdempotencyGuard)
   async createPayment(
     @IdempotencyAccess() idempotencyKey: string,
     @AccessInfo('id') id: string,
-  ) {}
+    @Param('id') bookingId: string,
+    @Body() clientId: { clientId: string },
+  ) {
+    return await this.billingService.createPayment(
+      bookingId,
+      id,
+      clientId.clientId,
+      idempotencyKey,
+    );
+  }
 }
