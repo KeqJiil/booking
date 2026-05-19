@@ -11,12 +11,14 @@ import type {
   Tx,
 } from 'src/infrastructure/repo/transactions/interfaces/TransactionRepo.interface';
 import { BookingProviderAdapter } from './infrastructure/adapters/booking.adapter';
+import type { IOutboxRepository } from 'src/infrastructure/repo/outbox/interfaces/outbox.interface';
 
 @Injectable()
 export class BillingService {
   constructor(
     @Inject('PAYMENT_SERVICE') private paymentService: IPaymentService,
     @Inject('BILLING_REPOSITORY') private billingRepo: IBillingRepo,
+    @Inject('OUTBOX_SERVICE') private outbox: IOutboxRepository<Tx>,
     private readonly userService: UserService,
     private readonly idempotency: IdempotencyService,
     private readonly transaction: ITransactionRepo,
@@ -114,7 +116,20 @@ export class BillingService {
       const data = await this.billingRepo.getPaymentById(paymentId, tx);
       if (!data) throw new NotFoundException();
       const refundData = await this.billingRepo.paymentRefund(bookingId, tx);
-      await this.paymentService.handleRefund(providerPaymentId, idempotencyKey);
+      await this.outbox.createOutbox(
+        {
+          type: 'REFUND_REQUEST',
+          itemId: paymentId,
+          status: 'PENDING',
+          retries: 0,
+          payload: {
+            providerPaymentId,
+            idempotencyKey,
+            bookingId,
+          },
+        },
+        tx,
+      );
       await this.idempotency.complete(idempotencyKey, tx, refundData, 200);
     });
   }

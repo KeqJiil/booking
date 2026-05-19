@@ -27,6 +27,7 @@ export type IOutboxDataView = IOutboxData & { id: string };
 
 export interface IOutboxRepository<TTx> {
   createOutbox(data: IOutboxData, tx: TTx): Promise<IOutboxDataView>;
+  getOutbox(status?: IOutboxStatuses): Promise<IOutboxDataView[]>;
   markProcessing(id: string, tx: TTx): Promise<IOutboxDataView>;
   markFailed(id: string, tx: TTx): Promise<IOutboxDataView>;
   markSucceeded(id: string, tx: TTx): Promise<IOutboxDataView>;

@@ -54,12 +54,12 @@ export class BillingRepository implements IBillingRepo {
   }
 
   async paymentSuccess(
-    bookingId: string,
+    id: string,
     providerPaymentId: string,
     tx: Tx,
   ): Promise<IPaymentData> {
     const data = await tx.payment.update({
-      where: { bookingId },
+      where: { id },
       data: {
         providerPaymentId,
       },
@@ -67,17 +67,17 @@ export class BillingRepository implements IBillingRepo {
     return this.getDataType(data);
   }
 
-  async paymentFail(bookingId: string, tx: Tx): Promise<IPaymentData> {
+  async paymentFail(id: string, tx: Tx): Promise<IPaymentData> {
     const data = await tx.payment.update({
-      where: { bookingId },
+      where: { id },
       data: { status: 'FAILED' },
     });
     return this.getDataType(data);
   }
 
-  async paymentRefund(bookingId: string, tx: Tx): Promise<IPaymentData> {
+  async paymentRefund(id: string, tx: Tx): Promise<IPaymentData> {
     const data = await tx.payment.update({
-      where: { bookingId },
+      where: { id },
       data: { status: 'REFUNDED' },
     });
     return this.getDataType(data);

@@ -3,13 +3,15 @@ import {
   IOutboxData,
   IOutboxDataView,
   IOutboxRepository,
+  IOutboxStatuses,
 } from '../interfaces/outbox.interface';
 import { Tx } from '../../transactions/interfaces/TransactionRepo.interface';
 import { IOutboxDb } from '../interfaces/outboxDb.interface';
+import { PrismaService } from 'src/database/prisma.service';
 
 @Injectable()
 export class OutboxRepository implements IOutboxRepository<Tx> {
-  constructor() {}
+  constructor(private readonly prisma: PrismaService) {}
 
   private getDataType(data: IOutboxDb): IOutboxDataView {
     return {
@@ -28,6 +30,14 @@ export class OutboxRepository implements IOutboxRepository<Tx> {
       data: { type: data.type, itemId: data.itemId, payload: data.payload },
     });
     return this.getDataType(outbox);
+  }
+
+  async getOutbox(status?: IOutboxStatuses): Promise<IOutboxDataView[]> {
+    const data = await this.prisma.outbox.findMany({
+      where: { status, retries: { lt: 5 } },
+      take: 10,
+    });
+    return data.map((el) => this.getDataType(el));
   }
 
   async markProcessing(id: string, tx: Tx): Promise<IOutboxDataView> {

@@ -11,7 +11,6 @@ import { ReviewBullBridge } from './proccessors/review/review.bridge';
     BullModule.registerQueue(
       { name: 'property' },
       { name: 'mail' },
-      { name: 'billing' },
       { name: 'review' },
     ),
   ],

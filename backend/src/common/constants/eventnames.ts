@@ -22,6 +22,7 @@ export const eventNames = {
   booking_confirmed: 'booking_confirmed',
   booking_completed: 'booking_completed',
   chat_created: 'chat_created',
+  billing_refund: 'billing_refund',
 } as const;
 
 export const eventBookingMap: Record<string, keyof typeof eventNames> = {

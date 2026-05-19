@@ -7,9 +7,19 @@ import { BillingRepository } from './infrastructure/repository/billing.repositor
 import { UserModule } from '../user/user.module';
 import { IdempotencyModule } from '../idempotency/idempotency.module';
 import { BookingProviderAdapter } from './infrastructure/adapters/booking.adapter';
+import { OutboxRepository } from 'src/infrastructure/repo/outbox/repo/outbox.repository';
+import { PrismaModule } from 'src/database/prisma.module';
+import { BillingRefundPending } from './infrastructure/cron/billingOutbox.cron';
+import { BullModule } from '@nestjs/bullmq';
 
 @Module({
-  imports: [StripeModule, UserModule, IdempotencyModule],
+  imports: [
+    StripeModule,
+    UserModule,
+    IdempotencyModule,
+    PrismaModule,
+    BullModule.registerQueue({ name: 'billing' }),
+  ],
   controllers: [BillingController],
   providers: [
     BillingService,
@@ -22,6 +32,8 @@ import { BookingProviderAdapter } from './infrastructure/adapters/booking.adapte
       useClass: BillingRepository,
     },
     BookingProviderAdapter,
+    { provide: 'OUTBOX_SERVICE', useClass: OutboxRepository },
+    BillingRefundPending,
   ],
 })
 export class BillingModule {}
