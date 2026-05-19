@@ -11,6 +11,8 @@ import { OutboxRepository } from 'src/infrastructure/repo/outbox/repo/outbox.rep
 import { PrismaModule } from 'src/database/prisma.module';
 import { BillingRefundPending } from './infrastructure/cron/billingOutbox.cron';
 import { BullModule } from '@nestjs/bullmq';
+import { BillingQueueHandler } from './infrastructure/queueHandlers/queue.handler';
+import { PaymentsQueueHandler } from './infrastructure/queueHandlers/payment.handler';
 
 @Module({
   imports: [
@@ -34,6 +36,8 @@ import { BullModule } from '@nestjs/bullmq';
     BookingProviderAdapter,
     { provide: 'OUTBOX_SERVICE', useClass: OutboxRepository },
     BillingRefundPending,
+    BillingQueueHandler,
+    PaymentsQueueHandler,
   ],
 })
 export class BillingModule {}

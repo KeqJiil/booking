@@ -9,7 +9,10 @@ import { DEFAULT_CURRENCY } from 'src/common/constants/defaultCurrency';
 import { ConfigService } from '@nestjs/config';
 import { Queue } from 'bullmq';
 import { InjectQueue } from '@nestjs/bullmq';
-import { IPaymentMetadata } from '../interfaces/data.interfaces';
+import {
+  IJobWebhookData,
+  IPaymentMetadata,
+} from '../interfaces/data.interfaces';
 import { paymentConsts } from 'src/common/constants/paymentConsts';
 
 @Injectable()
@@ -82,7 +85,7 @@ export class StripeService implements IPaymentService {
 
     if (!metadata?.bookingId) return event;
 
-    const jobData = {
+    const jobData: IJobWebhookData = {
       userId: metadata.userId,
       bookingId: metadata.bookingId,
       paymentIntentId: session.payment_intent as string,

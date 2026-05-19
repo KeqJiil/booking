@@ -21,7 +21,6 @@ import {
   CancelBookingStatusCommand,
   ConfirmBookingStatusCommand,
   CreateBookingCommand,
-  PayBookingStatusCommand,
   RejectBookingStatusCommand,
 } from './application/commands/booking.commands';
 import { ApiTags } from '@nestjs/swagger';
@@ -85,13 +84,6 @@ export class BookingController {
     @AccessInfo('id') userId: string,
   ) {
     await this.commandBus.execute(new RejectBookingStatusCommand(userId, id));
-  }
-
-  @Post('pay/:id')
-  @HttpCode(201)
-  @Authorization('USER')
-  async payBooking(@Param('id') id: string, @AccessInfo('id') userId: string) {
-    await this.commandBus.execute(new PayBookingStatusCommand(userId, id));
   }
 
   @Post('pay/:id')

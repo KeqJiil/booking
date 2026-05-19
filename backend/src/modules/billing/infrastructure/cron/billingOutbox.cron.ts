@@ -1,5 +1,5 @@
 import { Inject, Injectable } from '@nestjs/common';
-import { Cron } from '@nestjs/schedule';
+import { Cron, CronExpression } from '@nestjs/schedule';
 import { Logger } from 'nestjs-pino';
 import type {
   IOutboxDataView,
@@ -22,8 +22,8 @@ export class BillingRefundPending {
     @InjectQueue('billing') private billingQueue: Queue,
   ) {}
 
-  @Cron('0 */15 * * * *')
-  async handleCompletedBookings() {
+  @Cron(CronExpression.EVERY_10_MINUTES)
+  async handlePendingOutboxed() {
     this.logger.log('Billing Refund cron started');
     const outboxes = await this.outbox.getOutbox('PENDING');
     for (const task of outboxes) {
@@ -32,6 +32,22 @@ export class BillingRefundPending {
         await this.transaction.startTransaction(async (tx: Tx) => {
           await this.outbox.markProcessing(task.id, tx);
         });
+      } catch (error) {
+        this.logger.error(
+          { err: error, taskId: task.id },
+          'Failed to move outbox task to BullMQ',
+        );
+      }
+    }
+  }
+
+  @Cron(CronExpression.EVERY_30_MINUTES)
+  async handleProcessingOutboxes() {
+    this.logger.log('Billing Refund Processing cron started');
+    const outboxes = await this.outbox.getExpiredProcessing();
+    for (const task of outboxes) {
+      try {
+        await this.processTask(task);
       } catch (error) {
         this.logger.error(
           { err: error, taskId: task.id },

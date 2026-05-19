@@ -12,6 +12,10 @@ import { PrismaService } from 'src/database/prisma.service';
 export class BillingRepository implements IBillingRepo {
   constructor(private readonly prisma: PrismaService) {}
 
+  private getDb(tx?: unknown) {
+    return (tx ? tx : this.prisma) as Tx;
+  }
+
   private getDataType(data: IPaymentDbData) {
     return {
       bookingId: data.bookingId,
@@ -56,9 +60,10 @@ export class BillingRepository implements IBillingRepo {
   async paymentSuccess(
     id: string,
     providerPaymentId: string,
-    tx: Tx,
+    tx?: Tx,
   ): Promise<IPaymentData> {
-    const data = await tx.payment.update({
+    const db = this.getDb(tx);
+    const data = await db.payment.update({
       where: { id },
       data: {
         providerPaymentId,
@@ -67,8 +72,9 @@ export class BillingRepository implements IBillingRepo {
     return this.getDataType(data);
   }
 
-  async paymentFail(id: string, tx: Tx): Promise<IPaymentData> {
-    const data = await tx.payment.update({
+  async paymentFail(id: string, tx?: Tx): Promise<IPaymentData> {
+    const db = this.getDb(tx);
+    const data = await db.payment.update({
       where: { id },
       data: { status: 'FAILED' },
     });

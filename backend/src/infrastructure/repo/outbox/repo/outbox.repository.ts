@@ -35,7 +35,21 @@ export class OutboxRepository implements IOutboxRepository<Tx> {
   async getOutbox(status?: IOutboxStatuses): Promise<IOutboxDataView[]> {
     const data = await this.prisma.outbox.findMany({
       where: { status, retries: { lt: 5 } },
-      take: 10,
+      take: 30,
+    });
+    return data.map((el) => this.getDataType(el));
+  }
+
+  async getExpiredProcessing(): Promise<IOutboxDataView[]> {
+    const tenMinutesAgo = new Date(Date.now() - 10 * 60 * 1000);
+    const data = await this.prisma.outbox.findMany({
+      where: {
+        status: 'PROCESSING',
+        processingAt: {
+          lte: tenMinutesAgo,
+        },
+      },
+      take: 50,
     });
     return data.map((el) => this.getDataType(el));
   }
