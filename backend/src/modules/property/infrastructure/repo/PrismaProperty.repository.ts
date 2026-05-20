@@ -29,6 +29,7 @@ export class PrismaPropertyRepository implements IPropertyRepo {
           gte: date,
         },
       },
+      select: { id: true },
     });
     return bookings.length > 0;
   }
@@ -40,7 +41,7 @@ export class PrismaPropertyRepository implements IPropertyRepo {
       select: propertyPlainSelect,
     });
     if (!property) throw new NotFoundException();
-    return PropertyMapper.toEntity({
+    return PropertyMapper.toEntityDb({
       ...property,
       price: Number(property.price),
       hostId: property.hostId,

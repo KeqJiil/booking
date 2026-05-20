@@ -2,10 +2,7 @@ import { CommandHandler, EventPublisher, ICommandHandler } from '@nestjs/cqrs';
 import { CreatePropertyCommand } from './property.commands';
 import { Inject } from '@nestjs/common';
 import type { IPropertyRepo } from '../../domain/repo-interface/IPropertyRepo.interface';
-import {
-  IProperty,
-  PropertyEntity,
-} from '../../domain/entities/Property.entity';
+import { PropertyMapper } from '../mappers/property.mapper';
 
 @CommandHandler(CreatePropertyCommand)
 export class CreatePropertyHandler implements ICommandHandler<CreatePropertyCommand> {
@@ -15,14 +12,10 @@ export class CreatePropertyHandler implements ICommandHandler<CreatePropertyComm
   ) {}
 
   async execute(command: CreatePropertyCommand): Promise<any> {
-    const { address, city, country, ...restData } = command.data;
-    const createObj: IProperty = {
-      ...restData,
-      address: { address, city, country },
-    };
-    const property = PropertyEntity.create(createObj, command.data.images);
+    const property = PropertyMapper.toEntity(command.data);
     const propertyWithEvents = this.publisher.mergeObjectContext(property);
     await this.repository.save(property);
     propertyWithEvents.commit();
+    return { id: property.id };
   }
 }

@@ -1,4 +1,4 @@
-import { BadRequestException } from '@nestjs/common';
+import { WrongInputDataError } from 'src/common/exceptions/entityDomain.exceptions';
 
 export class Address {
   constructor(
@@ -6,6 +6,22 @@ export class Address {
     public readonly country: string,
     public readonly address: string,
   ) {
-    if (!city || !country || !address) throw new BadRequestException();
+    if (!city || !country || !address)
+      throw new WrongInputDataError(`Address data`);
+    this.city = this.normalize(city);
+    this.country = this.normalize(country);
+    this.address = this.normalize(address);
+  }
+
+  private normalize(string: string) {
+    return string.toLowerCase().trim();
+  }
+
+  public equals(other: Address) {
+    return (
+      this.city === other.city &&
+      this.address === other.address &&
+      this.country === other.country
+    );
   }
 }

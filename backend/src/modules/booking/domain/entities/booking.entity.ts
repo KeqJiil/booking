@@ -11,7 +11,10 @@ import {
 } from '../events/booking.events';
 import { AggregateRoot } from '@nestjs/cqrs';
 import { BookingDate } from '../value-objects/domainDate';
-import { BadRequestException } from '@nestjs/common';
+import {
+  UnexpectedDataError,
+  WrongInputDataError,
+} from 'src/common/exceptions/entityDomain.exceptions';
 
 export interface IBookingDbData {
   priceAtMoment: number;
@@ -83,14 +86,15 @@ export class BookingEntity extends AggregateRoot {
   static fromDB(rawData: IBookingDbData) {
     const { status, id, ...data } = rawData;
     if (badStatuses[status]) {
-      throw new BadRequestException('Wrong data type');
+      throw new WrongInputDataError('Status is not active');
     }
     const dateData = new BookingDate(data.startDate, data.endDate);
     return new BookingEntity(status, { ...data, dateData }, id);
   }
 
   public pay() {
-    if (this._status !== 'CONFIRMED') throw new BadRequestException();
+    if (this._status !== 'CONFIRMED')
+      throw new UnexpectedDataError(this._status, 'CONFIRMED');
     this.apply(
       new BookingStatusChanges(this._status, 'PAID', this._bookingData.hostId),
     );
@@ -98,7 +102,8 @@ export class BookingEntity extends AggregateRoot {
   }
 
   public reject() {
-    if (this._status !== 'PENDING') throw new BadRequestException();
+    if (this._status !== 'PENDING')
+      throw new UnexpectedDataError(this._status, 'PENDING');
     this.apply(
       new BookingStatusChanges(
         this._status,
@@ -110,7 +115,8 @@ export class BookingEntity extends AggregateRoot {
   }
 
   public cancel() {
-    if (this._status !== 'PENDING') throw new BadRequestException();
+    if (this._status !== 'PENDING')
+      throw new UnexpectedDataError(this._status, 'PENDING');
     this.apply(
       new BookingStatusChanges(
         this._status,
@@ -122,7 +128,8 @@ export class BookingEntity extends AggregateRoot {
   }
 
   public expire() {
-    if (this._status !== 'PENDING') throw new BadRequestException();
+    if (this._status !== 'PENDING')
+      throw new UnexpectedDataError(this._status, 'PENDING');
     this.apply(
       new BookingStatusChanges(
         this._status,
@@ -134,7 +141,8 @@ export class BookingEntity extends AggregateRoot {
   }
 
   public confirm() {
-    if (this._status !== 'PENDING') throw new BadRequestException();
+    if (this._status !== 'PENDING')
+      throw new UnexpectedDataError(this._status, 'PENDING');
     this.apply(
       new BookingConfirmStatus(
         this._bookingData.userId,
@@ -154,7 +162,8 @@ export class BookingEntity extends AggregateRoot {
   }
 
   public complete() {
-    if (this._status !== 'CONFIRMED') throw new BadRequestException();
+    if (this._status !== 'CONFIRMED')
+      throw new UnexpectedDataError(this._status, 'CONFIRMED');
     this.apply(
       new BookingCompletedStatus(
         this._bookingData.userId,

@@ -3,13 +3,14 @@ import { DeletePropertyCommand } from './property.commands';
 import type { IPropertyRepo } from '../../domain/repo-interface/IPropertyRepo.interface';
 import { ConflictException, Inject } from '@nestjs/common';
 import type { ITransactionRepo } from 'src/infrastructure/repo/transactions/interfaces/TransactionRepo.interface';
+import { TRANSACTION_REPO } from 'src/common/constants/providerConstants';
 
 @CommandHandler(DeletePropertyCommand)
 export class DeletePropertyHandler implements ICommandHandler<DeletePropertyCommand> {
   constructor(
     @Inject('IPropertyRepo') private repository: IPropertyRepo,
     private readonly publisher: EventPublisher,
-    @Inject('TransactionRepo') private readonly transactions: ITransactionRepo,
+    @Inject(TRANSACTION_REPO) private readonly transactions: ITransactionRepo,
   ) {}
 
   async execute(command: DeletePropertyCommand): Promise<any> {

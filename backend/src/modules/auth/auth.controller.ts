@@ -50,7 +50,10 @@ export class AuthController {
 
   @Post('verify/:id')
   @HttpCode(201)
-  async verify(@Res() res: Response, @Param('id') uuid: string) {
+  async verify(
+    @Res({ passthrough: true }) res: Response,
+    @Param('id') uuid: string,
+  ) {
     const { accessToken, refreshToken } = await this.authService.verify(uuid);
     res.cookie('refreshtoken', refreshToken, this.refreshConfig);
     return accessToken;

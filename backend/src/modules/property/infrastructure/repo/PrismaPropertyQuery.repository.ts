@@ -39,16 +39,17 @@ export class PrismaPropertyQueryRepository implements IPropertyQueryRepo {
       city,
       maxGuests,
       orderBy,
+      orderStyle,
     } = searchParams;
     const list = await this.prisma.property.findMany({
       where: {
         status: 'ALIVE',
-        name: { contains: name, mode: 'insensitive' },
+        ...(name ? { name: { contains: name, mode: 'insensitive' } } : {}),
         typeId,
         hostId,
         country,
         city,
-        maxGuests,
+        maxGuests: maxGuests ? { gte: maxGuests } : undefined,
         price:
           minPrice || maxPrice
             ? {
@@ -58,7 +59,7 @@ export class PrismaPropertyQueryRepository implements IPropertyQueryRepo {
             : undefined,
       },
       orderBy: {
-        [orderBy ? orderBy : 'name']: 'asc',
+        [orderBy ? orderBy : 'name']: [orderStyle ? orderStyle : 'asc'],
       },
       select: propertyViewSelect,
       take: searchParams.limit ?? 10,

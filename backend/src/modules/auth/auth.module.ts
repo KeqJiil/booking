@@ -5,8 +5,8 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { AuthService } from './auth.service';
 import { PrismaModule } from 'src/database/prisma.module';
 import { RedisModule } from 'src/infrastructure/redis/redis.module';
-import { RedisService } from 'src/infrastructure/redis/redis.service';
 import { UserModule } from '../user/user.module';
+import { AuthCronDeletion } from './cron/auth.cron';
 
 @Module({
   controllers: [AuthController],
@@ -23,7 +23,7 @@ import { UserModule } from '../user/user.module';
     RedisModule,
     UserModule,
   ],
-  providers: [AuthService, { provide: 'REDIS', useClass: RedisService }],
+  providers: [AuthService, AuthCronDeletion],
   exports: [AuthService],
 })
 export class AuthModule {}

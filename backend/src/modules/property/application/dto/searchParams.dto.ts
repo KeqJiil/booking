@@ -5,6 +5,7 @@ import {
   IsInt,
   Min,
   IsEnum,
+  Max,
 } from 'class-validator';
 import { Type } from 'class-transformer';
 import {
@@ -12,6 +13,10 @@ import {
   orderBy,
 } from '../../domain/repo-interface/IPropertyRepo.interface';
 import { ApiPropertyOptional } from '@nestjs/swagger';
+import {
+  type IOrderStyle,
+  orderStyle,
+} from 'src/common/constants/searchParamsConsts';
 
 export class PropertySearchParamsDto {
   @ApiPropertyOptional({ description: 'Search by property name' })
@@ -62,6 +67,12 @@ export class PropertySearchParamsDto {
   orderBy?: IOrderByProperty;
 
   @ApiPropertyOptional({
+    enum: orderStyle,
+    description: 'Sorting style',
+  })
+  orderStyle?: IOrderStyle;
+
+  @ApiPropertyOptional({
     default: 10,
     minimum: 5,
     description: 'Pagination limit',
@@ -70,6 +81,7 @@ export class PropertySearchParamsDto {
   @Type(() => Number)
   @IsInt()
   @Min(5)
+  @Max(50)
   limit?: number = 10;
 
   @ApiPropertyOptional({ description: 'Pagination cursor' })

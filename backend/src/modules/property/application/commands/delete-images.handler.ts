@@ -13,7 +13,7 @@ export class DeleteImagesCommandHandler implements ICommandHandler<DeleteImagesC
     const urlsToRemove = new Set(command.urls);
     const newUrls = entity.images
       .filter((el) => !urlsToRemove.has(el.data.url))
-      .map((el) => ({ url: el.data.url }));
+      .map((el) => ({ url: el.data.url, id: el.id }));
     entity.updateImages(newUrls);
     await this.repository.save(entity);
   }

@@ -1,9 +1,7 @@
 import {
   BadRequestException,
   ForbiddenException,
-  Inject,
   Injectable,
-  Optional,
   UnauthorizedException,
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
@@ -27,13 +25,13 @@ import {
 
 @Injectable()
 export class AuthService {
-  private TTL = 7 * 24 * 60 * 60 * 1000;
+  private TTL = 7 * 24 * 60 * 60;
   constructor(
     private readonly jwt: JwtService,
     private readonly prisma: PrismaService,
-    @Inject('REDIS') private cache: RedisService,
+    private readonly cache: RedisService,
     private eventEmitter: EventEmitter2,
-    @Optional() private readonly logger: Logger,
+    private readonly logger: Logger,
     private readonly userService: UserService,
   ) {}
 
@@ -88,7 +86,7 @@ export class AuthService {
       },
     });
 
-    if (!user || user.status === 'DELETED') throw new UnauthorizedException();
+    if (!user || user.status !== 'ALIVE') throw new UnauthorizedException();
     if (!user.password) throw new BadRequestException();
     const password = await bcrypt.compare(data.password, user.password);
     if (!password) throw new UnauthorizedException();
@@ -154,7 +152,7 @@ export class AuthService {
   }
 
   public async verify(uuid: string) {
-    const cache = await this.cache.get<IRegisterData>(`user:${uuid}`);
+    const cache = await this.cache.getdel<IRegisterData>(`user:${uuid}`);
     if (!cache) throw new BadRequestException();
     const user = await this.userService.verifyUser(cache.userId);
     const sessionId = randomUUID();
@@ -169,13 +167,12 @@ export class AuthService {
     this.eventEmitter.emit(eventNames.account_created, eventData);
 
     this.logger.log(user, `New user created`);
-    await this.cache.del(`user:${uuid}`);
     return tokens;
   }
 
   public async logout(refresh: string) {
     const payload = await this.jwt.verifyAsync(refresh);
-    if (!payload) throw new UnauthorizedException();
+    if (!payload) return true;
     await this.cache.del(`session:${payload.sessionId}`);
     return true;
   }

@@ -14,9 +14,17 @@ import { PropertyChangedHandler } from './application/events/propertyChanged.han
 import { IdempotencyModule } from '../idempotency/idempotency.module';
 import { TransactionRepo } from 'src/infrastructure/repo/transactions/repo/Transaction.repository';
 import { PropertyUploadProcessor } from './infrastructure/queueHandlers/queue.handler';
+import { AddImagesCommandHandler } from './application/commands/create-images.handler';
+import { DeleteImagesCommandHandler } from './application/commands/delete-images.handler';
+import { TRANSACTION_REPO } from 'src/common/constants/providerConstants';
+import { BullModule } from '@nestjs/bullmq';
 
 @Module({
-  imports: [PrismaModule, IdempotencyModule],
+  imports: [
+    PrismaModule,
+    IdempotencyModule,
+    BullModule.registerQueue({ name: 'property' }),
+  ],
   controllers: [PropertyController],
   providers: [
     { provide: 'IPropertyRepo', useClass: PrismaPropertyRepository },
@@ -30,7 +38,9 @@ import { PropertyUploadProcessor } from './infrastructure/queueHandlers/queue.ha
     PropertyCreatedHandler,
     PropertyChangedHandler,
     PropertyUploadProcessor,
-    { provide: 'ITransactionRepo', useClass: TransactionRepo },
+    AddImagesCommandHandler,
+    DeleteImagesCommandHandler,
+    { provide: TRANSACTION_REPO, useClass: TransactionRepo },
   ],
 })
 export class PropertyModule {}

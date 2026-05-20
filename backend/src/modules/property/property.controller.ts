@@ -61,7 +61,7 @@ export class PropertyController {
     @Body() createProperty: CreatePropertyDTO,
     @AccessInfo('id') id: string,
   ) {
-    await this.commandBus.execute(
+    return await this.commandBus.execute(
       new CreatePropertyCommand({
         ...createProperty,
         hostId: id,
@@ -79,7 +79,21 @@ export class PropertyController {
     @AccessInfo('id') userId: string,
   ) {
     await this.commandBus.execute(
-      new EditPropertyCommand(userId, { ...changeProperty, id }),
+      new EditPropertyCommand(userId, {
+        id,
+        name: changeProperty.name,
+        description: changeProperty.description,
+        maxGuests: changeProperty.maxGuests,
+        price: changeProperty.price,
+        typeId: changeProperty.typeId,
+        ...(changeProperty.newAddress
+          ? {
+              city: changeProperty.newAddress.city,
+              country: changeProperty.newAddress.country,
+              address: changeProperty.newAddress.address,
+            }
+          : {}),
+      }),
     );
   }
 
