@@ -4,12 +4,12 @@ import {
   Injectable,
   UnauthorizedException,
 } from '@nestjs/common';
-import { JwtService } from '@nestjs/jwt';
+import { JwtService, TokenExpiredError } from '@nestjs/jwt';
 import { PrismaService } from 'src/database/prisma.service';
 import { RegisterDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
 import * as bcrypt from 'bcrypt';
-import { randomUUID } from 'crypto';
+import { createHash, randomUUID } from 'crypto';
 import { IPayload, IRegisterData, ISession } from './types';
 import { Roles } from 'src/common/constants/roleLevels';
 import { EventEmitter2 } from '@nestjs/event-emitter';
@@ -26,6 +26,7 @@ import {
 @Injectable()
 export class AuthService {
   private TTL = 7 * 24 * 60 * 60;
+  private RESET_TTL = 30 * 60;
   constructor(
     private readonly jwt: JwtService,
     private readonly prisma: PrismaService,
@@ -40,9 +41,10 @@ export class AuthService {
     refresh: string,
     sessionId: string,
   ) {
-    const hashed = await bcrypt.hash(refresh, 10);
+    const sessionName = `session:${sessionId}`;
+    const hashed = this.hashToken(refresh);
     await this.cache.set(
-      `session:${sessionId}`,
+      sessionName,
       {
         userId,
         refresh: hashed,
@@ -51,6 +53,15 @@ export class AuthService {
       },
       this.TTL,
     );
+    await this.cache.sadd(`user:session:${userId}`, sessionName);
+  }
+
+  private async graceToken(token: string, sessionId: string) {
+    await this.cache.set(`${sessionId}:grace:${token}`, token, 15);
+  }
+
+  private hashToken(token: string): string {
+    return createHash('sha256').update(token).digest('hex');
   }
 
   private async signTokens(id: string, role: Roles, sessionId: string) {
@@ -63,6 +74,16 @@ export class AuthService {
       { expiresIn: '7d' },
     );
     return { accessToken, refreshToken };
+  }
+
+  private async revokeAllSessions(userId: string) {
+    const sessions = await this.cache.smembers(`user:session:${userId}`);
+    const tx = this.cache.raw().multi();
+    for (const s of sessions) {
+      tx.del(s);
+    }
+    tx.del(`user:session:${userId}`);
+    await tx.exec();
   }
 
   public async validateUser(userId: string) {
@@ -130,9 +151,15 @@ export class AuthService {
     if (!cache || cache.expiresAt < Date.now())
       throw new UnauthorizedException('No cache or cache expired');
 
-    const refreshCheck = await bcrypt.compare(refreshToken, cache.refresh);
-    if (!refreshCheck && cache.createdAt < Date.now() - 15_000)
-      throw new UnauthorizedException('Bad token');
+    const refreshCheck = cache.refresh === this.hashToken(refreshToken);
+    const grace = await this.cache.get<string>(
+      `${payload.sessionId}:grace:${refreshToken}`,
+    );
+    if (!refreshCheck && grace !== refreshToken) {
+      this.logger.warn(`Reuse detected ${grace}`);
+      await this.revokeAllSessions(cache.userId);
+      throw new UnauthorizedException('Reuse detected');
+    }
 
     const user = await this.userService.getUserById(payload.id);
     if (!user || user.status === 'DELETED')
@@ -143,6 +170,7 @@ export class AuthService {
       user.role,
       payload.sessionId,
     );
+    await this.graceToken(refreshToken, payload.sessionId);
     await this.createSession(
       payload.id,
       tokens.refreshToken,
@@ -171,17 +199,43 @@ export class AuthService {
   }
 
   public async logout(refresh: string) {
-    const payload = await this.jwt.verifyAsync(refresh);
-    if (!payload) return true;
-    await this.cache.del(`session:${payload.sessionId}`);
+    let sessionId: string | undefined;
+    try {
+      const payload = await this.jwt.verifyAsync<IPayload>(refresh);
+      sessionId = payload.sessionId;
+    } catch (err) {
+      if (err instanceof TokenExpiredError) {
+        const decoded = this.jwt.decode<IPayload | null>(refresh);
+        sessionId = decoded?.sessionId;
+      } else {
+        throw new UnauthorizedException();
+      }
+    }
+    const session = await this.cache.get<ISession>(`session:${sessionId}`);
+    await this.cache.del(`session:${sessionId}`);
+    if (session)
+      await this.cache.srem(
+        `user:session:${session.userId}`,
+        `session:${sessionId}`,
+      );
     return true;
   }
 
-  async forgotPassword(email: string) {
+  public async logoutAllSessions(refresh: string) {
+    const payload = await this.jwt.verifyAsync<IPayload>(refresh);
+    if (!payload) throw new UnauthorizedException('No payload inside token');
+    if (payload.id) {
+      await this.revokeAllSessions(payload.id);
+      return;
+    }
+    throw new UnauthorizedException();
+  }
+
+  public async forgotPassword(email: string) {
     const uuid = randomUUID();
     const user = await this.userService.getUserByEmail(email);
     if (!user) return;
-    await this.cache.set(`reset:${uuid}`, user.id, this.TTL);
+    await this.cache.set(`reset:${uuid}`, user.id, this.RESET_TTL);
     const queueData: IForgotData = {
       username: user.name,
       email,
@@ -191,7 +245,7 @@ export class AuthService {
     this.eventEmitter.emit(eventNames.forgot_password, queueData);
   }
 
-  async newPassword(newPassword: string, uuid: string) {
+  public async newPassword(newPassword: string, uuid: string) {
     const cache = await this.cache.get<string>(`reset:${uuid}`);
     if (!cache) throw new ForbiddenException();
     const hashed = await bcrypt.hash(newPassword, 10);
@@ -204,5 +258,6 @@ export class AuthService {
       },
     });
     await this.cache.del(`reset:${uuid}`);
+    await this.revokeAllSessions(cache);
   }
 }

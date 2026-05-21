@@ -13,7 +13,7 @@ import { ForgotNewPasswordDto } from './dto/newPassword.dto';
 export class AuthController {
   private refreshConfig = {
     httpOnly: true,
-    secure: false,
+    secure: process.env.NODE_ENV === 'production',
     sameSite: 'lax',
     maxAge: 7 * 24 * 60 * 60 * 1000,
   } as const;
@@ -74,6 +74,12 @@ export class AuthController {
     await this.authService.newPassword(newPassword.password, uuid);
   }
 
+  @Post('avoke-all')
+  @HttpCode(204)
+  async revokeAll(@Cookies('refreshtoken') token: string) {
+    await this.authService.logoutAllSessions(token);
+  }
+
   @Post('logout')
   @HttpCode(204)
   async logout(
@@ -83,7 +89,6 @@ export class AuthController {
     const logout = await this.authService.logout(token);
     if (logout) {
       res.clearCookie('refreshtoken');
-      return { success: true };
     }
   }
 }

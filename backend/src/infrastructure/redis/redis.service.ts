@@ -7,7 +7,12 @@ export class RedisService {
 
   async get<T>(key: string): Promise<T | null> {
     const data = await this.redis.get(key);
-    return data ? JSON.parse(data) : null;
+    if (!data) return null;
+    try {
+      return JSON.parse(data);
+    } catch {
+      return data as T;
+    }
   }
 
   set<T>(key: string, value: T, ttl?: number) {
@@ -17,10 +22,41 @@ export class RedisService {
 
   async getdel<T>(key: string): Promise<T | null> {
     const data = await this.redis.getdel(key);
-    return data ? JSON.parse(data) : null;
+    if (!data) return null;
+    try {
+      return JSON.parse(data);
+    } catch {
+      return data as T;
+    }
   }
 
   del(key: string) {
     return this.redis.del(key);
+  }
+
+  async sadd(key: string, ...members: unknown[]) {
+    const val = members.map((el) =>
+      typeof el === 'string' ? el : JSON.stringify(el),
+    );
+    await this.redis.sadd(key, ...val);
+  }
+
+  async smembers(key: string) {
+    return await this.redis.smembers(key);
+  }
+
+  async srem(key: string, ...members: unknown[]) {
+    const val = members.map((el) =>
+      typeof el === 'string' ? el : JSON.stringify(el),
+    );
+    return await this.redis.srem(key, ...val);
+  }
+
+  async expire(key: string, ttl: number) {
+    return await this.redis.expire(key, ttl);
+  }
+
+  raw() {
+    return this.redis;
   }
 }
