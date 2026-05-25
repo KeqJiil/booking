@@ -6,7 +6,9 @@ import { AuthService } from './auth.service';
 import { PrismaModule } from 'src/database/prisma.module';
 import { RedisModule } from 'src/infrastructure/redis/redis.module';
 import { UserModule } from '../user/user.module';
-import { AuthCronDeletion } from './cron/auth.cron';
+import { AuthCronDeletion } from './application/cron/auth.cron';
+import { RedisSessionRepository } from './repo/redisSesion.repository';
+import { AUTH_REDIS_REPO } from 'src/common/constants/providerConstants';
 
 @Module({
   controllers: [AuthController],
@@ -17,13 +19,20 @@ import { AuthCronDeletion } from './cron/auth.cron';
       global: true,
       useFactory: (config: ConfigService) => ({
         secret: config.getOrThrow<string>('JWT_SECRET'),
+        signOptions: {
+          algorithm: 'HS256',
+        },
       }),
     }),
     PrismaModule,
     RedisModule,
     UserModule,
   ],
-  providers: [AuthService, AuthCronDeletion],
+  providers: [
+    AuthService,
+    AuthCronDeletion,
+    { provide: AUTH_REDIS_REPO, useClass: RedisSessionRepository },
+  ],
   exports: [AuthService],
 })
 export class AuthModule {}

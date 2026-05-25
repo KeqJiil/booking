@@ -1,12 +1,20 @@
-import { Body, Controller, HttpCode, Param, Post, Res } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  HttpCode,
+  Param,
+  Post,
+  Req,
+  Res,
+} from '@nestjs/common';
 import { AuthService } from './auth.service';
-import { LoginDto } from './dto/login.dto';
+import { LoginDto } from './application/dto/login.dto';
 import { Cookies } from 'src/common/decorators/cookies.decorator';
-import { RegisterDto } from './dto/register.dto';
-import type { Response } from 'express';
+import { RegisterDto } from './application/dto/register.dto';
+import type { Request, Response } from 'express';
 import { ApiTags } from '@nestjs/swagger';
-import { ForgotPasswordDto } from './dto/forgotPassword.dto';
-import { ForgotNewPasswordDto } from './dto/newPassword.dto';
+import { ForgotPasswordDto } from './application/dto/forgotPassword.dto';
+import { ForgotNewPasswordDto } from './application/dto/newPassword.dto';
 
 @ApiTags('Auth')
 @Controller('auth')
@@ -15,6 +23,7 @@ export class AuthController {
     httpOnly: true,
     secure: process.env.NODE_ENV === 'production',
     sameSite: 'lax',
+    path: '/auth',
     maxAge: 7 * 24 * 60 * 60 * 1000,
   } as const;
   constructor(private readonly authService: AuthService) {}
@@ -35,9 +44,13 @@ export class AuthController {
   @HttpCode(201)
   async login(
     @Body() data: LoginDto,
+    @Req() req: Request,
     @Res({ passthrough: true }) res: Response,
   ) {
-    const { accessToken, refreshToken } = await this.authService.login(data);
+    const { accessToken, refreshToken } = await this.authService.login(
+      data,
+      req.ip!,
+    );
     res.cookie('refreshtoken', refreshToken, this.refreshConfig);
     return accessToken;
   }
@@ -74,10 +87,14 @@ export class AuthController {
     await this.authService.newPassword(newPassword.password, uuid);
   }
 
-  @Post('avoke-all')
+  @Post('revoke-all')
   @HttpCode(204)
-  async revokeAll(@Cookies('refreshtoken') token: string) {
+  async revokeAll(
+    @Cookies('refreshtoken') token: string,
+    @Res({ passthrough: true }) res: Response,
+  ) {
     await this.authService.logoutAllSessions(token);
+    res.clearCookie('refreshtoken', this.refreshConfig);
   }
 
   @Post('logout')
@@ -88,7 +105,10 @@ export class AuthController {
   ) {
     const logout = await this.authService.logout(token);
     if (logout) {
-      res.clearCookie('refreshtoken');
+      res.clearCookie('refreshtoken', this.refreshConfig);
     }
   }
 }
+
+//TOCTOU
+//

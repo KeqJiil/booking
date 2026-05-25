@@ -5,8 +5,7 @@ import type {
 } from '../interfaces/notificationsRepository.interface';
 import { filter, Observable, Subject } from 'rxjs';
 import { EventEmitter2 } from '@nestjs/event-emitter';
-import { eventNames } from 'process';
-import { IEventNames } from 'src/common/constants/eventnames';
+import { eventNames, IEventNames } from 'src/common/constants/eventnames';
 
 @Injectable()
 export class NotificationsService {
@@ -21,7 +20,7 @@ export class NotificationsService {
       ) as IEventNames;
       if (!Object.values(eventNames).includes(type)) return;
       const data = { type, userId: payload.userId, payload };
-      this.repo.createNotification(data);
+      void this.repo.createNotification(data);
       this.subject.next(data);
     });
   }

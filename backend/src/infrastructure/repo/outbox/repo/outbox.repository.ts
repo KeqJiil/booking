@@ -40,17 +40,11 @@ export class OutboxRepository implements IOutboxRepository<Tx> {
     return data.map((el) => this.getDataType(el));
   }
 
-  async getExpiredProcessing(): Promise<IOutboxDataView[]> {
-    const tenMinutesAgo = new Date(Date.now() - 10 * 60 * 1000);
-    const data = await this.prisma.outbox.findMany({
-      where: {
-        status: 'PROCESSING',
-        processingAt: {
-          lte: tenMinutesAgo,
-        },
-      },
-      take: 50,
-    });
+  async getExpiredProcessing(tx: Tx): Promise<IOutboxDataView[]> {
+    const data = (await tx.$queryRaw`
+      SELECT * 
+      FROM outbox 
+      WHERE processing_at <= NOW() - INTERVAL '30 minutes' FOR UPDATE SKIP LOCKED LIMIT 50`) satisfies IOutboxDb[];
     return data.map((el) => this.getDataType(el));
   }
 

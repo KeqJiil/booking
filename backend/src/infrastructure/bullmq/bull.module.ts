@@ -21,5 +21,6 @@ import { ReviewBullBridge } from './proccessors/review/review.bridge';
     ReviewBullBridge,
     { provide: 'REDIS', useClass: RedisService },
   ],
+  exports: [BullModule],
 })
 export class EventModule {}

@@ -28,10 +28,10 @@ export class BillingRefundPending {
     const outboxes = await this.outbox.getOutbox('PENDING');
     for (const task of outboxes) {
       try {
-        await this.processTask(task);
         await this.transaction.startTransaction(async (tx: Tx) => {
           await this.outbox.markProcessing(task.id, tx);
         });
+        await this.processTask(task);
       } catch (error) {
         this.logger.error(
           { err: error, taskId: task.id },
@@ -44,7 +44,18 @@ export class BillingRefundPending {
   @Cron(CronExpression.EVERY_30_MINUTES)
   async handleProcessingOutboxes() {
     this.logger.log('Billing Refund Processing cron started');
-    const outboxes = await this.outbox.getExpiredProcessing();
+    let outboxes: IOutboxDataView[] = [];
+    await this.transaction.startTransaction(async (tx: Tx) => {
+      outboxes = await this.outbox.getExpiredProcessing(tx);
+      for (const outbox of outboxes) {
+        if (outbox.retries < 5) {
+          await this.outbox.markProcessing(outbox.id, tx);
+          continue;
+        } else {
+          await this.outbox.markFailed(outbox.id, tx);
+        }
+      }
+    });
     for (const task of outboxes) {
       try {
         await this.processTask(task);

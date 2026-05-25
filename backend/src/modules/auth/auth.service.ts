@@ -1,13 +1,16 @@
 import {
   BadRequestException,
   ForbiddenException,
+  HttpException,
+  HttpStatus,
+  Inject,
   Injectable,
   UnauthorizedException,
 } from '@nestjs/common';
 import { JwtService, TokenExpiredError } from '@nestjs/jwt';
 import { PrismaService } from 'src/database/prisma.service';
-import { RegisterDto } from './dto/register.dto';
-import { LoginDto } from './dto/login.dto';
+import { RegisterDto } from './application/dto/register.dto';
+import { LoginDto } from './application/dto/login.dto';
 import * as bcrypt from 'bcrypt';
 import { createHash, randomUUID } from 'crypto';
 import { IPayload, IRegisterData, ISession } from './types';
@@ -22,42 +25,49 @@ import {
   IForgotData,
   IWelcomeData,
 } from 'src/infrastructure/bullmq/proccessors/auth/interfaces/IForgotPasswordData.interface';
+import { ConfigService } from '@nestjs/config';
+import { AUTH_REDIS_REPO } from 'src/common/constants/providerConstants';
+import type { SessionRepository } from './repo/sessionRepository.interface';
+import { SessionId } from './domain/typedId/session.id';
+import { UserId } from './domain/typedId/user.id';
+import { ISessionCreate, Session } from './domain/session.entity';
 
 @Injectable()
 export class AuthService {
-  private TTL = 7 * 24 * 60 * 60;
-  private RESET_TTL = 30 * 60;
+  private TTL: number;
+  private RESET_TTL: number;
+  private SALT_ROUNDS: number;
   constructor(
     private readonly jwt: JwtService,
     private readonly prisma: PrismaService,
     private readonly cache: RedisService,
-    private eventEmitter: EventEmitter2,
+    private readonly eventEmitter: EventEmitter2,
     private readonly logger: Logger,
     private readonly userService: UserService,
-  ) {}
+    private readonly config: ConfigService,
+    @Inject(AUTH_REDIS_REPO) private readonly sessionRepo: SessionRepository,
+  ) {
+    this.TTL = config.getOrThrow('TTL_CACHE');
+    this.RESET_TTL = config.getOrThrow('TTL_RESET');
+    this.SALT_ROUNDS = config.getOrThrow('SALT_ROUNDS');
+  }
 
   private async createSession(
     userId: string,
     refresh: string,
     sessionId: string,
   ) {
-    const sessionName = `session:${sessionId}`;
     const hashed = this.hashToken(refresh);
-    await this.cache.set(
-      sessionName,
-      {
-        userId,
-        refresh: hashed,
-        createdAt: Date.now(),
-        expiresAt: Date.now() + 7 * 24 * 60 * 60 * 1000,
-      },
-      this.TTL,
-    );
-    await this.cache.sadd(`user:session:${userId}`, sessionName);
-  }
-
-  private async graceToken(token: string, sessionId: string) {
-    await this.cache.set(`${sessionId}:grace:${token}`, token, 15);
+    const sessionTypedId = new SessionId(sessionId);
+    const userTypedId = new UserId(userId);
+    const sessionProps: ISessionCreate = {
+      id: sessionTypedId,
+      userId: userTypedId,
+      refreshHash: hashed,
+      ttlMs: this.TTL,
+    };
+    const session = Session.create(sessionProps);
+    await this.sessionRepo.save(session);
   }
 
   private hashToken(token: string): string {
@@ -67,23 +77,13 @@ export class AuthService {
   private async signTokens(id: string, role: Roles, sessionId: string) {
     const accessToken = await this.jwt.signAsync(
       { id, role },
-      { expiresIn: '15m' },
+      { expiresIn: this.config.getOrThrow('ACCESS_TTL') },
     );
     const refreshToken = await this.jwt.signAsync(
       { id, role, sessionId },
-      { expiresIn: '7d' },
+      { expiresIn: this.config.getOrThrow('REFRESH_TTL') },
     );
     return { accessToken, refreshToken };
-  }
-
-  private async revokeAllSessions(userId: string) {
-    const sessions = await this.cache.smembers(`user:session:${userId}`);
-    const tx = this.cache.raw().multi();
-    for (const s of sessions) {
-      tx.del(s);
-    }
-    tx.del(`user:session:${userId}`);
-    await tx.exec();
   }
 
   public async validateUser(userId: string) {
@@ -94,7 +94,7 @@ export class AuthService {
     return user;
   }
 
-  public async login(data: LoginDto) {
+  public async login(data: LoginDto, ip: string) {
     const user = await this.prisma.user.findUnique({
       where: {
         email: data.email,
@@ -108,10 +108,29 @@ export class AuthService {
     });
 
     if (!user || user.status !== 'ALIVE') throw new UnauthorizedException();
+
+    const key = `login:${ip}:${user.id}`;
+
+    const tries = await this.cache.raw().incr(key);
+    const maxTries = this.config.getOrThrow('NUMBER_OF_LOGIN_TRIES');
+
+    if (tries < maxTries) {
+      await this.cache.raw().expire(key, 10 * 60);
+    }
+
+    if (tries > maxTries) {
+      throw new HttpException(
+        'Too many requests',
+        HttpStatus.TOO_MANY_REQUESTS,
+      );
+    }
+
     if (!user.password) throw new BadRequestException();
+
     const password = await bcrypt.compare(data.password, user.password);
     if (!password) throw new UnauthorizedException();
 
+    await this.cache.del(key);
     const sessionId = randomUUID();
     const tokens = await this.signTokens(user.id, user.role, sessionId);
     await this.createSession(user.id, tokens.refreshToken, sessionId);
@@ -120,7 +139,7 @@ export class AuthService {
   }
 
   public async register(data: RegisterDto) {
-    const password = await bcrypt.hash(data.password, 10);
+    const password = await bcrypt.hash(data.password, this.SALT_ROUNDS);
     const newUser = await this.userService.createUser({
       password,
       email: data.email,
@@ -157,7 +176,8 @@ export class AuthService {
     );
     if (!refreshCheck && grace !== refreshToken) {
       this.logger.warn(`Reuse detected ${grace}`);
-      await this.revokeAllSessions(cache.userId);
+      const userId = new UserId(cache.userId);
+      await this.sessionRepo.deleteAllByUserId(userId);
       throw new UnauthorizedException('Reuse detected');
     }
 
@@ -170,7 +190,8 @@ export class AuthService {
       user.role,
       payload.sessionId,
     );
-    await this.graceToken(refreshToken, payload.sessionId);
+    const sessionId = new SessionId(payload.sessionId);
+    await this.sessionRepo.graceToken(refreshToken, sessionId);
     await this.createSession(
       payload.id,
       tokens.refreshToken,
@@ -200,24 +221,23 @@ export class AuthService {
 
   public async logout(refresh: string) {
     let sessionId: string | undefined;
+    let userId: string | undefined;
     try {
       const payload = await this.jwt.verifyAsync<IPayload>(refresh);
       sessionId = payload.sessionId;
+      userId = payload.id;
     } catch (err) {
       if (err instanceof TokenExpiredError) {
-        const decoded = this.jwt.decode<IPayload | null>(refresh);
+        const decoded = this.jwt.decode<IPayload>(refresh);
         sessionId = decoded?.sessionId;
+        userId = decoded?.id;
       } else {
         throw new UnauthorizedException();
       }
     }
-    const session = await this.cache.get<ISession>(`session:${sessionId}`);
-    await this.cache.del(`session:${sessionId}`);
-    if (session)
-      await this.cache.srem(
-        `user:session:${session.userId}`,
-        `session:${sessionId}`,
-      );
+    const sessionTypedId = new SessionId(sessionId);
+    const userTypedId = new UserId(userId);
+    await this.sessionRepo.delete(sessionTypedId, userTypedId);
     return true;
   }
 
@@ -225,7 +245,8 @@ export class AuthService {
     const payload = await this.jwt.verifyAsync<IPayload>(refresh);
     if (!payload) throw new UnauthorizedException('No payload inside token');
     if (payload.id) {
-      await this.revokeAllSessions(payload.id);
+      const userId = new UserId(payload.id);
+      await this.sessionRepo.deleteAllByUserId(userId);
       return;
     }
     throw new UnauthorizedException();
@@ -246,18 +267,19 @@ export class AuthService {
   }
 
   public async newPassword(newPassword: string, uuid: string) {
-    const cache = await this.cache.get<string>(`reset:${uuid}`);
-    if (!cache) throw new ForbiddenException();
-    const hashed = await bcrypt.hash(newPassword, 10);
+    const userId = await this.cache.get<string>(`reset:${uuid}`);
+    if (!userId) throw new ForbiddenException();
+    const hashed = await bcrypt.hash(newPassword, this.SALT_ROUNDS);
     await this.prisma.user.update({
       where: {
-        id: cache,
+        id: userId,
       },
       data: {
         password: hashed,
       },
     });
     await this.cache.del(`reset:${uuid}`);
-    await this.revokeAllSessions(cache);
+    const userTypedId = new UserId(userId);
+    await this.sessionRepo.deleteAllByUserId(userTypedId);
   }
 }

@@ -19,8 +19,8 @@ import {
 } from './application/queries/booking.query';
 import {
   CancelBookingStatusCommand,
-  ConfirmBookingStatusCommand,
   CreateBookingCommand,
+  PayBookingStatusCommand,
   RejectBookingStatusCommand,
 } from './application/commands/booking.commands';
 import { ApiTags } from '@nestjs/swagger';
@@ -93,7 +93,7 @@ export class BookingController {
     @Param('id') id: string,
     @AccessInfo('id') userId: string,
   ) {
-    await this.commandBus.execute(new ConfirmBookingStatusCommand(userId, id));
+    await this.commandBus.execute(new PayBookingStatusCommand(userId, id));
   }
 
   @Post('cancel/:id')

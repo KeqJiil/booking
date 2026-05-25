@@ -26,15 +26,15 @@ export class PrismaReviewRepository implements IReviewRepo {
   }
 
   async changeReveiew(data: IReviewChangeData, userId: string) {
-    await this.prisma.review.update({
+    await this.prisma.review.updateMany({
       where: { id: data.id, reviewerId: userId },
       data: { description: data.text, rating: data.rate },
     });
   }
 
-  async deleteReview(id: string, userId: string): Promise<void> {
+  async deleteReview(id: string): Promise<void> {
     await this.prisma.review.delete({
-      where: { userId, id },
+      where: { id },
     });
   }
 

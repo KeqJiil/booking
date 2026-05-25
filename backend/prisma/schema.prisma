@@ -125,7 +125,7 @@ model Booking {
   review Review?
   chats  Chat[]
 
-  payment   Payment?
+  payment Payment?
 
   startDate DateTime @map("start_date")
   endDate   DateTime @map("end_date")
@@ -165,7 +165,7 @@ model Chat {
   chatUsers ChatUser[]
   messages  Message[]
 
-  status LiveStatus
+  status LiveStatusChat
 
   bookingId String?  @map("booking_id")
   booking   Booking? @relation(references: [id], fields: [bookingId], onDelete: Cascade)
@@ -236,15 +236,15 @@ model IdempotencyKey {
 model Payment {
   id String @id @default(uuid())
 
-  userId   String          @map("user_id")
-  user     User            @relation(references: [id], fields: [userId])
+  userId String @map("user_id")
+  user   User   @relation(references: [id], fields: [userId])
 
-  bookingId         String  @unique
-  booking Booking @relation(fields: [bookingId], references: [id])
+  bookingId String  @unique
+  booking   Booking @relation(fields: [bookingId], references: [id])
 
   status   PaymentStatuses @default(PENDING)
   amount   Int
-  currency Currency @default(usd)
+  currency Currency        @default(usd)
 
   providerPaymentId String?
 
@@ -255,16 +255,16 @@ model Payment {
 model Outbox {
   id String @id @default(uuid())
 
-  itemId String
-  type OutboxEvents
+  itemId  String
+  type    OutboxEvents
   payload Json
-  status OutboxStatuses @default(PENDING)
+  status  OutboxStatuses @default(PENDING)
 
   retries Int @default(0)
 
   processingAt DateTime? @map("processing_at")
-  createdAt DateTime @default(now()) @map("created_at")
-  updatedAt DateTime @updatedAt @map("updated_at")
+  createdAt    DateTime  @default(now()) @map("created_at")
+  updatedAt    DateTime  @updatedAt @map("updated_at")
 }
 
 enum Roles {
@@ -297,12 +297,17 @@ enum LiveStatus {
 }
 
 enum NotificationTypes {
+  forgot_password
+  accound_need_confirmation
   account_created
   password_changed
   new_role_received
   property_created
   property_changed
   property_deleted
+  property_images_updated
+  property_images_added
+  property_images_deleted
   able_to_leave_review
   new_review_received
   new_review_created
@@ -315,6 +320,7 @@ enum NotificationTypes {
   booking_confirmed
   booking_completed
   chat_created
+  billing_refund
 }
 
 enum PaymentStatuses {
@@ -337,4 +343,9 @@ enum OutboxStatuses {
 
 enum Currency {
   usd
+}
+
+enum LiveStatusChat {
+  DELETED
+  ALIVE
 }

@@ -1,6 +1,6 @@
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
-import { ValidationPipe } from '@nestjs/common';
+import { BadRequestException, ValidationPipe } from '@nestjs/common';
 import cookieParser from 'cookie-parser';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 import { LoggingInterceptor } from './common/interceptors/logging.interceptor';
@@ -9,6 +9,7 @@ import helmet from 'helmet';
 import { Logger } from 'nestjs-pino';
 import { OutputInterceptor } from './common/interceptors/output.interceptor';
 import bodyParser from 'body-parser';
+import { exceptionFlattener } from './common/pipes/exceptionFactory';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule, {
@@ -23,7 +24,6 @@ async function bootstrap() {
     new LoggingInterceptor(app.get(Logger)),
     new OutputInterceptor(),
   );
-  app.useGlobalFilters(new AllExceptionsFilter(app.get(Logger)));
 
   const config = new DocumentBuilder()
     .setTitle('Booking Backend')
@@ -41,10 +41,20 @@ async function bootstrap() {
       transform: true,
       whitelist: true,
       forbidNonWhitelisted: true,
+      exceptionFactory: (errs) => {
+        const flatten = exceptionFlattener(errs);
+        return new BadRequestException({
+          statusCode: 400,
+          message: 'Validation failed',
+          errors: flatten,
+        });
+      },
     }),
   );
   app.use(cookieParser());
   app.use('/stripe/webhook', bodyParser.raw({ type: 'application/json' }));
+
+  app.useGlobalFilters(new AllExceptionsFilter(app.get(Logger)));
 
   await app.listen(3000);
 }
