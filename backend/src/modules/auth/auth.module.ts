@@ -4,7 +4,6 @@ import { JwtModule } from '@nestjs/jwt';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { AuthService } from './auth.service';
 import { PrismaModule } from 'src/database/prisma.module';
-import { RedisModule } from 'src/infrastructure/redis/redis.module';
 import { UserModule } from '../user/user.module';
 import { AuthCronDeletion } from './application/cron/auth.cron';
 import { RedisSessionRepository } from './repo/redisSesion.repository';
@@ -25,7 +24,6 @@ import { AUTH_REDIS_REPO } from 'src/common/constants/providerConstants';
       }),
     }),
     PrismaModule,
-    RedisModule,
     UserModule,
   ],
   providers: [

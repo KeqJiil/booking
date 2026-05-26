@@ -24,7 +24,6 @@ import { UploadModule } from './modules/upload/upload.module';
 import { MinioModule } from './infrastructure/minio/minio.module';
 import { RedisModule } from './infrastructure/redis/redis.module';
 import { IdempotencyInterceptor } from './common/interceptors/idempotency.interceptor';
-import { RedisService } from './infrastructure/redis/redis.service';
 import { EventModule } from './infrastructure/bullmq/bull.module';
 
 @Module({
@@ -32,6 +31,12 @@ import { EventModule } from './infrastructure/bullmq/bull.module';
     ConfigModule.forRoot({
       isGlobal: true,
     }),
+    RedisModule,
+    StripeModule.forRootAsync(true),
+    IdempotencyModule,
+    UploadModule,
+    MinioModule,
+    EventModule,
     ThrottlerModule.forRoot({
       throttlers: [
         {
@@ -78,20 +83,7 @@ import { EventModule } from './infrastructure/bullmq/bull.module';
     NotificationsModule,
     BillingModule,
     MailModule,
-    StripeModule.forRootAsync(),
-    IdempotencyModule,
-    UploadModule,
-    MinioModule,
-    RedisModule,
-    EventModule,
   ],
-  providers: [
-    MyJwtStrategy,
-    IdempotencyInterceptor,
-    {
-      provide: 'REDIS',
-      useClass: RedisService,
-    },
-  ],
+  providers: [MyJwtStrategy, IdempotencyInterceptor],
 })
 export class AppModule {}

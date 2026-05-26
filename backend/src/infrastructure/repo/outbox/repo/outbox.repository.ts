@@ -43,7 +43,7 @@ export class OutboxRepository implements IOutboxRepository<Tx> {
   async getExpiredProcessing(tx: Tx): Promise<IOutboxDataView[]> {
     const data = (await tx.$queryRaw`
       SELECT * 
-      FROM outbox 
+      FROM Outbox 
       WHERE processing_at <= NOW() - INTERVAL '30 minutes' FOR UPDATE SKIP LOCKED LIMIT 50`) satisfies IOutboxDb[];
     return data.map((el) => this.getDataType(el));
   }

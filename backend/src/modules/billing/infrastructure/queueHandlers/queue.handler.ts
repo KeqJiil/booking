@@ -1,6 +1,10 @@
 import { Processor, WorkerHost } from '@nestjs/bullmq';
 import { Inject } from '@nestjs/common';
 import { Job } from 'bullmq';
+import {
+  PRISMA_TRANSACTION_CLIENT,
+  STRIPE_PAYMENT_CLIENT,
+} from 'src/common/constants/providerConstants';
 import type { IPaymentService } from 'src/infrastructure/payments/interfaces/paymentService.interface';
 import type {
   IOutboxDataView,
@@ -14,8 +18,9 @@ import type {
 @Processor('billing')
 export class BillingQueueHandler extends WorkerHost {
   constructor(
-    @Inject('PAYMENT_SERVICE') private paymentService: IPaymentService,
+    @Inject(STRIPE_PAYMENT_CLIENT) private paymentService: IPaymentService,
     @Inject('OUTBOX_SERVICE') private outbox: IOutboxRepository<Tx>,
+    @Inject(PRISMA_TRANSACTION_CLIENT)
     private readonly transaction: ITransactionRepo,
   ) {
     super();

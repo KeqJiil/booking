@@ -8,9 +8,10 @@ import {
 import { catchError, from, mergeMap, Observable, of, tap } from 'rxjs';
 import { idempotencyStatuses } from '../constants/idempotencyStatuses';
 import { RedisService } from 'src/infrastructure/redis/redis.service';
+import { REDIS } from '../constants/providerConstants';
 
 export class IdempotencyInterceptor implements NestInterceptor {
-  constructor(@Inject('REDIS') private cache: RedisService) {}
+  constructor(@Inject(REDIS) private cache: RedisService) {}
 
   intercept(context: ExecutionContext, next: CallHandler): Observable<any> {
     const idempotency = context.switchToHttp().getRequest().headers[

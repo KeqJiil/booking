@@ -12,12 +12,14 @@ import type {
 import { InjectQueue } from '@nestjs/bullmq';
 import { Queue } from 'bullmq';
 import { eventNames } from 'src/common/constants/eventnames';
+import { PRISMA_TRANSACTION_CLIENT } from 'src/common/constants/providerConstants';
 
 @Injectable()
 export class BillingRefundPending {
   constructor(
     private readonly logger: Logger,
     @Inject('OUTBOX_SERVICE') private outbox: IOutboxRepository<Tx>,
+    @Inject(PRISMA_TRANSACTION_CLIENT)
     private readonly transaction: ITransactionRepo,
     @InjectQueue('billing') private billingQueue: Queue,
   ) {}

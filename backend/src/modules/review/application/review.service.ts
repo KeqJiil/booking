@@ -8,11 +8,12 @@ import { SearchParamsReviewsDto } from './dto/searchParams.dto';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { eventNames } from 'src/common/constants/eventnames';
 import { RedisService } from 'src/infrastructure/redis/redis.service';
+import { REDIS } from 'src/common/constants/providerConstants';
 
 @Injectable()
 export class ReviewService {
   constructor(
-    @Inject('REDIS') private readonly cache: RedisService,
+    @Inject(REDIS) private readonly cache: RedisService,
     @Inject('ReviewRepo') private readonly repo: IReviewRepo,
     private readonly eventEmmiter: EventEmitter2,
   ) {}

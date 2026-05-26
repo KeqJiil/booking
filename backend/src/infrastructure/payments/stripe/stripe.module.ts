@@ -3,11 +3,13 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import Stripe from 'stripe';
 import { StripeService } from './stripe.service';
 import { BullModule } from '@nestjs/bullmq';
+import { STRIPE_PAYMENT_CLIENT } from 'src/common/constants/providerConstants';
 
 @Module({})
 export class StripeModule {
-  static forRootAsync(): DynamicModule {
+  static forRootAsync(isGlobal: boolean): DynamicModule {
     return {
+      global: isGlobal,
       module: StripeModule,
       controllers: [],
       imports: [
@@ -17,6 +19,7 @@ export class StripeModule {
         }),
       ],
       providers: [
+        StripeService,
         {
           provide: 'STRIPE_CLIENT',
           useFactory: (configService: ConfigService) => {
@@ -26,8 +29,12 @@ export class StripeModule {
           },
           inject: [ConfigService],
         },
-        StripeService,
+        {
+          provide: STRIPE_PAYMENT_CLIENT,
+          useExisting: StripeService,
+        },
       ],
+      exports: [STRIPE_PAYMENT_CLIENT],
     };
   }
 }

@@ -5,11 +5,12 @@ import type { IAbleToReview } from './interfaces/IAbleToReview.interface';
 import { InjectQueue } from '@nestjs/bullmq';
 import { Queue } from 'bullmq';
 import { OnEvent } from '@nestjs/event-emitter';
+import { REDIS } from 'src/common/constants/providerConstants';
 
 @Injectable()
 export class ReviewBullBridge {
   constructor(
-    @Inject('REDIS') private cache: RedisService,
+    @Inject(REDIS) private cache: RedisService,
     @InjectQueue('review') private reviewQueue: Queue,
   ) {}
 

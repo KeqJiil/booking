@@ -1,4 +1,4 @@
-import { Processor } from '@nestjs/bullmq';
+import { Processor, WorkerHost } from '@nestjs/bullmq';
 import { CommandBus } from '@nestjs/cqrs';
 import { Job } from 'bullmq';
 import { eventNames } from 'src/common/constants/eventnames';
@@ -9,8 +9,10 @@ import {
 import { IUpdateImagesData } from '../../application/types/IAddImagesData.interface';
 
 @Processor('property')
-export class PropertyUploadProcessor {
-  constructor(private readonly commandBus: CommandBus) {}
+export class PropertyUploadProcessor extends WorkerHost {
+  constructor(private readonly commandBus: CommandBus) {
+    super();
+  }
 
   async process(job: Job) {
     switch (job.name as keyof typeof eventNames) {

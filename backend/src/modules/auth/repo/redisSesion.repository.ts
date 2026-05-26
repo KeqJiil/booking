@@ -1,14 +1,15 @@
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import { RedisService } from 'src/infrastructure/redis/redis.service';
 import { SessionRepository } from './sessionRepository.interface';
 import { Session, SessionPersistence } from '../domain/session.entity';
 import { SessionMapper } from '../application/mapper/session.mapper';
 import { UserId } from '../domain/typedId/user.id';
 import { SessionId } from '../domain/typedId/session.id';
+import { REDIS } from 'src/common/constants/providerConstants';
 
 @Injectable()
 export class RedisSessionRepository implements SessionRepository {
-  constructor(private readonly redis: RedisService) {}
+  constructor(@Inject(REDIS) private readonly redis: RedisService) {}
 
   async save(session: Session, ttl?: number): Promise<void> {
     const rawSession = SessionMapper.toPersist(session);

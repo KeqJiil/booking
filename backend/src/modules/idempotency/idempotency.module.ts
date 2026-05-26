@@ -9,5 +9,6 @@ import { PrismaIdempotencyRepo } from './repo/prismaIdempotency.repository';
     IdempotencyService,
     { provide: 'IDEMPOTENCY_REPO', useClass: PrismaIdempotencyRepo },
   ],
+  exports: [IdempotencyService],
 })
 export class IdempotencyModule {}

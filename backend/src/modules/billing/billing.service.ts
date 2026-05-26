@@ -12,15 +12,20 @@ import type {
 } from 'src/infrastructure/repo/transactions/interfaces/TransactionRepo.interface';
 import { BookingProviderAdapter } from './infrastructure/adapters/booking.adapter';
 import type { IOutboxRepository } from 'src/infrastructure/repo/outbox/interfaces/outbox.interface';
+import {
+  PRISMA_TRANSACTION_CLIENT,
+  STRIPE_PAYMENT_CLIENT,
+} from 'src/common/constants/providerConstants';
 
 @Injectable()
 export class BillingService {
   constructor(
-    @Inject('PAYMENT_SERVICE') private paymentService: IPaymentService,
+    @Inject(STRIPE_PAYMENT_CLIENT) private paymentService: IPaymentService,
     @Inject('BILLING_REPOSITORY') private billingRepo: IBillingRepo,
     @Inject('OUTBOX_SERVICE') private outbox: IOutboxRepository<Tx>,
     private readonly userService: UserService,
     private readonly idempotency: IdempotencyService,
+    @Inject(PRISMA_TRANSACTION_CLIENT)
     private readonly transaction: ITransactionRepo,
     private readonly bookingAdapter: BookingProviderAdapter,
   ) {}

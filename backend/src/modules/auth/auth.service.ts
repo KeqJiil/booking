@@ -26,7 +26,7 @@ import {
   IWelcomeData,
 } from 'src/infrastructure/bullmq/proccessors/auth/interfaces/IForgotPasswordData.interface';
 import { ConfigService } from '@nestjs/config';
-import { AUTH_REDIS_REPO } from 'src/common/constants/providerConstants';
+import { AUTH_REDIS_REPO, REDIS } from 'src/common/constants/providerConstants';
 import type { SessionRepository } from './repo/sessionRepository.interface';
 import { SessionId } from './domain/typedId/session.id';
 import { UserId } from './domain/typedId/user.id';
@@ -40,7 +40,7 @@ export class AuthService {
   constructor(
     private readonly jwt: JwtService,
     private readonly prisma: PrismaService,
-    private readonly cache: RedisService,
+    @Inject(REDIS) private readonly cache: RedisService,
     private readonly eventEmitter: EventEmitter2,
     private readonly logger: Logger,
     private readonly userService: UserService,
