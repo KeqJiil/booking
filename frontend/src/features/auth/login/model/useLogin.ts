@@ -1,6 +1,6 @@
 import { useMutation } from "@tanstack/react-query";
 import { loginFn } from "../api/login.api";
-import { useAuthToken } from "@shared/api/auth.store";
+import { useAuthToken } from "@/shared/api/auth.store";
 import type { ILoginData } from "./types";
 import { toast } from "sonner";
 

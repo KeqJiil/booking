@@ -3,12 +3,14 @@ import { Contr } from './mil.controller';
 import { MailService } from './mail.service';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { Resend } from 'resend';
+import { MailWorker } from './queueHandlers/registerQueue.handler';
 
 @Module({
   imports: [ConfigModule],
   controllers: [Contr],
   providers: [
     MailService,
+    MailWorker,
     {
       provide: 'MAIL_CLIENT',
       inject: [ConfigService],

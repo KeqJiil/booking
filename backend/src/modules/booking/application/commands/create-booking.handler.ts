@@ -7,18 +7,24 @@ import { BookingEntity } from '../../domain/entities/booking.entity';
 import type { IPropertyAdapterToBooking } from '../../domain/repo-interfaces/IPropertyAdapter.interface';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { eventNames } from 'src/common/constants/eventnames';
+import { REDIS } from 'src/common/constants/providerConstants';
+import { RedisService } from 'src/infrastructure/redis/redis.service';
 
 @CommandHandler(CreateBookingCommand)
 export class CreateBookingHandler implements ICommandHandler<CreateBookingCommand> {
   constructor(
     @Inject('TransactionRepo') private readonly transactions: ITransactionRepo,
     @Inject('BookingRepo') private readonly repo: IBookingRepo,
+    @Inject(REDIS) private readonly cache: RedisService,
     private readonly eventEmitter: EventEmitter2,
     @Inject('PropertyAdapter')
     private readonly PropertyProviderAdapter: IPropertyAdapterToBooking,
   ) {}
 
   async execute(command: CreateBookingCommand): Promise<void> {
+    const cacheKey = `booking:create:${command.idempotencyKey}`;
+    const data = await this.cache.get(cacheKey);
+    if (data) return;
     await this.transactions.startTransaction(async (tx) => {
       const additionalData = await this.PropertyProviderAdapter.getData(
         command.data.propertyId,
@@ -41,5 +47,6 @@ export class CreateBookingHandler implements ICommandHandler<CreateBookingComman
       this.eventEmitter.emit(eventNames.booking_created, { id: entity.id });
       entity.commit();
     });
+    void this.cache.set(cacheKey, 0, 360);
   }
 }

@@ -24,6 +24,7 @@ import {
   RejectBookingStatusCommand,
 } from './application/commands/booking.commands';
 import { ApiTags } from '@nestjs/swagger';
+import { IdempotencyAccess } from 'src/common/decorators/idempotency.decorator';
 
 @ApiTags('Bookings')
 @Controller('bookings')
@@ -38,7 +39,7 @@ export class BookingController {
   @Authorization('USER')
   async getMyBookings(
     @AccessInfo('id') id: string,
-    @Body() searchParams: SearchParamsBookingsDto,
+    @Query() searchParams: SearchParamsBookingsDto,
   ) {
     return await this.queryBus.execute(
       new GetMyBookingsQuery(id, searchParams),
@@ -70,9 +71,10 @@ export class BookingController {
   async createBooking(
     @Body() data: CreateBookingDto,
     @AccessInfo('id') id: string,
+    @IdempotencyAccess() idempotencyKey: string,
   ) {
     await this.commandBus.execute(
-      new CreateBookingCommand({ ...data, userId: id }),
+      new CreateBookingCommand({ ...data, userId: id }, idempotencyKey),
     );
   }
 

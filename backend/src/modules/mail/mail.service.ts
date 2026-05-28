@@ -4,6 +4,7 @@ import { Resend } from 'resend';
 import { welcomeTemplate } from 'src/templates/welcome';
 import { registerTemplate } from 'src/templates/registerConfirm';
 import { resetPasswordTemplate } from 'src/templates/forgotPassword';
+import { Logger } from 'nestjs-pino';
 
 @Injectable()
 export class MailService implements IMailer {
@@ -11,6 +12,7 @@ export class MailService implements IMailer {
     @Inject('MAIL_CLIENT') private readonly resend: Resend,
     @Inject('MAIL_MAIL') private readonly mailName: string,
     @Inject('BACKEND_URL') private readonly url: string,
+    private readonly logger: Logger,
   ) {}
 
   async sendWelcome(userEmail: string, username: string): Promise<void> {
@@ -64,5 +66,6 @@ export class MailService implements IMailer {
       subject: 'Register',
       html: registerTemplate(username, uuid, this.url),
     });
+    this.logger.log(`email was send on ${userEmail}`);
   }
 }

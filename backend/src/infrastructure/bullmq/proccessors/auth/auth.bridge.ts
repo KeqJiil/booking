@@ -8,10 +8,14 @@ import type {
   IWelcomeData,
 } from './interfaces/IForgotPasswordData.interface';
 import type { IRegisterQueue } from './interfaces/IRegisterData.interface';
+import { Logger } from 'nestjs-pino';
 
 @Injectable()
 export class AuthBullBridge {
-  constructor(@InjectQueue('mail') private mailQueue: Queue) {}
+  constructor(
+    @InjectQueue('mail') private mailQueue: Queue,
+    private readonly logger: Logger,
+  ) {}
 
   @OnEvent(eventNames.forgot_password)
   async forgotPassword(payload: IForgotData) {
@@ -23,6 +27,9 @@ export class AuthBullBridge {
 
   @OnEvent(eventNames.accound_need_confirmation)
   async accountConfirmation(payload: IRegisterQueue) {
+    this.logger.log(
+      `Event accound need confirmation posted with data: ${payload.email}`,
+    );
     await this.mailQueue.add(eventNames.accound_need_confirmation, payload, {
       attempts: 5,
       backoff: { type: 'exponential', delay: 500 },

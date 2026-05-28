@@ -1,6 +1,7 @@
 import {
   Body,
   Controller,
+  Get,
   HttpCode,
   Param,
   Post,
@@ -61,7 +62,7 @@ export class AuthController {
     await this.authService.register(data);
   }
 
-  @Post('verify/:id')
+  @Get('verify/:id')
   @HttpCode(201)
   async verify(
     @Res({ passthrough: true }) res: Response,

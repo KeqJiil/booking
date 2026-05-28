@@ -59,7 +59,7 @@ export class PrismaPropertyQueryRepository implements IPropertyQueryRepo {
             : undefined,
       },
       orderBy: {
-        [orderBy ? orderBy : 'name']: [orderStyle ? orderStyle : 'asc'],
+        [orderBy ? orderBy : 'name']: orderStyle ? orderStyle : 'asc',
       },
       select: propertyViewSelect,
       take: searchParams.limit ?? 10,

@@ -47,9 +47,9 @@ export class AuthService {
     private readonly config: ConfigService,
     @Inject(AUTH_REDIS_REPO) private readonly sessionRepo: SessionRepository,
   ) {
-    this.TTL = config.getOrThrow('TTL_CACHE');
-    this.RESET_TTL = config.getOrThrow('TTL_RESET');
-    this.SALT_ROUNDS = config.getOrThrow('SALT_ROUNDS');
+    this.TTL = Number(config.getOrThrow('TTL_CACHE'));
+    this.RESET_TTL = Number(config.getOrThrow('TTL_RESET'));
+    this.SALT_ROUNDS = Number(config.getOrThrow('SALT_ROUNDS'));
   }
 
   private async createSession(

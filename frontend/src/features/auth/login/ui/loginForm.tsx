@@ -1,8 +1,8 @@
 import { useLogin } from "../model/useLogin";
-import { Button } from "@shared/ui/button";
+import { Button } from "@/shared/ui/button";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Input } from "@shared/ui/input";
+import { Input } from "@/shared/ui/input";
 import { loginSchema, type ILoginSchema } from "../model/loginForm";
 
 export function LoginForm() {
@@ -17,7 +17,7 @@ export function LoginForm() {
 
   return (
     <div>
-      <form onSubmit={onSubmit} className="flex flex-col">
+      <form onSubmit={onSubmit} className="flex flex-col gap-2">
         <Input placeholder="Enter email" {...register("email")} />
         <span
           className={`${formState.errors.email?.message ? "opacity-100" : "opacity-0"} text-red-500`}

@@ -6,10 +6,13 @@
     "module": "esnext",
     "types": ["vite/client"],
     "skipLibCheck": true,
-
     "baseUrl": ".",
     "paths": {
-      "@shared/*": ["src/shared/*"]
+      "@/shared/*": ["src/shared/*"],
+      "@/entities/*": ["src/entities/*"],
+      "@/features/*": ["src/features/*"],
+      "@/widgets/*": ["src/widgets/*"],
+      "@/pages/*": ["src/pages/*"]
     },
 
     /* Bundler mode */

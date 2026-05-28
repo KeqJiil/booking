@@ -40,8 +40,8 @@ export class UserController {
   @Authorization('ADMIN')
   @HttpCode(200)
   @Patch(':id/role')
-  async changeRole(@Param('id') userId: string, @Body() role: Roles) {
-    return await this.userService.changeRole(userId, role);
+  async changeRole(@Param('id') userId: string, @Body() role: { role: Roles }) {
+    return await this.userService.changeRole(userId, role.role);
   }
 
   @Authorization('USER')

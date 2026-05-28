@@ -1,4 +1,4 @@
-import { api } from "@shared/api/axios.interceptors";
+import { api } from "@/shared/api/axios.interceptors";
 import type { ILoginData } from "../model/types";
 import type { IReturnTypeAuth } from "../../types";
 
