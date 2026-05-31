@@ -18,7 +18,10 @@ export class RedisSessionRepository implements SessionRepository {
     const rawSession = SessionMapper.toPersist(session);
     const sessionName = `session:${rawSession.id}`;
     const cacheUser = `user:session:${rawSession.userId}`;
-    const ex = rawSession.expiresAt - Date.now() / 1000;
+    const ex = Math.max(
+      1,
+      Math.floor((rawSession.expiresAt - Date.now()) / 1000),
+    );
     const tx = this.redis.raw().multi();
     tx.set(sessionName, JSON.stringify(rawSession), 'EX', ex);
     tx.sadd(cacheUser, rawSession.id);

@@ -4,8 +4,8 @@ import {
   Get,
   HttpCode,
   Param,
+  Patch,
   Post,
-  Req,
   Res,
 } from '@nestjs/common';
 import { AuthService } from './auth.service';
@@ -19,9 +19,14 @@ import { ForgotNewPasswordDto } from './application/dto/newPassword.dto';
 import { CommandBus } from '@nestjs/cqrs';
 import {
   LoginCommand,
+  LogoutCommand,
   RefreshCommand,
   RegisterCommand,
+  RevokeAllSessionsCommand,
 } from './application/commands/auth.commands';
+import { Authorization } from 'src/common/decorators/authorization.decorator';
+import { AccessInfo } from 'src/common/decorators/accessInfo.decorator';
+import { ChangePasswordDto } from '../user/dto/password.dto';
 
 @ApiTags('Auth')
 @Controller('auth')
@@ -55,7 +60,6 @@ export class AuthController {
   @HttpCode(201)
   async login(
     @Body() data: LoginDto,
-    @Req() req: Request,
     @Res({ passthrough: true }) res: Response,
   ) {
     const { access, refresh } = await this.commandBus.execute(
@@ -97,13 +101,21 @@ export class AuthController {
     await this.authService.newPassword(newPassword.password, uuid);
   }
 
+  @Authorization('USER')
+  @HttpCode(200)
+  @Patch('change-password')
+  async changePassword(
+    @Body() data: ChangePasswordDto,
+    @AccessInfo('id') id: string,
+  ) {}
+
   @Post('revoke-all')
   @HttpCode(204)
   async revokeAll(
     @Cookies('refreshtoken') token: string,
     @Res({ passthrough: true }) res: Response,
   ) {
-    await this.authService.logoutAllSessions(token);
+    await this.commandBus.execute(new RevokeAllSessionsCommand(token));
     res.clearCookie('refreshtoken', this.refreshConfig);
   }
 
@@ -113,10 +125,8 @@ export class AuthController {
     @Cookies('refreshtoken') token: string,
     @Res({ passthrough: true }) res: Response,
   ) {
-    const logout = await this.authService.logout(token);
-    if (logout) {
-      res.clearCookie('refreshtoken', this.refreshConfig);
-    }
+    await this.commandBus.execute(new LogoutCommand(token));
+    res.clearCookie('refreshtoken', this.refreshConfig);
   }
 }
 

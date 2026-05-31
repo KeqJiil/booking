@@ -19,7 +19,7 @@ model User {
   paymentAccountId String? @map("payment_account_id")
   avatarUrl        String? @map("avatar_url")
 
-  status LiveStatus @default(NOT_CONFIRMED)
+  status LiveStatus @default(ALIVE)
 
   authCredentials AuthCredential?
   chatUsers       ChatUser[]
@@ -45,6 +45,7 @@ model AuthCredential {
 
   passwordHash String @map("password_hash")
   email        String @unique
+  isEmailVerified Boolean @default(false)
 
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt() @map("updated_at")
@@ -304,7 +305,6 @@ enum Themes {
 enum LiveStatus {
   DELETED
   ALIVE
-  NOT_CONFIRMED
 }
 
 enum NotificationTypes {

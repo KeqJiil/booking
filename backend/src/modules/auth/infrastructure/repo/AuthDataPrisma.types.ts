@@ -3,4 +3,5 @@ export interface IAuthDataPrisma {
   id: string;
   email: string;
   passwordHash: string;
+  isEmailVerified: boolean;
 }

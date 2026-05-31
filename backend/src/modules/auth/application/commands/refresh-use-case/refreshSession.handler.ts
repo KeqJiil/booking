@@ -1,6 +1,6 @@
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
-import { RefreshCommand } from './auth.commands';
-import { ITokens } from '../../types';
+import { RefreshCommand } from '../auth.commands';
+import { ITokens } from '../../../types';
 import { Inject, UnauthorizedException } from '@nestjs/common';
 import {
   AUTH_SESSION_REPO,
@@ -8,16 +8,16 @@ import {
   TOKEN_ISSUER_ACCESS,
   TOKEN_ISSUER_REFRESH,
 } from 'src/common/constants/providerConstants';
-import type { SessionRepository } from '../../domain/repository/sessionRepository.interface';
-import type { ITokenIssuerService } from '../abstractions/TokenIssuer.interface';
+import type { SessionRepository } from '../../../domain/repository/sessionRepository.interface';
+import type { ITokenIssuerService } from '../../abstractions/TokenIssuer.interface';
 import {
   IAccessTokenPayload,
   IRefreshTokenPayload,
-} from '../abstractions/tokenPayload.interface';
-import type { IHasherService } from '../abstractions/hashed.interface';
-import { SessionId } from '../../domain/typedId/session.id';
+} from '../../abstractions/tokenPayload.interface';
+import type { IHasherService } from '../../abstractions/hashed.interface';
+import { SessionId } from '../../../domain/typedId/session.id';
 import { Logger } from 'nestjs-pino';
-import { UserId } from '../../domain/typedId/user.id';
+import { UserId } from '../../../domain/typedId/user.id';
 import { UserService } from 'src/modules/user/user.service';
 
 @CommandHandler(RefreshCommand)
@@ -43,18 +43,17 @@ export class RefreshCommandHandler implements ICommandHandler<RefreshCommand> {
     if (!session || session.isExpired(Date.now()))
       throw new UnauthorizedException('No cache or cache expired');
 
+    const user = await this.userService.getUserById(userId);
+    if (!user || user.status === 'DELETED')
+      throw new UnauthorizedException('No such user');
+
     const hashed = this.hasher.hash(command.refreshToken);
-    const refreshCheck = session.checkHash(hashed);
-    if (!refreshCheck && !session.isInGrace(Date.now(), hashed)) {
+    if (!session.checkHash(hashed) && !session.isInGrace(Date.now(), hashed)) {
       this.logger.warn(`Reuse detected`);
       const tokenUserId = new UserId(userId);
       await this.sessionRepo.deleteAllByUserId(tokenUserId);
       throw new UnauthorizedException('Reuse detected');
     }
-
-    const user = await this.userService.getUserById(userId);
-    if (!user || user.status === 'DELETED')
-      throw new UnauthorizedException('No such user');
 
     const access = await this.tokenIssuerAccess.sign({ userId, role });
     const refresh = await this.tokenIssuerRefresh.sign({

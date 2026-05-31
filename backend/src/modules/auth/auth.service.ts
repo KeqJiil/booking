@@ -180,7 +180,7 @@ export class AuthService {
     );
     await this.rotateSession(session, tokens.refreshToken);
     return tokens;
-  }
+  } //
 
   public async verify(uuid: string) {
     const cache = await this.cache.getdel<IRegisterData>(`user:${uuid}`);
@@ -221,7 +221,7 @@ export class AuthService {
     const userTypedId = new UserId(userId);
     await this.sessionRepo.delete(sessionTypedId, userTypedId);
     return true;
-  }
+  } //
 
   public async logoutAllSessions(refresh: string) {
     const payload = await this.jwt.verifyAsync<IPayload>(refresh);
@@ -232,7 +232,7 @@ export class AuthService {
       return;
     }
     throw new UnauthorizedException();
-  }
+  } //
 
   public async forgotPassword(email: string) {
     const uuid = randomUUID();

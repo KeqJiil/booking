@@ -1,9 +1,9 @@
 import { Injectable } from '@nestjs/common';
-import { ICrypto } from '../../application/abstractions/crypto.interface';
+import { ICryptoService } from '../../application/abstractions/crypto.interface';
 import * as bcrypt from 'bcrypt';
 
 @Injectable()
-export class CryptoBcryptService implements ICrypto {
+export class CryptoBcryptService implements ICryptoService {
   constructor(private readonly saltRounds: number) {}
 
   async crypto(item: string): Promise<string> {

@@ -10,18 +10,25 @@ export class AuthUser extends AggregateRoot {
     private readonly _userId: UserId,
     private _email: Email,
     private hashedPassword: string,
+    private verified: boolean,
   ) {
     super();
   }
 
   static create(id: AuthId, userId: UserId, email: Email, hashed: string) {
-    const user = new AuthUser(id, userId, email, hashed);
+    const user = new AuthUser(id, userId, email, hashed, false);
     user.apply(new UserCreatedEvent(id, userId, email));
     return user;
   }
 
-  static fromPersist(id: AuthId, userId: UserId, email: Email, hashed: string) {
-    return new AuthUser(id, userId, email, hashed);
+  static fromPersist(
+    id: AuthId,
+    userId: UserId,
+    email: Email,
+    hashed: string,
+    isEmailVerified: boolean,
+  ) {
+    return new AuthUser(id, userId, email, hashed, isEmailVerified);
   }
 
   changePassword(newPassword: string) {
@@ -35,6 +42,10 @@ export class AuthUser extends AggregateRoot {
       email: this._email.toString(),
       password: this.hashedPassword,
     };
+  }
+
+  isActivated() {
+    return this.verified;
   }
 
   get password() {

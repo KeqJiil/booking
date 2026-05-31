@@ -25,10 +25,8 @@ export class UserService {
   async createUser(user: IUserCreate) {
     return await this.prisma.user.create({
       data: {
+        id: user.userId.toString(),
         name: user.name,
-        email: user.email,
-        status: 'NOT_CONFIRMED',
-        password: user.password,
         userSettings: {
           create: {},
         },
@@ -36,12 +34,17 @@ export class UserService {
     });
   }
 
-  async getUserById(id: string) {
-    return await this.prisma.user.findUnique({ where: { id } });
+  async hasValidStatus(userId: UserId) {
+    const data = await this.prisma.user.findUnique({
+      where: { id: userId.toString() },
+      select: { status: true },
+    });
+    if (!data) return false;
+    return data.status === 'ALIVE';
   }
 
-  async getUserByEmail(email: string) {
-    return await this.prisma.user.findUnique({ where: { email } });
+  async getUserById(id: string) {
+    return await this.prisma.user.findUnique({ where: { id } });
   }
 
   async updateAvatar(id: string, url: string) {

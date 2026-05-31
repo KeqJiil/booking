@@ -23,7 +23,7 @@ export class JwtIssuerService<
 
   async sign(payload: T): Promise<string> {
     const token = await this.jwtService.signAsync(payload, {
-      expiresIn: this.expiresInMs / 1000,
+      expiresIn: this.expiresInMs,
     } as JwtSignOptions);
     return token;
   }

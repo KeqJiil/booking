@@ -4,7 +4,6 @@ import { UserId } from '../../domain/typedId/user.id';
 import { IRegisterData } from '../../types';
 import { REDIS } from 'src/common/constants/providerConstants';
 import { RedisService } from 'src/infrastructure/redis/redis.service';
-import { randomUUID } from 'crypto';
 import { ConfigService } from '@nestjs/config';
 
 @Injectable()
@@ -17,8 +16,7 @@ export class RedisRegisterRepository implements IRegisterRepository {
     this.ttl = Number(this.config.getOrThrow('TTL_CACHE'));
   }
 
-  async save(userId: UserId): Promise<void> {
-    const uuid = randomUUID();
+  async save(userId: UserId, uuid: string): Promise<void> {
     const cacheData: IRegisterData = {
       uuid,
       userId: userId.id,

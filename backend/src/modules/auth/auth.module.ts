@@ -26,13 +26,15 @@ import {
   IRefreshTokenPayload,
 } from './application/abstractions/tokenPayload.interface';
 import { ITokenIssuerService } from './application/abstractions/TokenIssuer.interface';
-import { RefreshCommandHandler } from './application/commands/RefreshSession.handler';
+import { RefreshCommandHandler } from './application/commands/refresh-use-case/refreshSession.handler';
 import { CryptoBcryptService } from './infrastructure/services/bycrypt.service';
 import { RedisRegisterRepository } from './infrastructure/repo/redisRegister.repository';
 import { EventEmitterAuthQueue } from './infrastructure/queue/eventEmitter.queue';
 import { AuthDataPrismaRepository } from './infrastructure/repo/authData.repository';
-import { RegisterCommandHandler } from './application/commands/Register.handler';
-import { LoginCommandHandler } from './application/commands/login.handler';
+import { RegisterCommandHandler } from './application/commands/register-use-case/register.handler';
+import { LoginCommandHandler } from './application/commands/login-use-case/login.handler';
+import { RevokeAllSessionCommandHandler } from './application/commands/logoutAll.handler';
+import { LogoutCommandHandler } from './application/commands/logout.handler';
 
 @Module({
   controllers: [AuthController],
@@ -54,10 +56,11 @@ import { LoginCommandHandler } from './application/commands/login.handler';
   providers: [
     RefreshCommandHandler,
     SessionCreationService,
-    AuthService,
     AuthCronDeletion,
     RegisterCommandHandler,
     LoginCommandHandler,
+    RevokeAllSessionCommandHandler,
+    LogoutCommandHandler,
     { provide: HASHER, useClass: Sha256HashService },
     { provide: AUTH_SESSION_REPO, useClass: RedisSessionRepository },
     {
@@ -95,9 +98,8 @@ import { LoginCommandHandler } from './application/commands/login.handler';
     { provide: AUTH_USER_REPO, useClass: AuthDataPrismaRepository },
     {
       provide: REFRESH_TTL,
-      useFactory: (config: ConfigService) => ({
-        ttl: Number(config.getOrThrow('REFRESH_TTL')),
-      }),
+      useFactory: (config: ConfigService) =>
+        Number(config.getOrThrow('REFRESH_TTL')),
       inject: [ConfigService],
     },
   ],

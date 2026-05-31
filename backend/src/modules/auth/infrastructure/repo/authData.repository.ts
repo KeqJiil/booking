@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { IAuthDataRepository } from '../../domain/repository/authData.interface';
 import { AuthUser } from '../../domain/entity/AuthUser';
 import { Email } from '../../domain/VO/emailVo';
@@ -12,11 +12,17 @@ export class AuthDataPrismaRepository implements IAuthDataRepository {
   constructor(private readonly prisma: PrismaService) {}
 
   private toDomain(authUser: IAuthDataPrisma) {
-    const { id, userId, email, passwordHash } = authUser;
+    const { id, userId, email, passwordHash, isEmailVerified } = authUser;
     const authId = new AuthId(id);
     const userTypedId = new UserId(userId);
     const emailVO = Email.create(email);
-    return AuthUser.fromPersist(authId, userTypedId, emailVO, passwordHash);
+    return AuthUser.fromPersist(
+      authId,
+      userTypedId,
+      emailVO,
+      passwordHash,
+      isEmailVerified,
+    );
   }
 
   async save(data: AuthUser): Promise<void> {
@@ -38,21 +44,33 @@ export class AuthDataPrismaRepository implements IAuthDataRepository {
     });
   }
 
-  async getByEmail(emailToFind: Email): Promise<AuthUser> {
+  async getByEmail(emailToFind: Email): Promise<AuthUser | null> {
     const authUser = await this.prisma.authCredential.findUnique({
       where: { email: emailToFind.toString() },
-      select: { userId: true, passwordHash: true, id: true, email: true },
+      select: {
+        userId: true,
+        passwordHash: true,
+        id: true,
+        email: true,
+        isEmailVerified: true,
+      },
     });
-    if (!authUser) throw new NotFoundException('User was not found');
+    if (!authUser) return null;
     return this.toDomain(authUser);
   }
 
-  async getById(id: UserId): Promise<AuthUser> {
+  async getById(id: UserId): Promise<AuthUser | null> {
     const authUser = await this.prisma.authCredential.findUnique({
       where: { id: id.toString() },
-      select: { userId: true, passwordHash: true, id: true, email: true },
+      select: {
+        userId: true,
+        passwordHash: true,
+        id: true,
+        email: true,
+        isEmailVerified: true,
+      },
     });
-    if (!authUser) throw new NotFoundException('User was not found');
+    if (!authUser) return null;
     return this.toDomain(authUser);
   }
 }

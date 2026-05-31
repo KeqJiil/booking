@@ -11,7 +11,6 @@ import { UserService } from './user.service';
 import { Authorization } from 'src/common/decorators/authorization.decorator';
 import { UserSettingsDto } from './dto/settings.dto';
 import { AccessInfo } from 'src/common/decorators/accessInfo.decorator';
-import { ChangePasswordDto } from './dto/password.dto';
 import type { Roles } from 'src/common/constants/roleLevels';
 import { ApiTags } from '@nestjs/swagger';
 
@@ -42,16 +41,6 @@ export class UserController {
   @Patch(':id/role')
   async changeRole(@Param('id') userId: string, @Body() role: { role: Roles }) {
     return await this.userService.changeRole(userId, role.role);
-  }
-
-  @Authorization('USER')
-  @HttpCode(200)
-  @Patch('change-password')
-  async changePassword(
-    @Body() { password, newPassword }: ChangePasswordDto,
-    @AccessInfo('id') id: string,
-  ) {
-    return await this.userService.changePassword(id, password, newPassword);
   }
 
   @Authorization('USER')
