@@ -127,7 +127,7 @@ export class AuthService {
     await this.createSession(user.id, tokens.refreshToken, sessionId);
 
     return tokens;
-  }
+  } //
 
   public async register(data: RegisterDto) {
     const password = await bcrypt.hash(data.password, this.SALT_ROUNDS);

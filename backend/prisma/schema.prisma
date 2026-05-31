@@ -15,15 +15,13 @@ model User {
   id String @id @default(uuid())
 
   name             String
-  email            String  @unique
   role             Roles   @default(USER)
   paymentAccountId String? @map("payment_account_id")
   avatarUrl        String? @map("avatar_url")
 
-  status LiveStatus @default(ALIVE)
+  status LiveStatus @default(NOT_CONFIRMED)
 
-  password String?
-
+  authCredentials AuthCredential?
   chatUsers       ChatUser[]
   properties      Property[]
   bookings        Booking[]
@@ -34,6 +32,19 @@ model User {
   payments        Payment[]
 
   userSettings UserSettings?
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt() @map("updated_at")
+}
+
+model AuthCredential {
+  id String @id @default(uuid())
+
+  userId String @unique
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  passwordHash String @map("password_hash")
+  email        String @unique
 
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt() @map("updated_at")

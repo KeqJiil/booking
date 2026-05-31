@@ -14,16 +14,13 @@ import { SessionRepository } from '../../domain/repository/sessionRepository.int
 export class RedisSessionRepository implements SessionRepository {
   constructor(@Inject(REDIS) private readonly redis: RedisService) {}
 
-  async save(session: Session, ttl?: number): Promise<void> {
+  async save(session: Session): Promise<void> {
     const rawSession = SessionMapper.toPersist(session);
     const sessionName = `session:${rawSession.id}`;
     const cacheUser = `user:session:${rawSession.userId}`;
+    const ex = rawSession.expiresAt - Date.now() / 1000;
     const tx = this.redis.raw().multi();
-    if (ttl !== undefined) {
-      tx.set(sessionName, JSON.stringify(rawSession), 'EX', ttl);
-    } else {
-      tx.set(sessionName, JSON.stringify(rawSession));
-    }
+    tx.set(sessionName, JSON.stringify(rawSession), 'EX', ex);
     tx.sadd(cacheUser, rawSession.id);
     await tx.exec();
   }

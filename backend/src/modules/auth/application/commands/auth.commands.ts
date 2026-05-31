@@ -4,10 +4,7 @@ import { LoginDto } from '../dto/login.dto';
 import { RegisterDto } from '../dto/register.dto';
 
 export class LoginCommand extends Command<ITokens> {
-  constructor(
-    public readonly data: LoginDto,
-    public readonly ip: string,
-  ) {
+  constructor(public readonly data: LoginDto) {
     super();
   }
 }

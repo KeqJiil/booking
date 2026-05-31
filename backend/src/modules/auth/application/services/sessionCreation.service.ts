@@ -23,12 +23,15 @@ export class SessionCreationService {
     ttl: number,
   ) {
     const hashed = this.hasher.hash(refresh);
-    const session = Session.create({
-      id,
-      userId,
-      refreshHash: hashed,
-      ttlMs: ttl,
-    });
+    const session = Session.create(
+      {
+        id,
+        userId,
+        refreshHash: hashed,
+        ttlMs: ttl,
+      },
+      Date.now(),
+    );
     await this.sessionRepo.save(session);
   }
 }

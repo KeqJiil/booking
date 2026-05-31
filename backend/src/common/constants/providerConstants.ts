@@ -10,3 +10,6 @@ export const TOKEN_ISSUER_ACCESS = Symbol('TOKEN_ISSUER_ACCESS');
 export const AUTH_CRYPTOR = Symbol('AUTH_CRYPTOR');
 export const AUTH_REGISTER_REPO = Symbol('AUTH_REGISTER_REPO');
 export const AUTH_QUEUE = Symbol('AUTH_QUEUE');
+export const AUTH_USER_REPO = Symbol('AUTH_USER_REPO');
+export const REFRESH_TTL = Symbol('REFRESH_TTL');
+

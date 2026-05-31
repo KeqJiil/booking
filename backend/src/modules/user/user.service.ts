@@ -12,6 +12,7 @@ import { eventNames } from 'src/common/constants/eventnames';
 import { Logger } from 'nestjs-pino';
 import { IUserCreate } from './types';
 import { Tx } from 'src/infrastructure/repo/transactions/interfaces/TransactionRepo.interface';
+import { UserId } from '../auth/domain/typedId/user.id';
 
 @Injectable()
 export class UserService {
@@ -65,6 +66,17 @@ export class UserService {
     return await this.prisma.userSettings.findUnique({
       where: { userId },
     });
+  }
+
+  async getRole(userId: UserId) {
+    const role = await this.prisma.user.findUnique({
+      where: {
+        id: userId.toString(),
+      },
+      select: { role: true },
+    });
+    if (!role) throw new NotFoundException();
+    return role;
   }
 
   async changeSettings(userId: string, settings: UserSettingsDto) {

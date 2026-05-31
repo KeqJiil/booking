@@ -17,7 +17,11 @@ import { ApiTags } from '@nestjs/swagger';
 import { ForgotPasswordDto } from './application/dto/forgotPassword.dto';
 import { ForgotNewPasswordDto } from './application/dto/newPassword.dto';
 import { CommandBus } from '@nestjs/cqrs';
-import { RefreshCommand } from './application/commands/auth.commands';
+import {
+  LoginCommand,
+  RefreshCommand,
+  RegisterCommand,
+} from './application/commands/auth.commands';
 
 @ApiTags('Auth')
 @Controller('auth')
@@ -54,18 +58,17 @@ export class AuthController {
     @Req() req: Request,
     @Res({ passthrough: true }) res: Response,
   ) {
-    const { accessToken, refreshToken } = await this.authService.login(
-      data,
-      req.ip!,
+    const { access, refresh } = await this.commandBus.execute(
+      new LoginCommand(data),
     );
-    res.cookie('refreshtoken', refreshToken, this.refreshConfig);
-    return accessToken;
+    res.cookie('refreshtoken', refresh, this.refreshConfig);
+    return access;
   }
 
   @Post('register')
   @HttpCode(201)
   async register(@Body() data: RegisterDto) {
-    await this.authService.register(data);
+    await this.commandBus.execute(new RegisterCommand(data));
   }
 
   @Get('verify/:id')
