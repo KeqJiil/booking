@@ -7,3 +7,6 @@ export const STRIPE_PAYMENT_CLIENT = Symbol('STRIPE_PAYMENT_CLIENT');
 export const HASHER = Symbol('HASHER');
 export const TOKEN_ISSUER_REFRESH = Symbol('TOKEN_ISSUER_REFRESH');
 export const TOKEN_ISSUER_ACCESS = Symbol('TOKEN_ISSUER_ACCESS');
+export const AUTH_CRYPTOR = Symbol('AUTH_CRYPTOR');
+export const AUTH_REGISTER_REPO = Symbol('AUTH_REGISTER_REPO');
+export const AUTH_QUEUE = Symbol('AUTH_QUEUE');

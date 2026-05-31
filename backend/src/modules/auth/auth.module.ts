@@ -8,6 +8,9 @@ import { UserModule } from '../user/user.module';
 import { AuthCronDeletion } from './infrastructure/cron/auth.cron';
 import { RedisSessionRepository } from './infrastructure/repo/redisSesion.repository';
 import {
+  AUTH_CRYPTOR,
+  AUTH_QUEUE,
+  AUTH_REGISTER_REPO,
   AUTH_SESSION_REPO,
   HASHER,
   TOKEN_ISSUER_ACCESS,
@@ -22,6 +25,9 @@ import {
 } from './application/abstractions/tokenPayload.interface';
 import { ITokenIssuerService } from './application/abstractions/TokenIssuer.interface';
 import { RefreshCommandHandler } from './application/commands/RefreshSession.handler';
+import { CryptoBcryptService } from './infrastructure/services/bycrypt.service';
+import { RedisRegisterRepository } from './infrastructure/repo/redisRegister.repository';
+import { EventEmitterAuthQueue } from './infrastructure/queue/eventEmitter.queue';
 
 @Module({
   controllers: [AuthController],
@@ -71,6 +77,14 @@ import { RefreshCommandHandler } from './application/commands/RefreshSession.han
         ),
       inject: [JwtService, ConfigService],
     },
+    {
+      provide: AUTH_CRYPTOR,
+      useFactory: (config: ConfigService): CryptoBcryptService =>
+        new CryptoBcryptService(Number(config.getOrThrow('SALT_ROUNDS'))),
+      inject: [ConfigService],
+    },
+    { provide: AUTH_REGISTER_REPO, useClass: RedisRegisterRepository },
+    { provide: AUTH_QUEUE, useClass: EventEmitterAuthQueue },
   ],
   exports: [AuthService],
 })

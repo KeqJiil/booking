@@ -1,6 +1,8 @@
 import { JwtService, JwtSignOptions } from '@nestjs/jwt';
 import { ITokenIssuerService } from '../../application/abstractions/TokenIssuer.interface';
+import { Injectable } from '@nestjs/common';
 
+@Injectable()
 export class JwtIssuerService<
   T extends object,
 > implements ITokenIssuerService<T> {

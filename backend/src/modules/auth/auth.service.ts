@@ -149,7 +149,7 @@ export class AuthService {
       userId: newUser.id,
     };
     this.eventEmitter.emit(eventNames.accound_need_confirmation, queueData);
-  }
+  } //
 
   public async refreshTokens(refreshToken: string) {
     const payload = await this.jwt.verifyAsync<IPayload>(refreshToken);
