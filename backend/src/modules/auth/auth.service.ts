@@ -13,7 +13,7 @@ import { RegisterDto } from './application/dto/register.dto';
 import { LoginDto } from './application/dto/login.dto';
 import * as bcrypt from 'bcrypt';
 import { createHash, randomUUID } from 'crypto';
-import { IPayload, IRegisterData, ISession } from './types';
+import { IPayload, IRegisterData } from './types';
 import { Roles } from 'src/common/constants/roleLevels';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { eventNames } from 'src/common/constants/eventnames';
@@ -68,6 +68,12 @@ export class AuthService {
     };
     const session = Session.create(sessionProps);
     await this.sessionRepo.save(session);
+  }
+
+  private async rotateSession(session: Session, token: string) {
+    const newHash = this.hashToken(token);
+    const newSession = session.rotate(newHash);
+    await this.sessionRepo.save(newSession);
   }
 
   private hashToken(token: string): string {
@@ -164,19 +170,16 @@ export class AuthService {
     const payload = await this.jwt.verifyAsync<IPayload>(refreshToken);
     if (!payload) throw new UnauthorizedException('No payload inside token');
 
-    const cache = await this.cache.get<ISession>(
-      `session:${payload.sessionId}`,
-    );
-    if (!cache || cache.expiresAt < Date.now())
+    const id = new SessionId(payload.sessionId);
+    const session = await this.sessionRepo.findById(id);
+    if (!session || session.isExpired(Date.now()))
       throw new UnauthorizedException('No cache or cache expired');
 
-    const refreshCheck = cache.refresh === this.hashToken(refreshToken);
-    const grace = await this.cache.get<string>(
-      `${payload.sessionId}:grace:${refreshToken}`,
-    );
+    const refreshCheck = session.checkHash(this.hashToken(refreshToken));
+    const grace = await this.sessionRepo.findGrace(refreshToken, id);
     if (!refreshCheck && grace !== refreshToken) {
       this.logger.warn(`Reuse detected ${grace}`);
-      const userId = new UserId(cache.userId);
+      const userId = new UserId(payload.id);
       await this.sessionRepo.deleteAllByUserId(userId);
       throw new UnauthorizedException('Reuse detected');
     }
@@ -192,11 +195,7 @@ export class AuthService {
     );
     const sessionId = new SessionId(payload.sessionId);
     await this.sessionRepo.graceToken(refreshToken, sessionId);
-    await this.createSession(
-      payload.id,
-      tokens.refreshToken,
-      payload.sessionId,
-    );
+    await this.rotateSession(session, tokens.refreshToken);
     return tokens;
   }
 

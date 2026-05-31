@@ -97,6 +97,10 @@ export class Session {
     );
   }
 
+  public checkHash(hash: string) {
+    return this.refreshHash === hash;
+  }
+
   public isInGrace(now: number, tokenHash: string) {
     if (tokenHash !== this.previousRefreshHash || !this.previousRotatedAt) {
       return false;

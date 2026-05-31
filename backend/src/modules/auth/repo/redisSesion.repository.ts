@@ -73,4 +73,8 @@ export class RedisSessionRepository implements SessionRepository {
   ): Promise<void> {
     await this.redis.set(`grace:${sessionId.id}:${token}`, token, ttl);
   }
+
+  async findGrace(token: string, sessionId: SessionId): Promise<string | null> {
+    return await this.redis.get(`grace:${sessionId.id}:${token}`);
+  }
 }

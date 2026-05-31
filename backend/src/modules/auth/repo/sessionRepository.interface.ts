@@ -9,4 +9,5 @@ export interface SessionRepository {
   delete(id: SessionId, userId: UserId): Promise<void>;
   deleteAllByUserId(userId: UserId): Promise<number>;
   graceToken(token: string, sessionId: SessionId, ttl?: number): Promise<void>;
+  findGrace(token: string, sessionId: SessionId): Promise<string | null>;
 }
