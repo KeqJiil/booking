@@ -26,11 +26,14 @@ import {
   IWelcomeData,
 } from 'src/infrastructure/bullmq/proccessors/auth/interfaces/IForgotPasswordData.interface';
 import { ConfigService } from '@nestjs/config';
-import { AUTH_REDIS_REPO, REDIS } from 'src/common/constants/providerConstants';
-import type { SessionRepository } from './repo/sessionRepository.interface';
+import {
+  AUTH_SESSION_REPO,
+  REDIS,
+} from 'src/common/constants/providerConstants';
+import type { SessionRepository } from './infrastructure/repo/sessionRepository.interface';
 import { SessionId } from './domain/typedId/session.id';
 import { UserId } from './domain/typedId/user.id';
-import { ISessionCreate, Session } from './domain/session.entity';
+import { ISessionCreate, Session } from './domain/entity/session.entity';
 
 @Injectable()
 export class AuthService {
@@ -45,7 +48,7 @@ export class AuthService {
     private readonly logger: Logger,
     private readonly userService: UserService,
     private readonly config: ConfigService,
-    @Inject(AUTH_REDIS_REPO) private readonly sessionRepo: SessionRepository,
+    @Inject(AUTH_SESSION_REPO) private readonly sessionRepo: SessionRepository,
   ) {
     this.TTL = Number(config.getOrThrow('TTL_CACHE'));
     this.RESET_TTL = Number(config.getOrThrow('TTL_RESET'));
@@ -68,7 +71,7 @@ export class AuthService {
     };
     const session = Session.create(sessionProps);
     await this.sessionRepo.save(session);
-  }
+  } //
 
   private async rotateSession(session: Session, token: string) {
     const newHash = this.hashToken(token);
@@ -78,7 +81,7 @@ export class AuthService {
 
   private hashToken(token: string): string {
     return createHash('sha256').update(token).digest('hex');
-  }
+  } //
 
   private async signTokens(id: string, role: Roles, sessionId: string) {
     const accessToken = await this.jwt.signAsync(
@@ -90,28 +93,10 @@ export class AuthService {
       { expiresIn: this.config.getOrThrow('REFRESH_TTL') },
     );
     return { accessToken, refreshToken };
-  }
-
-  public async validateUser(userId: string) {
-    const user = await this.prisma.user.findUnique({
-      where: { id: userId },
-    });
-    if (!user) throw new UnauthorizedException();
-    return user;
-  }
+  } //
 
   public async login(data: LoginDto, ip: string) {
-    const user = await this.prisma.user.findUnique({
-      where: {
-        email: data.email,
-      },
-      select: {
-        password: true,
-        role: true,
-        id: true,
-        status: true,
-      },
-    });
+    const user = await this.userService.getUserByEmail(data.email);
 
     if (!user || user.status !== 'ALIVE') throw new UnauthorizedException();
 
@@ -175,10 +160,10 @@ export class AuthService {
     if (!session || session.isExpired(Date.now()))
       throw new UnauthorizedException('No cache or cache expired');
 
-    const refreshCheck = session.checkHash(this.hashToken(refreshToken));
-    const grace = await this.sessionRepo.findGrace(refreshToken, id);
-    if (!refreshCheck && grace !== refreshToken) {
-      this.logger.warn(`Reuse detected ${grace}`);
+    const hashed = this.hashToken(refreshToken);
+    const refreshCheck = session.checkHash(hashed);
+    if (!refreshCheck && !session.isInGrace(Date.now(), hashed)) {
+      this.logger.warn(`Reuse detected`);
       const userId = new UserId(payload.id);
       await this.sessionRepo.deleteAllByUserId(userId);
       throw new UnauthorizedException('Reuse detected');
@@ -193,8 +178,6 @@ export class AuthService {
       user.role,
       payload.sessionId,
     );
-    const sessionId = new SessionId(payload.sessionId);
-    await this.sessionRepo.graceToken(refreshToken, sessionId);
     await this.rotateSession(session, tokens.refreshToken);
     return tokens;
   }

@@ -2,7 +2,7 @@ import {
   ISessionFromPersistence,
   Session,
   type SessionPersistence,
-} from '../../domain/session.entity';
+} from '../../domain/entity/session.entity';
 import { SessionId } from '../../domain/typedId/session.id';
 import { UserId } from '../../domain/typedId/user.id';
 

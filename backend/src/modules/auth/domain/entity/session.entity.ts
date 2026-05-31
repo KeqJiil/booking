@@ -1,5 +1,5 @@
-import { SessionId } from './typedId/session.id';
-import { UserId } from './typedId/user.id';
+import { SessionId } from '../typedId/session.id';
+import { UserId } from '../typedId/user.id';
 
 export interface ISessionCreate {
   id: SessionId;
@@ -48,8 +48,7 @@ export class Session {
     return this.userId.id;
   }
 
-  static create(props: ISessionCreate) {
-    const now = Date.now();
+  static create(props: ISessionCreate, now: number) {
     return new Session(
       props.id,
       props.userId,

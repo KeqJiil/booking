@@ -1,11 +1,14 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { RedisService } from 'src/infrastructure/redis/redis.service';
-import { SessionRepository } from './sessionRepository.interface';
-import { Session, SessionPersistence } from '../domain/session.entity';
-import { SessionMapper } from '../application/mapper/session.mapper';
-import { UserId } from '../domain/typedId/user.id';
-import { SessionId } from '../domain/typedId/session.id';
+import {
+  Session,
+  SessionPersistence,
+} from '../../domain/entity/session.entity';
+import { SessionMapper } from '../../application/mapper/session.mapper';
+import { UserId } from '../../domain/typedId/user.id';
+import { SessionId } from '../../domain/typedId/session.id';
 import { REDIS } from 'src/common/constants/providerConstants';
+import { SessionRepository } from '../../domain/repository/sessionRepository.interface';
 
 @Injectable()
 export class RedisSessionRepository implements SessionRepository {
@@ -64,17 +67,5 @@ export class RedisSessionRepository implements SessionRepository {
     tx.del(`user:session:${userId.id}`);
     await tx.exec();
     return sessions.length;
-  }
-
-  async graceToken(
-    token: string,
-    sessionId: SessionId,
-    ttl?: number,
-  ): Promise<void> {
-    await this.redis.set(`grace:${sessionId.id}:${token}`, token, ttl);
-  }
-
-  async findGrace(token: string, sessionId: SessionId): Promise<string | null> {
-    return await this.redis.get(`grace:${sessionId.id}:${token}`);
   }
 }

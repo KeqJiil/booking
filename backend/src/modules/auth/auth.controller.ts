@@ -16,6 +16,8 @@ import type { Request, Response } from 'express';
 import { ApiTags } from '@nestjs/swagger';
 import { ForgotPasswordDto } from './application/dto/forgotPassword.dto';
 import { ForgotNewPasswordDto } from './application/dto/newPassword.dto';
+import { CommandBus } from '@nestjs/cqrs';
+import { RefreshCommand } from './application/commands/auth.commands';
 
 @ApiTags('Auth')
 @Controller('auth')
@@ -27,7 +29,10 @@ export class AuthController {
     path: '/auth',
     maxAge: 7 * 24 * 60 * 60 * 1000,
   } as const;
-  constructor(private readonly authService: AuthService) {}
+  constructor(
+    private readonly authService: AuthService,
+    private readonly commandBus: CommandBus,
+  ) {}
 
   @Post('refresh')
   @HttpCode(201)
@@ -35,10 +40,11 @@ export class AuthController {
     @Cookies('refreshtoken') token: string,
     @Res({ passthrough: true }) res: Response,
   ) {
-    const { accessToken, refreshToken } =
-      await this.authService.refreshTokens(token);
-    res.cookie('refreshtoken', refreshToken, this.refreshConfig);
-    return accessToken;
+    const { access, refresh } = await this.commandBus.execute(
+      new RefreshCommand(token),
+    );
+    res.cookie('refreshtoken', refresh, this.refreshConfig);
+    return access;
   }
 
   @Post('login')

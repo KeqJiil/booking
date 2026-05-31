@@ -1,12 +1,5 @@
 import { Roles } from 'src/common/constants/roleLevels';
 
-export interface ISession {
-  userId: string;
-  refresh: string;
-  createdAt: number;
-  expiresAt: number;
-}
-
 export interface IPayload {
   id: string;
   sessionId: string;
@@ -21,4 +14,9 @@ export interface IJwtAccess {
 export interface IRegisterData {
   uuid: string;
   userId: string;
+}
+
+export interface ITokens {
+  refresh: string;
+  access: string;
 }
