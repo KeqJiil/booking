@@ -3,6 +3,7 @@ import { UserId } from '../typedId/user.id';
 import { Email } from '../VO/emailVo';
 import { UserCreatedEvent } from '../events/authUser.events';
 import { AuthId } from '../typedId/auth.id';
+import { NotAllowedError } from 'src/common/exceptions/entityDomain.exceptions';
 
 export class AuthUser extends AggregateRoot {
   private constructor(
@@ -10,7 +11,7 @@ export class AuthUser extends AggregateRoot {
     private readonly _userId: UserId,
     private _email: Email,
     private hashedPassword: string,
-    private verified: boolean,
+    private isVerified: boolean,
   ) {
     super();
   }
@@ -35,6 +36,11 @@ export class AuthUser extends AggregateRoot {
     this.hashedPassword = newPassword;
   }
 
+  verify() {
+    if (this.isVerified) throw new NotAllowedError('You are already verified');
+    this.isVerified = true;
+  }
+
   toPersist() {
     return {
       id: this._id.toString(),
@@ -45,7 +51,7 @@ export class AuthUser extends AggregateRoot {
   }
 
   isActivated() {
-    return this.verified;
+    return this.isVerified;
   }
 
   get password() {

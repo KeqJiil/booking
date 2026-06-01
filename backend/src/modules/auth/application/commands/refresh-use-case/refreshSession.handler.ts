@@ -1,6 +1,6 @@
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { RefreshCommand } from '../auth.commands';
-import { ITokens } from '../../../types';
+import { ITokens } from '../../abstractions/types';
 import { Inject, UnauthorizedException } from '@nestjs/common';
 import {
   AUTH_SESSION_REPO,

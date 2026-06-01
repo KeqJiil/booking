@@ -3,6 +3,7 @@ import type { SessionRepository } from '../../domain/repository/sessionRepositor
 import {
   AUTH_SESSION_REPO,
   HASHER,
+  REFRESH_TTL,
 } from 'src/common/constants/providerConstants';
 import type { IHasherService } from '../abstractions/hashed.interface';
 import { SessionId } from '../../domain/typedId/session.id';
@@ -14,21 +15,17 @@ export class SessionCreationService {
   constructor(
     @Inject(AUTH_SESSION_REPO) private readonly sessionRepo: SessionRepository,
     @Inject(HASHER) private readonly hasher: IHasherService,
+    @Inject(REFRESH_TTL) private readonly ttl: number,
   ) {}
 
-  async createSession(
-    userId: UserId,
-    refresh: string,
-    id: SessionId,
-    ttl: number,
-  ) {
+  async createSession(userId: UserId, refresh: string, id: SessionId) {
     const hashed = this.hasher.hash(refresh);
     const session = Session.create(
       {
         id,
         userId,
         refreshHash: hashed,
-        ttlMs: ttl,
+        ttlMs: this.ttl,
       },
       Date.now(),
     );

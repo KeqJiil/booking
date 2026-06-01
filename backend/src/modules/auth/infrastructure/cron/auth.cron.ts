@@ -13,9 +13,9 @@ export class AuthCronDeletion {
   @Cron('*/10 * * * *')
   async handleCompletedBookings() {
     this.logger.log('Auth cron');
-    await this.prisma.user.deleteMany({
+    await this.prisma.authCredential.deleteMany({
       where: {
-        status: 'NOT_CONFIRMED',
+        isEmailVerified: false,
         createdAt: {
           lte: new Date(Date.now() - 15 * 60 * 1000),
         },

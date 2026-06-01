@@ -1,8 +1,7 @@
 import { Command } from '@nestjs/cqrs';
-import { ITokens } from '../../types';
+import { ITokens } from '../abstractions/types';
 import { LoginDto } from '../dto/login.dto';
 import { RegisterDto } from '../dto/register.dto';
-import { UserId } from '../../domain/typedId/user.id';
 
 export class LoginCommand extends Command<ITokens> {
   constructor(public readonly data: LoginDto) {
@@ -28,7 +27,7 @@ export class ForgotPasswordCommand extends Command<void> {
   }
 }
 
-export class VerifyAccoundCommand extends Command<ITokens> {
+export class VerifyAccountCommand extends Command<void> {
   constructor(public readonly uuid: string) {
     super();
   }
@@ -57,7 +56,7 @@ export class RevokeAllSessionsCommand extends Command<void> {
 
 export class ChangePasswordCommand extends Command<void> {
   constructor(
-    public readonly userId: UserId,
+    public readonly userId: string,
     public readonly oldPassword: string,
     public readonly newPassword: string,
   ) {

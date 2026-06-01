@@ -105,28 +105,6 @@ export class UserService {
     });
   }
 
-  async changePassword(userId: string, password: string, newPassword: string) {
-    const user = await this.prisma.user.findUnique({
-      where: { id: userId },
-      select: { password: true },
-    });
-    if (!user) throw new NotFoundException();
-    const isMatch = await bcrypt.compare(password, user.password!);
-    if (!isMatch) throw new UnauthorizedException();
-    const newHashedPassword = await bcrypt.hash(newPassword, 10);
-    const updatedUser = await this.prisma.user.update({
-      where: { id: userId },
-      data: { password: newHashedPassword },
-    });
-
-    this.eventEmmiter.emit(eventNames.password_changed, {
-      ...updatedUser,
-      userId: updatedUser.id,
-    });
-
-    return updatedUser;
-  }
-
   async deleteUser(userId: string) {
     const user = await this.prisma.user.update({
       where: {

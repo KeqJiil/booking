@@ -1,4 +1,4 @@
-import { IRegisterData } from '../../types';
+import { IRegisterData } from '../../application/abstractions/types';
 import { UserId } from '../typedId/user.id';
 
 export interface IRegisterRepository {

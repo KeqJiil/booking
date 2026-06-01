@@ -12,4 +12,5 @@ export const AUTH_REGISTER_REPO = Symbol('AUTH_REGISTER_REPO');
 export const AUTH_QUEUE = Symbol('AUTH_QUEUE');
 export const AUTH_USER_REPO = Symbol('AUTH_USER_REPO');
 export const REFRESH_TTL = Symbol('REFRESH_TTL');
-
+export const EMAIL_FORGOT_PASSWORD_TTL = Symbol('EMAIL_FORGOT_PASSWORD_TTL');
+export const AUTH_EMAIL_FORGOT_REPO = Symbol('AUTH_EMAIL_FORGOT_REPO');

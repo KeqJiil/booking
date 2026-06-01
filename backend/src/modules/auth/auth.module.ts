@@ -2,17 +2,18 @@ import { Module } from '@nestjs/common';
 import { AuthController } from './auth.controller';
 import { JwtModule, JwtService } from '@nestjs/jwt';
 import { ConfigModule, ConfigService } from '@nestjs/config';
-import { AuthService } from './auth.service';
 import { PrismaModule } from 'src/database/prisma.module';
 import { UserModule } from '../user/user.module';
 import { AuthCronDeletion } from './infrastructure/cron/auth.cron';
 import { RedisSessionRepository } from './infrastructure/repo/redisSesion.repository';
 import {
   AUTH_CRYPTOR,
+  AUTH_EMAIL_FORGOT_REPO,
   AUTH_QUEUE,
   AUTH_REGISTER_REPO,
   AUTH_SESSION_REPO,
   AUTH_USER_REPO,
+  EMAIL_FORGOT_PASSWORD_TTL,
   HASHER,
   REFRESH_TTL,
   TOKEN_ISSUER_ACCESS,
@@ -33,8 +34,11 @@ import { EventEmitterAuthQueue } from './infrastructure/queue/eventEmitter.queue
 import { AuthDataPrismaRepository } from './infrastructure/repo/authData.repository';
 import { RegisterCommandHandler } from './application/commands/register-use-case/register.handler';
 import { LoginCommandHandler } from './application/commands/login-use-case/login.handler';
-import { RevokeAllSessionCommandHandler } from './application/commands/logoutAll.handler';
-import { LogoutCommandHandler } from './application/commands/logout.handler';
+import { RevokeAllSessionCommandHandler } from './application/commands/revoke-all-use-case/logoutAll.handler';
+import { LogoutCommandHandler } from './application/commands/logout-use-case/logout.handler';
+import { ForgotPasswordEmailRepository } from './infrastructure/repo/forgotPasswordEmail.repository';
+import { ChangePasswordCommandHandler } from './application/commands/change-password-use-case/changePassword.handler';
+import { ForgotPasswordCommandHandler } from './application/commands/forgot-password-use-case/forgotPassword.handler';
 
 @Module({
   controllers: [AuthController],
@@ -61,6 +65,8 @@ import { LogoutCommandHandler } from './application/commands/logout.handler';
     LoginCommandHandler,
     RevokeAllSessionCommandHandler,
     LogoutCommandHandler,
+    ChangePasswordCommandHandler,
+    ForgotPasswordCommandHandler,
     { provide: HASHER, useClass: Sha256HashService },
     { provide: AUTH_SESSION_REPO, useClass: RedisSessionRepository },
     {
@@ -97,12 +103,21 @@ import { LogoutCommandHandler } from './application/commands/logout.handler';
     { provide: AUTH_QUEUE, useClass: EventEmitterAuthQueue },
     { provide: AUTH_USER_REPO, useClass: AuthDataPrismaRepository },
     {
+      provide: AUTH_EMAIL_FORGOT_REPO,
+      useClass: ForgotPasswordEmailRepository,
+    },
+    {
       provide: REFRESH_TTL,
       useFactory: (config: ConfigService) =>
         Number(config.getOrThrow('REFRESH_TTL')),
       inject: [ConfigService],
     },
+    {
+      provide: EMAIL_FORGOT_PASSWORD_TTL,
+      useFactory: (config: ConfigService) =>
+        Number(config.getOrThrow('CACHE_TTL')),
+      inject: [ConfigService],
+    },
   ],
-  exports: [AuthService],
 })
 export class AuthModule {}

@@ -1,4 +1,5 @@
 import { Roles } from 'src/common/constants/roleLevels';
+import { UserId } from '../../domain/typedId/user.id';
 
 export interface IPayload {
   id: string;
@@ -13,7 +14,7 @@ export interface IJwtAccess {
 
 export interface IRegisterData {
   uuid: string;
-  userId: string;
+  userId: UserId;
 }
 
 export interface ITokens {

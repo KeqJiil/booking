@@ -1,7 +1,7 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { IRegisterRepository } from '../../domain/repository/registerFlow.interface';
 import { UserId } from '../../domain/typedId/user.id';
-import { IRegisterData } from '../../types';
+import { IRegisterData } from '../../application/abstractions/types';
 import { REDIS } from 'src/common/constants/providerConstants';
 import { RedisService } from 'src/infrastructure/redis/redis.service';
 import { ConfigService } from '@nestjs/config';

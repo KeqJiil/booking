@@ -1,12 +1,11 @@
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { LoginCommand } from '../auth.commands';
-import { ITokens } from '../../../types';
+import { ITokens } from '../../abstractions/types';
 import type { IAuthDataRepository } from '../../../domain/repository/authData.interface';
 import { Inject, NotFoundException } from '@nestjs/common';
 import {
   AUTH_CRYPTOR,
   AUTH_USER_REPO,
-  REFRESH_TTL,
   TOKEN_ISSUER_ACCESS,
   TOKEN_ISSUER_REFRESH,
 } from 'src/common/constants/providerConstants';
@@ -33,7 +32,6 @@ export class LoginCommandHandler implements ICommandHandler<LoginCommand> {
     @Inject(TOKEN_ISSUER_ACCESS)
     private readonly tokenIssuerAccess: ITokenIssuerService<IAccessTokenPayload>,
     private readonly userService: UserService,
-    @Inject(REFRESH_TTL) private readonly ttl: number,
   ) {}
 
   async execute(command: LoginCommand): Promise<ITokens> {
@@ -60,7 +58,6 @@ export class LoginCommandHandler implements ICommandHandler<LoginCommand> {
       authUser.userId,
       refresh,
       sessionId,
-      this.ttl,
     );
     return {
       access,
