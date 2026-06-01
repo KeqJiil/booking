@@ -28,7 +28,10 @@ export class ForgotChangePasswordCommandHandler implements ICommandHandler<Forgo
     if (!data) throw new BadRequestException();
     const newHashed = await this.cryptor.crypto(command.password);
     const authUser = await this.authUserRepo.getById(data.userId);
-    if (!authUser) throw new BadRequestException();
+    if (!authUser) {
+      await this.emailForgotRepo.deleteKey(command.uuid);
+      throw new BadRequestException();
+    }
     authUser.changePassword(newHashed);
     await this.authUserRepo.save(authUser);
     await this.emailForgotRepo.deleteKey(command.uuid);

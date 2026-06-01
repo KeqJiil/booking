@@ -47,6 +47,7 @@ export class AuthUser extends AggregateRoot {
       userId: this._userId.toString(),
       email: this._email.toString(),
       password: this.hashedPassword,
+      isVerified: this.isVerified,
     };
   }
 

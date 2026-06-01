@@ -6,7 +6,7 @@ import {
   AUTH_QUEUE,
   AUTH_USER_REPO,
 } from 'src/common/constants/providerConstants';
-import { BadRequestException, Inject } from '@nestjs/common';
+import { Inject } from '@nestjs/common';
 import { IForgotPasswordPayload } from '../../abstractions/forgotPasswordPayload.interface';
 import type { IEmailInteractRepository } from 'src/modules/auth/domain/repository/emailInteract.interface';
 import type { IAuthDataRepository } from 'src/modules/auth/domain/repository/authData.interface';
@@ -27,7 +27,7 @@ export class ForgotPasswordCommandHandler implements ICommandHandler<ForgotPassw
     const uuid = randomUUID();
     const email = Email.create(command.email);
     const authUser = await this.authUserRepo.getByEmail(email);
-    if (!authUser) throw new BadRequestException();
+    if (!authUser) return;
     const data: IForgotPasswordPayload = {
       uuid,
       userId: authUser.userId,

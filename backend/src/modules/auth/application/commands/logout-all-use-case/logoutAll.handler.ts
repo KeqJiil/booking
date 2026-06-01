@@ -9,6 +9,7 @@ import type { SessionRepository } from '../../../domain/repository/sessionReposi
 import type { ITokenIssuerService } from '../../abstractions/TokenIssuer.interface';
 import type { IRefreshTokenPayload } from '../../abstractions/tokenPayload.interface';
 import { UserId } from '../../../domain/typedId/user.id';
+import { TokenExpiredError } from '@nestjs/jwt';
 
 @CommandHandler(RevokeAllSessionsCommand)
 export class RevokeAllSessionCommandHandler implements ICommandHandler<RevokeAllSessionsCommand> {
@@ -19,7 +20,16 @@ export class RevokeAllSessionCommandHandler implements ICommandHandler<RevokeAll
   ) {}
 
   async execute(command: RevokeAllSessionsCommand): Promise<void> {
-    const payload = await this.refreshIssuer.verify(command.refreshToken);
+    let payload: IRefreshTokenPayload | null = null;
+    try {
+      payload = await this.refreshIssuer.verify(command.refreshToken);
+    } catch (err) {
+      if (err instanceof TokenExpiredError) {
+        payload = await this.refreshIssuer.getData(command.refreshToken);
+      } else {
+        throw new UnauthorizedException();
+      }
+    }
     if (!payload) throw new UnauthorizedException('No payload inside token');
     if (payload.userId) {
       const userId = new UserId(payload.userId);

@@ -62,7 +62,7 @@ export class RefreshCommandHandler implements ICommandHandler<RefreshCommand> {
       sessionId,
     });
     const newHash = this.hasher.hash(refresh);
-    const newSession = session.rotate(newHash);
+    const newSession = session.rotate(newHash, Date.now());
     await this.sessionRepo.save(newSession);
     return { access, refresh };
   }

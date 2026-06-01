@@ -84,13 +84,13 @@ export class Session {
     };
   }
 
-  public rotate(newHash: string) {
+  public rotate(newHash: string, now: number) {
     return new Session(
       this.id,
       this.userId,
       newHash,
       this.refreshHash,
-      Date.now(),
+      now,
       this.createdAt,
       this.expiresAt,
     );

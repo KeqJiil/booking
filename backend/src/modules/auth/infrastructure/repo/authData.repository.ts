@@ -5,7 +5,7 @@ import { Email } from '../../domain/VO/emailVo';
 import { UserId } from '../../domain/typedId/user.id';
 import { PrismaService } from 'src/database/prisma.service';
 import { AuthId } from '../../domain/typedId/auth.id';
-import { IAuthDataPrisma } from './AuthDataPrisma.types';
+import { IAuthDataPrisma } from './authDataPrisma.types';
 
 @Injectable()
 export class AuthDataPrismaRepository implements IAuthDataRepository {
@@ -26,7 +26,7 @@ export class AuthDataPrismaRepository implements IAuthDataRepository {
   }
 
   async save(data: AuthUser): Promise<void> {
-    const { id, userId, email, password } = data.toPersist();
+    const { id, userId, email, password, isVerified } = data.toPersist();
     await this.prisma.authCredential.upsert({
       where: {
         id,
@@ -34,6 +34,7 @@ export class AuthDataPrismaRepository implements IAuthDataRepository {
       update: {
         email,
         passwordHash: password,
+        isEmailVerified: isVerified,
       },
       create: {
         id,

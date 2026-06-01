@@ -9,6 +9,7 @@ import type { IHasherService } from '../abstractions/hashed.interface';
 import { SessionId } from '../../domain/typedId/session.id';
 import { UserId } from '../../domain/typedId/user.id';
 import { Session } from '../../domain/entity/session.entity';
+import { Logger } from 'nestjs-pino';
 
 @Injectable()
 export class SessionCreationService {
@@ -16,6 +17,7 @@ export class SessionCreationService {
     @Inject(AUTH_SESSION_REPO) private readonly sessionRepo: SessionRepository,
     @Inject(HASHER) private readonly hasher: IHasherService,
     @Inject(REFRESH_TTL) private readonly ttl: number,
+    private readonly logger: Logger,
   ) {}
 
   async createSession(userId: UserId, refresh: string, id: SessionId) {
@@ -30,5 +32,6 @@ export class SessionCreationService {
       Date.now(),
     );
     await this.sessionRepo.save(session);
+    this.logger.log(`New session for ${userId.toString()} was created`);
   }
 }

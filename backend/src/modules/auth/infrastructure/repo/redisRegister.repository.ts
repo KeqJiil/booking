@@ -19,7 +19,7 @@ export class RedisRegisterRepository implements IRegisterRepository {
   async save(userId: UserId, uuid: string): Promise<void> {
     const cacheData: IRegisterData = {
       uuid,
-      userId: userId.id,
+      userId,
     };
     await this.redis.set(`user:${uuid}`, cacheData, this.ttl);
   }

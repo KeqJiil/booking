@@ -34,11 +34,12 @@ import { EventEmitterAuthQueue } from './infrastructure/queue/eventEmitter.queue
 import { AuthDataPrismaRepository } from './infrastructure/repo/authData.repository';
 import { RegisterCommandHandler } from './application/commands/register-use-case/register.handler';
 import { LoginCommandHandler } from './application/commands/login-use-case/login.handler';
-import { RevokeAllSessionCommandHandler } from './application/commands/revoke-all-use-case/logoutAll.handler';
+import { RevokeAllSessionCommandHandler } from './application/commands/logout-all-use-case/logoutAll.handler';
 import { LogoutCommandHandler } from './application/commands/logout-use-case/logout.handler';
 import { ForgotPasswordEmailRepository } from './infrastructure/repo/forgotPasswordEmail.repository';
 import { ChangePasswordCommandHandler } from './application/commands/change-password-use-case/changePassword.handler';
 import { ForgotPasswordCommandHandler } from './application/commands/forgot-password-use-case/forgotPassword.handler';
+import { VerifyAccontCommandHandler } from './application/commands/verify-use-case/verify.handler';
 
 @Module({
   controllers: [AuthController],
@@ -46,7 +47,7 @@ import { ForgotPasswordCommandHandler } from './application/commands/forgot-pass
     JwtModule.registerAsync({
       imports: [ConfigModule],
       inject: [ConfigService],
-      global: true,
+      global: false,
       useFactory: (config: ConfigService) => ({
         secret: config.getOrThrow<string>('JWT_SECRET'),
         signOptions: {
@@ -58,6 +59,7 @@ import { ForgotPasswordCommandHandler } from './application/commands/forgot-pass
     UserModule,
   ],
   providers: [
+    VerifyAccontCommandHandler,
     RefreshCommandHandler,
     SessionCreationService,
     AuthCronDeletion,

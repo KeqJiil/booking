@@ -1,6 +1,6 @@
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { RegisterCommand } from '../auth.commands';
-import { Inject } from '@nestjs/common';
+import { ConflictException, Inject } from '@nestjs/common';
 import {
   AUTH_CRYPTOR,
   AUTH_QUEUE,
@@ -32,10 +32,12 @@ export class RegisterCommandHandler implements ICommandHandler<RegisterCommand> 
 
   async execute(command: RegisterCommand): Promise<void> {
     const { email, name } = command.data;
-    const password = await this.crypto.crypto(command.data.password);
     const userId = new UserId(randomUUID());
     const authId = new AuthId(randomUUID());
     const emailVO = Email.create(email);
+    const existing = await this.authRepo.getByEmail(emailVO);
+    if (existing) throw new ConflictException('Email already in use');
+    const password = await this.crypto.crypto(command.data.password);
     const authUser = AuthUser.create(authId, userId, emailVO, password);
     const newUser = await this.userService.createUser({
       userId,
