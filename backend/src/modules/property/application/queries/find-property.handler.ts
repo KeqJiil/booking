@@ -1,7 +1,7 @@
 import { IQueryHandler, QueryHandler } from '@nestjs/cqrs';
 import type {
   IPropertyQueryRepo,
-  IPropertyView,
+  IPropertyDetailView,
 } from '../../domain/repo-interface/IPropertyRepo.interface';
 import { Inject } from '@nestjs/common';
 import { FindPropertyByIdQuery } from './property.queries';
@@ -12,7 +12,7 @@ export class FindPropertyHandler implements IQueryHandler<FindPropertyByIdQuery>
     @Inject('IPropertyRepoQuery') private repository: IPropertyQueryRepo,
   ) {}
 
-  async execute(query: FindPropertyByIdQuery): Promise<IPropertyView> {
+  async execute(query: FindPropertyByIdQuery): Promise<IPropertyDetailView> {
     return await this.repository.getById(query.id);
   }
 }

@@ -1,7 +1,8 @@
 import { IQueryHandler, QueryHandler } from '@nestjs/cqrs';
 import type {
   IPropertyQueryRepo,
-  IPropertyView,
+  IPropertyListView,
+  IPaginatedResponse,
 } from '../../domain/repo-interface/IPropertyRepo.interface';
 import { Inject } from '@nestjs/common';
 import { FindPropertyBySearchParamsQuery } from './property.queries';
@@ -14,7 +15,7 @@ export class FindPropertiesHandler implements IQueryHandler<FindPropertyBySearch
 
   async execute(
     query: FindPropertyBySearchParamsQuery,
-  ): Promise<IPropertyView[]> {
+  ): Promise<IPaginatedResponse<IPropertyListView>> {
     return await this.repository.getList(query.searchParams);
   }
 }

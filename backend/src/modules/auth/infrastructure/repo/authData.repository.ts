@@ -62,7 +62,7 @@ export class AuthDataPrismaRepository implements IAuthDataRepository {
 
   async getById(id: UserId): Promise<AuthUser | null> {
     const authUser = await this.prisma.authCredential.findUnique({
-      where: { id: id.toString() },
+      where: { userId: id.toString() },
       select: {
         userId: true,
         passwordHash: true,

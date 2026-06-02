@@ -68,7 +68,7 @@ model UserSettings {
 }
 
 model Property {
-  id String @id @default(uuid())
+  id String @id @default(uuid(7))
 
   name        String
   description String
@@ -110,7 +110,7 @@ model PropertyType {
 }
 
 model Image {
-  id String @id @default(uuid())
+  id String @id @default(uuid(7))
 
   url        String
   propertyId String   @map("property_id")

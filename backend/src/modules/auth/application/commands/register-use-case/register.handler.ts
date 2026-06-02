@@ -40,7 +40,7 @@ export class RegisterCommandHandler implements ICommandHandler<RegisterCommand> 
     const password = await this.crypto.crypto(command.data.password);
     const authUser = AuthUser.create(authId, userId, emailVO, password);
     const newUser = await this.userService.createUser({
-      userId,
+      userId: userId.toString(),
       name,
     });
     await this.authRepo.save(authUser);

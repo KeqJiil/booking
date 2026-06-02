@@ -1,6 +1,6 @@
 import { Prisma } from '@prisma/client';
 
-export const propertyViewSelect = Prisma.validator<Prisma.PropertySelect>()({
+const propertyBaseSelect = {
   id: true,
   name: true,
   description: true,
@@ -12,6 +12,16 @@ export const propertyViewSelect = Prisma.validator<Prisma.PropertySelect>()({
   hostId: true,
   host: { select: { name: true } },
   propertyType: { select: { name: true } },
+} satisfies Prisma.PropertySelect;
+
+export const propertyListSelect = Prisma.validator<Prisma.PropertySelect>()({
+  ...propertyBaseSelect,
+  images: { select: { url: true }, take: 1, orderBy: { id: 'asc' } },
+});
+
+export const propertyDetailSelect = Prisma.validator<Prisma.PropertySelect>()({
+  ...propertyBaseSelect,
+  images: { select: { url: true }, orderBy: { id: 'asc' } },
 });
 
 export const propertyPlainSelect = Prisma.validator<Prisma.PropertySelect>()({

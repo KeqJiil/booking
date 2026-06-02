@@ -1,6 +1,4 @@
-import { UserId } from '../auth/domain/typedId/user.id';
-
 export interface IUserCreate {
-  userId: UserId;
+  userId: string;
   name: string;
 }

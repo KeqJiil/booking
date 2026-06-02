@@ -44,7 +44,7 @@ export class UserController {
   }
 
   @Authorization('USER')
-  @HttpCode(2001)
+  @HttpCode(201)
   @Delete('my/delete')
   async deleteMyAccount(@AccessInfo('id') id: string) {
     return await this.userService.deleteUser(id);
@@ -60,7 +60,7 @@ export class UserController {
   @Authorization('ADMIN')
   @HttpCode(200)
   @Patch(':id/restore')
-  async restoreUser(@Body() id: string) {
+  async restoreUser(@Param() id: string) {
     return await this.userService.restoreUser(id);
   }
 }

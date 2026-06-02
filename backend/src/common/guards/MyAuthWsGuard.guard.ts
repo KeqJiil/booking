@@ -16,7 +16,8 @@ export class WsAuthGuard implements CanActivate {
     if (!token) return false;
     try {
       const payload = await this.jwtService.verifyAsync(token);
-      const user = await this.userSerive.verifyUser(payload.id as string);
+      const user = await this.userSerive.getUserById(payload.id);
+      if (!user) throw new Error();
       client['user'] = { id: user.id, role: user.role };
       return true;
     } catch {

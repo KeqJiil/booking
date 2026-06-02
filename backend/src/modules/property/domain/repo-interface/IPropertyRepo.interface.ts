@@ -21,7 +21,7 @@ export interface IPropertySearchParams {
   maxGuests?: number;
 }
 
-export interface IPropertyView {
+interface IPropertyViewBase {
   id: string;
   name: string;
   description: string;
@@ -35,13 +35,30 @@ export interface IPropertyView {
   hostId: string;
 }
 
+export interface IPropertyListView extends IPropertyViewBase {
+  coverImage: string | null;
+}
+
+export interface IPropertyDetailView extends IPropertyViewBase {
+  images: string[];
+}
+
 export interface IPropertyRepo {
   checkBookings(id: string, date: Date, tx?: unknown): Promise<boolean>;
   getEntityById(id: string, tx?: unknown): Promise<PropertyEntity>;
   save(property: PropertyEntity, tx?: unknown): Promise<void>;
 }
 
+export interface IPaginatedResponse<T> {
+  data: T[];
+  hasNextPage: boolean;
+  hasPreviousPage: boolean;
+  nextCursor: string | null;
+}
+
 export interface IPropertyQueryRepo {
-  getById(id: string): Promise<IPropertyView>;
-  getList(searchParams: IPropertySearchParams): Promise<IPropertyView[]>;
+  getById(id: string): Promise<IPropertyDetailView>;
+  getList(
+    searchParams: IPropertySearchParams,
+  ): Promise<IPaginatedResponse<IPropertyListView>>;
 }

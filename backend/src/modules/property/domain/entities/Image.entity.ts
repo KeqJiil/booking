@@ -1,4 +1,4 @@
-import { randomUUID } from 'crypto';
+import { v7 as uuidv7 } from 'uuid';
 
 export interface IImage {
   id?: string;
@@ -12,7 +12,7 @@ export class ImageEntity {
   ) {}
 
   static createImage(data: Omit<IImage, 'id'>, id?: string) {
-    id = id ? id : randomUUID();
+    id = id ? id : uuidv7();
     return new ImageEntity(id, data);
   }
 

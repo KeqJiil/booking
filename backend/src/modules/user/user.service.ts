@@ -1,18 +1,12 @@
-import {
-  Injectable,
-  NotFoundException,
-  UnauthorizedException,
-} from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from 'src/database/prisma.service';
 import { UserSettingsDto } from './dto/settings.dto';
-import bcrypt from 'bcrypt';
 import { Roles } from 'src/common/constants/roleLevels';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { eventNames } from 'src/common/constants/eventnames';
 import { Logger } from 'nestjs-pino';
 import { IUserCreate } from './types';
 import { Tx } from 'src/infrastructure/repo/transactions/interfaces/TransactionRepo.interface';
-import { UserId } from '../auth/domain/typedId/user.id';
 
 @Injectable()
 export class UserService {
@@ -25,7 +19,7 @@ export class UserService {
   async createUser(user: IUserCreate) {
     return await this.prisma.user.create({
       data: {
-        id: user.userId.toString(),
+        id: user.userId,
         name: user.name,
         userSettings: {
           create: {},
@@ -34,34 +28,25 @@ export class UserService {
     });
   }
 
-  async hasValidStatus(userId: UserId) {
+  async hasValidStatus(userId: string) {
     const data = await this.prisma.user.findUnique({
-      where: { id: userId.toString() },
+      where: { id: userId },
       select: { status: true },
     });
     if (!data) return false;
     return data.status === 'ALIVE';
   }
 
-  async getUserById(id: string) {
-    return await this.prisma.user.findUnique({ where: { id } });
-  }
-
-  async updateAvatar(id: string, url: string) {
-    return await this.prisma.user.update({
-      where: { id },
-      data: { avatarUrl: url },
+  async getUserById(userId: string) {
+    return await this.prisma.user.findUnique({
+      where: { id: userId },
     });
   }
 
-  async verifyUser(id: string) {
+  async updateAvatar(userId: string, url: string) {
     return await this.prisma.user.update({
-      where: {
-        id,
-      },
-      data: {
-        status: 'ALIVE',
-      },
+      where: { id: userId },
+      data: { avatarUrl: url },
     });
   }
 
@@ -71,10 +56,10 @@ export class UserService {
     });
   }
 
-  async getRole(userId: UserId) {
+  async getRole(userId: string) {
     const role = await this.prisma.user.findUnique({
       where: {
-        id: userId.toString(),
+        id: userId,
       },
       select: { role: true },
     });
@@ -84,7 +69,7 @@ export class UserService {
 
   async changeSettings(userId: string, settings: UserSettingsDto) {
     return await this.prisma.userSettings.update({
-      where: { userId },
+      where: { id: userId },
       data: {
         notifications: settings.notifications,
         theme: settings.theme,
@@ -120,9 +105,7 @@ export class UserService {
         status: 'DELETED',
       },
     });
-    this.logger.log(
-      `User ${user.name} ${user.email} id:${user.id} was deleted`,
-    );
+    this.logger.log(`User ${user.name} id:${user.id} was deleted`);
     return { id: user.id, status: user.status };
   }
 
@@ -141,9 +124,7 @@ export class UserService {
         status: 'ALIVE',
       },
     });
-    this.logger.log(
-      `User ${user.name} ${user.email} id:${user.id} was restored`,
-    );
+    this.logger.log(`User ${user.name} id:${user.id} was restored`);
     return { id: user.id, status: user.status };
   }
 

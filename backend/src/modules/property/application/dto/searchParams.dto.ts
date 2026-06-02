@@ -70,6 +70,8 @@ export class PropertySearchParamsDto {
     enum: orderStyle,
     description: 'Sorting style',
   })
+  @IsOptional()
+  @IsEnum(orderStyle)
   orderStyle?: IOrderStyle;
 
   @ApiPropertyOptional({

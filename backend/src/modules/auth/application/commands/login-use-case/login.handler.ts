@@ -43,7 +43,7 @@ export class LoginCommandHandler implements ICommandHandler<LoginCommand> {
       authUser.password,
     );
     if (!password) throw new UnauthorizedException();
-    const { role } = await this.userService.getRole(authUser.userId);
+    const { role } = await this.userService.getRole(authUser.userId.toString());
     const sessionId = new SessionId(randomUUID());
     const access = await this.tokenIssuerAccess.sign({
       userId: authUser.userId.toString(),

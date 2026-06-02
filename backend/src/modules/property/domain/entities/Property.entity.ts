@@ -5,7 +5,7 @@ import {
   PropertyCreated,
   PropertyDeleted,
 } from '../events/property.events';
-import { randomUUID } from 'crypto';
+import { v7 as uuidv7 } from 'uuid';
 import { IImage, ImageEntity } from './Image.entity';
 import {
   NotAllowedError,
@@ -64,12 +64,7 @@ export class PropertyEntity extends AggregateRoot {
       throw new WrongInputDataError('Description');
     if (images.length > 20) throw new WrongInputDataError('Number of images');
     const imageEntities = this.createImages(images);
-    const entity = new PropertyEntity(
-      data,
-      'ALIVE',
-      randomUUID(),
-      imageEntities,
-    );
+    const entity = new PropertyEntity(data, 'ALIVE', uuidv7(), imageEntities);
     entity.apply(new PropertyCreated(entity._props.hostId, entity._id));
     return entity;
   }
