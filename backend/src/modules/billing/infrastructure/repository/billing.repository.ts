@@ -58,32 +58,33 @@ export class BillingRepository implements IBillingRepo {
   }
 
   async paymentSuccess(
-    id: string,
+    bookingId: string,
     providerPaymentId: string,
     tx?: Tx,
   ): Promise<IPaymentData> {
     const db = this.getDb(tx);
     const data = await db.payment.update({
-      where: { id },
+      where: { bookingId },
       data: {
         providerPaymentId,
+        status: 'SUCCEEDED',
       },
     });
     return this.getDataType(data);
   }
 
-  async paymentFail(id: string, tx?: Tx): Promise<IPaymentData> {
+  async paymentFail(bookingId: string, tx?: Tx): Promise<IPaymentData> {
     const db = this.getDb(tx);
     const data = await db.payment.update({
-      where: { id },
+      where: { bookingId },
       data: { status: 'FAILED' },
     });
     return this.getDataType(data);
   }
 
-  async paymentRefund(id: string, tx: Tx): Promise<IPaymentData> {
+  async paymentRefund(bookingId: string, tx: Tx): Promise<IPaymentData> {
     const data = await tx.payment.update({
-      where: { id },
+      where: { bookingId },
       data: { status: 'REFUNDED' },
     });
     return this.getDataType(data);

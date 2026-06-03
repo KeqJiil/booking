@@ -2,23 +2,34 @@ import { Inject, Injectable } from '@nestjs/common';
 import { Cron, CronExpression } from '@nestjs/schedule';
 import { Logger } from 'nestjs-pino';
 import type {
-  IOutboxDataView,
-  IOutboxRepository,
-} from 'src/infrastructure/repo/outbox/interfaces/outbox.interface';
-import type {
   ITransactionRepo,
   Tx,
 } from 'src/infrastructure/repo/transactions/interfaces/TransactionRepo.interface';
 import { InjectQueue } from '@nestjs/bullmq';
 import { Queue } from 'bullmq';
 import { eventNames } from 'src/common/constants/eventnames';
-import { PRISMA_TRANSACTION_CLIENT } from 'src/common/constants/providerConstants';
+import {
+  BILLING_OUTBOX_REPO,
+  PRISMA_TRANSACTION_CLIENT,
+} from 'src/common/constants/providerConstants';
+import {
+  IBillingOutboxTypes,
+  IOutboxBillingPayload,
+  IOutboxBillingViewData,
+} from '../repository/billingOutbox.types';
+import { OutboxRepository } from '../../../../infrastructure/repo/outbox/repo/outbox.repository';
+import { PaymentId } from '../../domain/typedId/paymentId';
 
 @Injectable()
 export class BillingRefundPending {
   constructor(
     private readonly logger: Logger,
-    @Inject('OUTBOX_SERVICE') private outbox: IOutboxRepository<Tx>,
+    @Inject(BILLING_OUTBOX_REPO)
+    private readonly outbox: OutboxRepository<
+      IBillingOutboxTypes,
+      IOutboxBillingPayload,
+      PaymentId
+    >,
     @Inject(PRISMA_TRANSACTION_CLIENT)
     private readonly transaction: ITransactionRepo,
     @InjectQueue('billing') private billingQueue: Queue,
@@ -46,13 +57,13 @@ export class BillingRefundPending {
   @Cron(CronExpression.EVERY_30_MINUTES)
   async handleProcessingOutboxes() {
     this.logger.log('Billing Refund Processing cron started');
-    let outboxes: IOutboxDataView[] = [];
+    let outboxes: IOutboxBillingViewData[] = [];
     await this.transaction.startTransaction(async (tx: Tx) => {
       outboxes = await this.outbox.getExpiredProcessing(tx);
       for (const outbox of outboxes) {
         if (outbox.retries < 5) {
           await this.outbox.markProcessing(outbox.id, tx);
-          continue;
+          await this.outbox.incrementRetries(outbox.id, tx);
         } else {
           await this.outbox.markFailed(outbox.id, tx);
         }
@@ -70,7 +81,7 @@ export class BillingRefundPending {
     }
   }
 
-  private async processTask(task: IOutboxDataView) {
+  private async processTask(task: IOutboxBillingViewData) {
     await this.billingQueue.add(eventNames.billing_refund, task, {
       jobId: task.id,
       attempts: 5,

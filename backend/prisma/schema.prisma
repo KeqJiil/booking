@@ -43,8 +43,8 @@ model AuthCredential {
   userId String @unique
   user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  passwordHash String @map("password_hash")
-  email        String @unique
+  passwordHash    String  @map("password_hash")
+  email           String  @unique
   isEmailVerified Boolean @default(false)
 
   createdAt DateTime @default(now()) @map("created_at")
@@ -268,7 +268,7 @@ model Outbox {
   id String @id @default(uuid())
 
   itemId  String
-  type    OutboxEvents
+  type    String
   payload Json
   status  OutboxStatuses @default(PENDING)
 
@@ -339,10 +339,6 @@ enum PaymentStatuses {
   SUCCEEDED
   FAILED
   REFUNDED
-}
-
-enum OutboxEvents {
-  REFUND_REQUEST
 }
 
 enum OutboxStatuses {

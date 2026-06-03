@@ -14,23 +14,41 @@ export const outboxTypes = {
 
 export type IOutboxTypes = (typeof outboxTypes)[keyof typeof outboxTypes];
 
-export interface IOutboxData {
-  itemId: string;
-  type: IOutboxTypes;
-  payload: Record<any, any>;
+export interface IOutboxData<T, TPayload, TID> {
+  itemId: TID;
+  type: T;
+  payload: TPayload;
   status: IOutboxStatuses;
   retries: number;
   processingAt?: Date;
 }
 
-export type IOutboxDataView = IOutboxData & { id: string };
+export type IOutboxDataView<T, TPayload, TID> = IOutboxData<
+  T,
+  TPayload,
+  TID
+> & { id: string };
 
-export interface IOutboxRepository<TTx> {
-  createOutbox(data: IOutboxData, tx: TTx): Promise<IOutboxDataView>;
-  getOutbox(status?: IOutboxStatuses): Promise<IOutboxDataView[]>;
-  getExpiredProcessing(tx: TTx): Promise<IOutboxDataView[]>;
-  markProcessing(id: string, tx: TTx): Promise<IOutboxDataView>;
-  markFailed(id: string, tx: TTx): Promise<IOutboxDataView>;
-  markSucceeded(id: string, tx: TTx): Promise<IOutboxDataView>;
-  incrementRetries(id: string, tx: TTx): Promise<IOutboxDataView>;
+export interface IOutboxRepository<TTx, T, TPayload, TID> {
+  createOutbox(
+    data: IOutboxData<T, TPayload, TID>,
+    tx: TTx,
+  ): Promise<IOutboxDataView<T, TPayload, TID>>;
+  getOutbox(
+    status?: IOutboxStatuses,
+  ): Promise<IOutboxDataView<T, TPayload, TID>[]>;
+  getExpiredProcessing(tx: TTx): Promise<IOutboxDataView<T, TPayload, TID>[]>;
+  markProcessing(
+    id: string,
+    tx: TTx,
+  ): Promise<IOutboxDataView<T, TPayload, TID>>;
+  markFailed(id: string, tx: TTx): Promise<IOutboxDataView<T, TPayload, TID>>;
+  markSucceeded(
+    id: string,
+    tx: TTx,
+  ): Promise<IOutboxDataView<T, TPayload, TID>>;
+  incrementRetries(
+    id: string,
+    tx: TTx,
+  ): Promise<IOutboxDataView<T, TPayload, TID>>;
 }
