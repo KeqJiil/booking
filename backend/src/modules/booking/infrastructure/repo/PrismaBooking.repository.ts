@@ -29,7 +29,7 @@ export class PrismaBookingRepo implements IBookingRepo {
   }
 
   async getIdsToComplete(): Promise<{ id: string }[]> {
-    return await this.prisma.booking.findMany({
+    return this.prisma.booking.findMany({
       where: {
         AND: {
           status: 'CONFIRMED',
@@ -96,14 +96,14 @@ export class PrismaBookingRepo implements IBookingRepo {
     const db = this.getDb(tx);
     const data = (await db.$queryRaw`
     SELECT 
-      Booking.id, Booking.user_id, 
-      Booking.property_id AS "propertyId", Booking.price_at_the_moment AS "priceAtTheMoment", 
-      Booking.amount_due AS "amountDue", Booking.days, 
-      Booking.start_date AS "startDate", Booking.end_date AS "endDate", 
-      Booking.status, Property.host_Id AS "hostId"
-    FROM Booking
-    INNER JOIN Property ON Booking.property_id=Property.id 
-    WHERE Booking.id = ${id}
+      "Booking".id, "Booking".user_id, 
+      "Booking".property_id AS "propertyId", "Booking".price_at_moment AS "priceAtTheMoment", 
+      "Booking".amount_due AS "amountDue", "Booking".days, 
+      "Booking".start_date AS "startDate", "Booking".end_date AS "endDate", 
+      "Booking".status, "Property".host_Id AS "hostId"
+    FROM "Booking"
+    INNER JOIN "Property" ON "Booking".property_id="Property".id 
+    WHERE "Booking".id = ${id}
     FOR UPDATE
     `[0]) as IDataReturnType;
     if (!data) return null;

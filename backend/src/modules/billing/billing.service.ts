@@ -1,4 +1,9 @@
-import { Inject, Injectable, NotFoundException } from '@nestjs/common';
+import {
+  ForbiddenException,
+  Inject,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import type { IPaymentService } from 'src/infrastructure/payments/interfaces/paymentService.interface';
 import type {
   IBillingRepo,
@@ -120,6 +125,7 @@ export class BillingService {
       if (idempotencyId.isDuplicate) return idempotencyId.response;
       const data = await this.billingRepo.getPaymentById(paymentId, tx);
       if (!data) throw new NotFoundException();
+      if (data.userId !== userId) throw new ForbiddenException();
       const refundData = await this.billingRepo.paymentRefund(bookingId, tx);
       await this.outbox.createOutbox(
         {

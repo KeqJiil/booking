@@ -1,4 +1,3 @@
-import { Injectable } from '@nestjs/common';
 import {
   IOutboxData,
   IOutboxDataView,
@@ -8,71 +7,99 @@ import {
 import { Tx } from '../../transactions/interfaces/TransactionRepo.interface';
 import { IOutboxDb } from '../interfaces/outboxDb.interface';
 import { PrismaService } from 'src/database/prisma.service';
+import { TypedId } from '../../../../common/typedId/typedID.generic';
+import { Prisma } from '@prisma/client';
 
-@Injectable()
-export class OutboxRepository implements IOutboxRepository<Tx> {
-  constructor(private readonly prisma: PrismaService) {}
+export abstract class OutboxRepository<
+  T extends string,
+  TPayload extends object,
+  TID extends TypedId<any>,
+> implements IOutboxRepository<Tx, T, TPayload, TID> {
+  protected constructor(private readonly prisma: PrismaService) {}
 
-  private getDataType(data: IOutboxDb): IOutboxDataView {
-    return {
-      id: data.id,
-      itemId: data.itemId,
-      type: data.type,
-      payload: data.payload,
-      status: data.status,
-      retries: data.retries,
-      ...(data.processingAt ? { processingAt: data.processingAt } : {}),
-    };
-  }
+  protected abstract serializePayload(raw: TPayload): Prisma.JsonValue;
 
-  async createOutbox(data: IOutboxData, tx: Tx): Promise<IOutboxDataView> {
+  protected abstract fromDb(
+    raw: IOutboxDb<any, any, any>,
+  ): IOutboxDataView<T, TPayload, TID>;
+
+  async createOutbox(
+    data: IOutboxData<T, TPayload, TID>,
+    tx: Tx,
+  ): Promise<IOutboxDataView<T, TPayload, TID>> {
     const outbox = await tx.outbox.create({
-      data: { type: data.type, itemId: data.itemId, payload: data.payload },
+      data: {
+        type: data.type,
+        itemId: data.itemId.toString(),
+        payload: this.serializePayload(
+          data.payload,
+        ) as unknown as Prisma.InputJsonValue,
+      },
     });
-    return this.getDataType(outbox);
+    return this.fromDb(outbox);
   }
 
-  async getOutbox(status?: IOutboxStatuses): Promise<IOutboxDataView[]> {
+  async getOutbox(
+    status?: IOutboxStatuses,
+  ): Promise<IOutboxDataView<T, TPayload, TID>[]> {
     const data = await this.prisma.outbox.findMany({
       where: { status, retries: { lt: 5 } },
       take: 30,
     });
-    return data.map((el) => this.getDataType(el));
+    return data.map((el) => this.fromDb(el));
   }
 
-  async getExpiredProcessing(tx: Tx): Promise<IOutboxDataView[]> {
+  async getExpiredProcessing(
+    tx: Tx,
+  ): Promise<IOutboxDataView<T, TPayload, TID>[]> {
     const data = (await tx.$queryRaw`
       SELECT * 
-      FROM Outbox 
-      WHERE processing_at <= NOW() - INTERVAL '30 minutes' FOR UPDATE SKIP LOCKED LIMIT 50`) satisfies IOutboxDb[];
-    return data.map((el) => this.getDataType(el));
+      FROM "Outbox" 
+      WHERE processing_at <= NOW() - INTERVAL '30 minutes' FOR UPDATE SKIP LOCKED LIMIT 50`) satisfies IOutboxDb<
+      T,
+      TPayload,
+      TID
+    >[];
+    return data.map((el) => this.fromDb(el));
   }
 
-  async markProcessing(id: string, tx: Tx): Promise<IOutboxDataView> {
+  async markProcessing(
+    id: string,
+    tx: Tx,
+  ): Promise<IOutboxDataView<T, TPayload, TID>> {
     const outbox = await tx.outbox.update({
       where: { id },
-      data: { status: 'PROCESSING' },
+      data: { status: 'PROCESSING', processingAt: new Date(Date.now()) },
     });
-    return this.getDataType(outbox);
+    return this.fromDb(outbox);
   }
 
-  async markSucceeded(id: string, tx: Tx): Promise<IOutboxDataView> {
+  async markSucceeded(
+    id: string,
+    tx: Tx,
+  ): Promise<IOutboxDataView<T, TPayload, TID>> {
     const outbox = await tx.outbox.update({
       where: { id },
       data: { status: 'SUCCEEDED' },
     });
-    return this.getDataType(outbox);
+    return this.fromDb(outbox);
   }
 
-  async markFailed(id: string, tx: Tx): Promise<IOutboxDataView> {
+  async markFailed(
+    id: string,
+    tx: Tx,
+  ): Promise<IOutboxDataView<T, TPayload, TID>> {
     const outbox = await tx.outbox.update({
       where: { id },
       data: { status: 'FAILED' },
     });
-    return this.getDataType(outbox);
+    return this.fromDb(outbox);
   }
 
-  async incrementRetries(id: string, tx: Tx): Promise<IOutboxDataView> {
+  async incrementRetries(
+    id: string,
+    tx: Tx,
+  ): Promise<IOutboxDataView<T, TPayload, TID>> {
     const outbox = await tx.outbox.update({
       where: { id },
       data: {
@@ -81,6 +108,6 @@ export class OutboxRepository implements IOutboxRepository<Tx> {
         },
       },
     });
-    return this.getDataType(outbox);
+    return this.fromDb(outbox);
   }
 }

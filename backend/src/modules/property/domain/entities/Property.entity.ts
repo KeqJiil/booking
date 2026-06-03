@@ -34,7 +34,6 @@ export interface IPlainProperty {
 export const LiveStatus = {
   ALIVE: 'ALIVE',
   DELETED: 'DELETED',
-  NOT_CONFIRMED: 'NOT_CONFIRMED',
 } as const;
 
 export type ILiveStatus = keyof typeof LiveStatus;
@@ -139,10 +138,9 @@ export class PropertyEntity extends AggregateRoot {
 
   updateImages(data: IImage[]) {
     if (data.length > 20) throw new WrongInputDataError('Number of images');
-    const images = data.map((el) =>
+    this._images = data.map((el) =>
       ImageEntity.createImage({ url: el.url }, el.id),
     );
-    this._images = images;
   }
 
   deleteProperty(userId: string, isAdmin: boolean) {
