@@ -23,6 +23,13 @@ export class StripeService implements IPaymentService {
     private readonly config: ConfigService,
   ) {}
 
+  async getUser(userId: string): Promise<string | null> {
+    const result = await this.stripe.customers.search({
+      query: `metadata['userId']:'${userId}'`,
+    });
+    return result[0] || null;
+  }
+
   async createUser(email: string, userId: string) {
     const res = await this.stripe.customers.create(
       {

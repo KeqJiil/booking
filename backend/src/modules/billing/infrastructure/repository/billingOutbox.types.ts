@@ -5,6 +5,7 @@ import { IOutboxDataView } from '../../../../infrastructure/repo/outbox/interfac
 export interface IOutboxBillingPayload {
   paymentId: PaymentId;
   paymentIntendId: PaymentIntendId;
+  idempotencyKey: string;
 }
 
 export const BillingOutboxTypes = {

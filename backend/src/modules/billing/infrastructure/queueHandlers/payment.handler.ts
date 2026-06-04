@@ -1,16 +1,15 @@
 import { Processor, WorkerHost } from '@nestjs/bullmq';
-import { Inject } from '@nestjs/common';
-import type { IBillingRepo } from '../repository/billingRepository.interface';
 import { Job } from 'bullmq';
 import { IJobWebhookData } from 'src/infrastructure/payments/interfaces/data.interfaces';
 import { IPaymentConsts } from 'src/common/constants/paymentConsts';
 import { CommandBus } from '@nestjs/cqrs';
 import { PayBookingStatusCommand } from 'src/modules/booking/application/commands/booking.commands';
+import { BillingService } from '../../billing.service';
 
 @Processor('payments')
 export class PaymentsQueueHandler extends WorkerHost {
   constructor(
-    @Inject('BILLING_REPOSITORY') private billingRepo: IBillingRepo,
+    private readonly billingService: BillingService,
     private readonly commandBus: CommandBus,
   ) {
     super();
@@ -20,7 +19,7 @@ export class PaymentsQueueHandler extends WorkerHost {
     const data = job.data as IJobWebhookData;
     switch (job.name as IPaymentConsts) {
       case 'payment_success': {
-        await this.billingRepo.paymentSuccess(
+        await this.billingService.successPayment(
           data.bookingId,
           data.paymentIntentId,
         );
@@ -30,7 +29,7 @@ export class PaymentsQueueHandler extends WorkerHost {
         break;
       }
       case 'payment_failed': {
-        await this.billingRepo.paymentFail(data.bookingId);
+        await this.billingService.failPayment(data.bookingId);
         break;
       }
     }

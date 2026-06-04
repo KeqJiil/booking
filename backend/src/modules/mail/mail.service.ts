@@ -24,19 +24,6 @@ export class MailService implements IMailer {
     });
   }
 
-  async sendNotification(
-    userEmail: string,
-    data: Record<string, string>,
-  ): Promise<void> {
-    console.log('started');
-    await this.resend.emails.send({
-      from: this.mailName,
-      to: userEmail,
-      subject: 'Hello World',
-      html: (() => welcomeTemplate('123'))(),
-    });
-  }
-
   async sendForgotPassword(
     email: string,
     uuid: string,
@@ -49,11 +36,6 @@ export class MailService implements IMailer {
       html: resetPasswordTemplate(username, uuid, this.url),
     });
   }
-
-  async sendCheckOfAction(
-    userEmail: string,
-    actionName: string,
-  ): Promise<void> {}
 
   async sendRegister(
     userEmail: string,

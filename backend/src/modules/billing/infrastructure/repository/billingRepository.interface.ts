@@ -18,12 +18,12 @@ export interface IBillingRepo {
   getPaymentById(id: string, tx?: unknown): Promise<IPaymentView | null>;
   createPayment(paymentData: IPaymentData, tx?: unknown): Promise<string>;
   paymentSuccess(
-    bookingId: string,
+    paymentId: string,
     providerPaymentId: string,
     tx?: unknown,
   ): Promise<IPaymentData>;
-  paymentFail(bookingId: string, tx?: unknown): Promise<IPaymentData>;
-  paymentRefund(bookingId: string, tx?: unknown): Promise<IPaymentData>;
+  paymentFail(paymentId: string, tx?: unknown): Promise<IPaymentData>;
+  paymentRefund(paymentId: string, tx?: unknown): Promise<IPaymentData>;
 }
 
 export interface IPaymentDbData {

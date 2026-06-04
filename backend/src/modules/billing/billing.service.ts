@@ -16,18 +16,30 @@ import type {
   Tx,
 } from 'src/infrastructure/repo/transactions/interfaces/TransactionRepo.interface';
 import { BookingProviderAdapter } from './infrastructure/adapters/booking.adapter';
-import type { IOutboxRepository } from 'src/infrastructure/repo/outbox/interfaces/outbox.interface';
 import {
+  BILLING_OUTBOX_REPO,
   PRISMA_TRANSACTION_CLIENT,
   STRIPE_PAYMENT_CLIENT,
 } from 'src/common/constants/providerConstants';
+import { OutboxRepository } from '../../infrastructure/repo/outbox/repo/outbox.repository';
+import {
+  IBillingOutboxTypes,
+  IOutboxBillingPayload,
+} from './infrastructure/repository/billingOutbox.types';
+import { PaymentId } from './domain/typedId/paymentId';
+import { PaymentIntendId } from './domain/typedId/paymentIntend.id';
 
 @Injectable()
 export class BillingService {
   constructor(
     @Inject(STRIPE_PAYMENT_CLIENT) private paymentService: IPaymentService,
     @Inject('BILLING_REPOSITORY') private billingRepo: IBillingRepo,
-    @Inject('OUTBOX_SERVICE') private outbox: IOutboxRepository<Tx>,
+    @Inject(BILLING_OUTBOX_REPO)
+    private outbox: OutboxRepository<
+      IBillingOutboxTypes,
+      IOutboxBillingPayload,
+      PaymentId
+    >,
     private readonly userService: UserService,
     private readonly idempotency: IdempotencyService,
     @Inject(PRISMA_TRANSACTION_CLIENT)
@@ -43,6 +55,12 @@ export class BillingService {
     const payment = await this.billingRepo.getPaymentById(id);
     if (!payment || payment?.userId !== userId) throw new NotFoundException();
     return payment;
+  }
+
+  async getUserId(userId: string) {
+    const data = await this.paymentService.getUser(userId);
+    if (!data) throw new NotFoundException();
+    return data;
   }
 
   async createPaymentAccount(
@@ -97,21 +115,20 @@ export class BillingService {
     return payment;
   }
 
-  async failPayment(bookingId: string) {
+  async failPayment(paymentId: string) {
     await this.transaction.startTransaction(async (tx: Tx) => {
-      await this.billingRepo.paymentFail(bookingId, tx);
+      await this.billingRepo.paymentFail(paymentId, tx);
     });
   }
 
-  async successPayment(bookingId: string, providerAccountId: string) {
+  async successPayment(paymentId: string, providerAccountId: string) {
     await this.transaction.startTransaction(async (tx: Tx) => {
-      await this.billingRepo.paymentSuccess(bookingId, providerAccountId, tx);
+      await this.billingRepo.paymentSuccess(paymentId, providerAccountId, tx);
     });
   }
 
   async refundPayment(
     userId: string,
-    bookingId: string,
     paymentId: string,
     providerPaymentId: string,
     idempotencyKey: string,
@@ -126,17 +143,19 @@ export class BillingService {
       const data = await this.billingRepo.getPaymentById(paymentId, tx);
       if (!data) throw new NotFoundException();
       if (data.userId !== userId) throw new ForbiddenException();
-      const refundData = await this.billingRepo.paymentRefund(bookingId, tx);
+      const refundData = await this.billingRepo.paymentRefund(paymentId, tx);
+      const paymentTypedId = new PaymentId(paymentId);
+      const paymentIntendId = new PaymentIntendId(providerPaymentId);
       await this.outbox.createOutbox(
         {
           type: 'REFUND_REQUEST',
-          itemId: paymentId,
+          itemId: paymentTypedId,
           status: 'PENDING',
           retries: 0,
           payload: {
-            providerPaymentId,
+            paymentIntendId,
             idempotencyKey,
-            bookingId,
+            paymentId: paymentTypedId,
           },
         },
         tx,
