@@ -26,13 +26,13 @@ describe('PropertyEntity', () => {
   });
 
   it('should let be deleted', () => {
-    const entity = PropertyEntity.create(validData, [], 'id1');
+    const entity = PropertyEntity.create(validData, []);
     entity.deleteProperty('user1', false);
     expect(entity.status).toBe('DELETED');
   });
 
   it('shouldnt let someone else change', () => {
-    const entity = PropertyEntity.create(validData, [], 'id1');
+    const entity = PropertyEntity.create(validData, []);
     entity.deleteProperty('hacker', false);
     expect(entity.status).toBe('ALIVE');
   });
