@@ -1,4 +1,4 @@
-import { Inject, NotFoundException } from '@nestjs/common';
+import { BadRequestException, Inject, NotFoundException } from '@nestjs/common';
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { CancelBookingStatusCommand } from './booking.commands';
 import type { ITransactionRepo } from '../../../../infrastructure/repo/transactions/interfaces/TransactionRepo.interface';
@@ -16,7 +16,11 @@ export class CancelBookingHandler implements ICommandHandler<CancelBookingStatus
       const entity = await this.repo.getEntityById(command.bookingId, tx);
       if (!entity || !entity.isBooker(command.userId))
         throw new NotFoundException();
-      entity.cancel();
+      try {
+        entity.cancel();
+      } catch (e) {
+        throw new BadRequestException(e);
+      }
       await this.repo.save(entity, tx);
       entity.commit();
     });

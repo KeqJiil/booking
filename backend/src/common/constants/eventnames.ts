@@ -25,7 +25,7 @@ export const eventNames = {
   billing_refund: 'billing_refund',
 } as const;
 
-export const eventBookingMap: Record<string, keyof typeof eventNames> = {
+export const eventBookingMap = {
   PAID: 'booking_paid',
   EXPIRED: 'booking_expired',
   REJECTED: 'booking_rejected',
