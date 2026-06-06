@@ -1,6 +1,9 @@
-import { BadRequestException } from '@nestjs/common';
 import { PropertyEntity } from '../domain/entities/Property.entity';
 import { Address } from '../domain/value-objects/address.value';
+import {
+  NotAllowedError,
+  WrongInputDataError,
+} from '../../../common/exceptions/entityDomain.exceptions';
 
 describe('PropertyEntity', () => {
   const validData = {
@@ -21,7 +24,7 @@ describe('PropertyEntity', () => {
   it('should throw an error', () => {
     const invalidData = { ...validData, description: 'short' };
     expect(() => PropertyEntity.create(invalidData, [])).toThrow(
-      BadRequestException,
+      WrongInputDataError,
     );
   });
 
@@ -33,7 +36,8 @@ describe('PropertyEntity', () => {
 
   it('shouldnt let someone else change', () => {
     const entity = PropertyEntity.create(validData, []);
-    entity.deleteProperty('hacker', false);
-    expect(entity.status).toBe('ALIVE');
+    expect(() => entity.deleteProperty('hacker', false)).toThrow(
+      NotAllowedError,
+    );
   });
 });
