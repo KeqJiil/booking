@@ -32,6 +32,6 @@ export const eventBookingMap = {
   CANCELLED: 'booking_cancelled',
   CONFIRMED: 'booking_confirmed',
   COMPLETED: 'booking_completed',
-};
+} as const;
 
 export type IEventNames = (typeof eventNames)[keyof typeof eventNames];
