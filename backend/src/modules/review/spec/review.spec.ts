@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/unbound-method */
 import { ReviewService } from '../application/review.service';
 import { Test, TestingModule } from '@nestjs/testing';
 import { NotFoundException } from '@nestjs/common';
@@ -6,6 +5,8 @@ import { RedisService } from 'src/infrastructure/redis/redis.service';
 import { createMock } from '@golevelup/ts-jest';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { PrismaReviewRepository } from '../infrastructure/repo/IReview.repository';
+import { eventNames } from 'src/common/constants/eventnames';
+import { REDIS } from 'src/common/constants/providerConstants';
 
 jest.mock('crypto', () => ({
   randomUUID: jest.fn().mockReturnValue('fake-uuid-123'),
@@ -13,14 +14,14 @@ jest.mock('crypto', () => ({
 
 describe('review service', () => {
   let service: ReviewService;
-  let cache: RedisService;
-  let repo: PrismaReviewRepository;
+  let cache: jest.Mocked<RedisService>;
+  let repo: jest.Mocked<PrismaReviewRepository>;
   let eventEmitter: EventEmitter2;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
-        { provide: 'REDIS', useValue: createMock<RedisService>() },
+        { provide: REDIS, useValue: createMock<RedisService>() },
         { provide: EventEmitter2, useValue: createMock<EventEmitter2>() },
         ReviewService,
         {
@@ -31,8 +32,8 @@ describe('review service', () => {
     }).compile();
 
     service = module.get<ReviewService>(ReviewService);
-    cache = module.get<RedisService>('REDIS');
-    repo = module.get<PrismaReviewRepository>('ReviewRepo');
+    cache = module.get(REDIS);
+    repo = module.get('ReviewRepo');
     eventEmitter = module.get<EventEmitter2>(EventEmitter2);
     jest.clearAllMocks();
   });
@@ -113,13 +114,79 @@ describe('review service', () => {
 
   describe('getReviewsByProperty', () => {
     it('should return reviews', async () => {
-      const mockResult = [{ id: '1', text: 'nice' }];
+      const mockResult = [
+        {
+          id: '1',
+          text: 'nice',
+          rating: 3,
+          description: '123123123',
+          bookingId: '222',
+          propertyId: '1231',
+          reviewerId: 'user-1',
+          createdAt: new Date(34124612784621),
+        },
+      ];
       repo.getReviewsByProperty.mockResolvedValue(mockResult);
 
       const result = await service.getReviewsByProperty('prop-1', {});
 
       expect(result).toEqual(mockResult);
       expect(repo.getReviewsByProperty).toHaveBeenCalledWith('prop-1', {});
+    });
+  });
+
+  describe('getMyReviews', () => {
+    it('should return reviews for the user', async () => {
+      const mockResult = [
+        {
+          id: '1',
+          text: 'nice',
+          rating: 3,
+          description: '123123123',
+          bookingId: '222',
+          propertyId: '1231',
+          reviewerId: 'user-1',
+          createdAt: new Date(34124612784621),
+        },
+      ];
+      repo.getMyReviews.mockResolvedValue(mockResult);
+
+      const result = await service.getMyReviews('user-1', {});
+
+      expect(result).toEqual(mockResult);
+      expect(repo.getMyReviews).toHaveBeenCalledWith('user-1', {});
+    });
+  });
+
+  describe('createReview event names', () => {
+    it('should emit new_review_created and new_review_received with correct payload', async () => {
+      const dto = { text: 'Great!', rate: 5, propertyId: 'prop-1' };
+      const userId = 'user-1';
+      cache.get.mockResolvedValue({ bookingId: 'booking-777' });
+      repo.save.mockResolvedValue(undefined);
+
+      await service.createReview(dto, userId);
+
+      expect(eventEmitter.emit).toHaveBeenCalledWith(
+        eventNames.new_review_created,
+        { ...dto, userId },
+      );
+      expect(eventEmitter.emit).toHaveBeenCalledWith(
+        eventNames.new_review_received,
+        { ...dto, userId },
+      );
+    });
+  });
+
+  describe('changeReview error', () => {
+    it('repo throws → propagates error and does not emit event', async () => {
+      repo.changeReveiew.mockRejectedValue(new NotFoundException());
+
+      await expect(
+        service.changeReview('rev-1', { text: 'upd', rate: 3 }, 'user-1'),
+      ).rejects.toThrow(NotFoundException);
+
+      expect(eventEmitter.emit).not.toHaveBeenCalled();
     });
   });
 });
