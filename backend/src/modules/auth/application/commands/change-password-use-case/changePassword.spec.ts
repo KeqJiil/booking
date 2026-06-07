@@ -119,7 +119,13 @@ describe('ChangePasswordCommandHandler', () => {
       cryptor.compare.mockResolvedValue(false);
 
       await expect(
-        handler.execute(new ChangePasswordCommand(userId.toString(), 'WrongOld!', 'NewPass1!')),
+        handler.execute(
+          new ChangePasswordCommand(
+            userId.toString(),
+            'WrongOld!',
+            'NewPass1!',
+          ),
+        ),
       ).rejects.toThrow(BadRequestException);
 
       expect(cryptor.crypto).not.toHaveBeenCalled();

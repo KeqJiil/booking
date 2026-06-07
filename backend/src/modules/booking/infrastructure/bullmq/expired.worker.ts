@@ -14,7 +14,7 @@ export class BookingWorker extends WorkerHost {
     switch (job.name as keyof typeof eventNames) {
       case 'booking_created': {
         await this.commandBus.execute(
-          new ExpireBookingStatusCommand(job.data.id),
+          new ExpireBookingStatusCommand(job.data.id as string),
         );
       }
     }

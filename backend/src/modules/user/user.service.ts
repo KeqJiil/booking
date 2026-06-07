@@ -17,7 +17,7 @@ export class UserService {
   ) {}
 
   async createUser(user: IUserCreate) {
-    return await this.prisma.user.create({
+    return this.prisma.user.create({
       data: {
         id: user.userId,
         name: user.name,
@@ -68,7 +68,7 @@ export class UserService {
   }
 
   async changeSettings(userId: string, settings: UserSettingsDto) {
-    return await this.prisma.userSettings.update({
+    return this.prisma.userSettings.update({
       where: { id: userId },
       data: {
         notifications: settings.notifications,

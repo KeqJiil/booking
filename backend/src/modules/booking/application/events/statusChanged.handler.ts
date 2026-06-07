@@ -7,13 +7,13 @@ import { Logger } from 'nestjs-pino';
 @EventsHandler(BookingStatusChanges)
 export class BookingStatusChangedHandler implements IEventHandler<BookingStatusChanges> {
   constructor(
-    private readonly eventEmmiter: EventEmitter2,
+    private readonly eventEmitter: EventEmitter2,
     private readonly logger: Logger,
   ) {}
 
   handle(event: BookingStatusChanges) {
-    const type = eventBookingMap[event.newStatus];
-    if (type) this.eventEmmiter.emit(type, event);
+    const type: string = eventBookingMap[event.newStatus];
+    if (type) this.eventEmitter.emit(type, event);
     else
       this.logger.error({ event }, 'Not found type of event for eventEmiter');
   }

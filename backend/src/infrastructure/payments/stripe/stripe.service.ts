@@ -27,7 +27,7 @@ export class StripeService implements IPaymentService {
     const result = await this.stripe.customers.search({
       query: `metadata['userId']:'${userId}'`,
     });
-    return result[0] || null;
+    return result.data[0]?.id || null;
   }
 
   async createUser(email: string, userId: string) {

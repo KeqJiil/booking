@@ -117,7 +117,7 @@ import { VerifyAccontCommandHandler } from './application/commands/verify-use-ca
     {
       provide: EMAIL_FORGOT_PASSWORD_TTL,
       useFactory: (config: ConfigService) =>
-        Number(config.getOrThrow('CACHE_TTL')),
+        Number(config.getOrThrow('TTL_CACHE')),
       inject: [ConfigService],
     },
   ],

@@ -6,7 +6,7 @@ export class Address {
     public readonly country: string,
     public readonly address: string,
   ) {
-    if (!city || !country || !address)
+    if (!city.trim() || !country.trim() || !address.trim())
       throw new WrongInputDataError(`Address data`);
     this.city = this.normalize(city);
     this.country = this.normalize(country);

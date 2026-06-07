@@ -58,13 +58,13 @@ export class BillingRepository implements IBillingRepo {
   }
 
   async paymentSuccess(
-    paymentId: string,
+    bookingId: string,
     providerPaymentId: string,
     tx?: Tx,
   ): Promise<IPaymentData> {
     const db = this.getDb(tx);
     const data = await db.payment.update({
-      where: { id: paymentId },
+      where: { bookingId },
       data: {
         providerPaymentId,
         status: 'SUCCEEDED',
@@ -73,10 +73,10 @@ export class BillingRepository implements IBillingRepo {
     return this.getDataType(data);
   }
 
-  async paymentFail(paymentId: string, tx?: Tx): Promise<IPaymentData> {
+  async paymentFail(bookingId: string, tx?: Tx): Promise<IPaymentData> {
     const db = this.getDb(tx);
     const data = await db.payment.update({
-      where: { id: paymentId },
+      where: { bookingId },
       data: { status: 'FAILED' },
     });
     return this.getDataType(data);

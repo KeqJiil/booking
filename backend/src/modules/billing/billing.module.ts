@@ -11,6 +11,7 @@ import { BullModule } from '@nestjs/bullmq';
 import { BillingQueueHandler } from './infrastructure/queueHandlers/queue.handler';
 import { PaymentsQueueHandler } from './infrastructure/queueHandlers/payment.handler';
 import { BillingOutboxRepository } from './infrastructure/repository/billingOutbox.repository';
+import { BILLING_OUTBOX_REPO } from '../../common/constants/providerConstants';
 
 @Module({
   imports: [
@@ -27,7 +28,7 @@ import { BillingOutboxRepository } from './infrastructure/repository/billingOutb
       useClass: BillingRepository,
     },
     BookingProviderAdapter,
-    { provide: BillingOutboxRepository, useClass: BillingOutboxRepository },
+    { provide: BILLING_OUTBOX_REPO, useClass: BillingOutboxRepository },
     BillingRefundPending,
     BillingQueueHandler,
     PaymentsQueueHandler,

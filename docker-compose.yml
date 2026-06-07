@@ -3,6 +3,7 @@ services:
     image: booking_backend
     build:
       context: ./backend
+      target: main
     depends_on:
       db:
         condition: service_healthy
@@ -23,29 +24,7 @@ services:
       - "3000:3000"
       - "51212:51212"
     env_file: ".env"
-    command: npm run start:dev
-    volumes:
-      - ./backend:/app/back
-      - /app/back/node_modules
-
-  frontend:
-    image: booking_frontend
-    build:
-      context: ./frontend
-    ports:
-      - "5173:5173"
-    environment:
-      CHOKIDAR_USEPOLLING: true
-      WATCHPACK_POLLING: true
-      VITE_BACKEND_HOST: http://localhost:3000
-    volumes:
-      - ./frontend:/app/front
-      - /app/front/node_modules
-    depends_on:
-      backend:
-        condition: service_started
-    env_file: ".env"
-    command: npm run dev
+    restart: unless-stopped
 
   db:
     image: postgres:17-alpine
@@ -62,17 +41,6 @@ services:
       retries: 5
     volumes:
       - db_data:/var/lib/postgresql/data
-
-  pgadmin:
-    image: dpage/pgadmin4:latest
-    container_name: booking_pgadmin
-    ports:
-      - "5050:80"
-    environment:
-      PGADMIN_DEFAULT_EMAIL: admin@admin.com
-      PGADMIN_DEFAULT_PASSWORD: admin
-    depends_on:
-      - db
 
   redis:
     image: redis:8-alpine

@@ -7,7 +7,7 @@ import { UserService } from 'src/modules/user/user.service';
 export class WsAuthGuard implements CanActivate {
   constructor(
     private readonly jwtService: JwtService,
-    private readonly userSerive: UserService,
+    private readonly userService: UserService,
   ) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
@@ -16,8 +16,8 @@ export class WsAuthGuard implements CanActivate {
     if (!token) return false;
     try {
       const payload = await this.jwtService.verifyAsync(token);
-      const user = await this.userSerive.getUserById(payload.id);
-      if (!user) throw new Error();
+      const user = await this.userService.getUserById(payload.id as string);
+      if (!user) return false;
       client['user'] = { id: user.id, role: user.role };
       return true;
     } catch {

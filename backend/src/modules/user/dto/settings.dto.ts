@@ -1,19 +1,20 @@
-import { ApiProperty } from '@nestjs/swagger';
+import { ApiPropertyOptional } from '@nestjs/swagger';
 import { Themes } from '@prisma/client';
 import { IsBoolean, IsEnum, IsOptional } from 'class-validator';
 
 export class UserSettingsDto {
-  @ApiProperty({
+  @ApiPropertyOptional({
+    enum: Themes,
     example: 'DARK',
-    description: 'User theme',
+    description: 'UI theme preference',
   })
   @IsOptional()
   @IsEnum(Themes)
   theme?: Themes;
 
-  @ApiProperty({
+  @ApiPropertyOptional({
     example: true,
-    description: 'Notification status',
+    description: 'Enable or disable push notifications',
   })
   @IsOptional()
   @IsBoolean()

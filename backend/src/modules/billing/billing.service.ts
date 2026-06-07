@@ -115,15 +115,15 @@ export class BillingService {
     return payment;
   }
 
-  async failPayment(paymentId: string) {
+  async failPayment(bookingId: string) {
     await this.transaction.startTransaction(async (tx: Tx) => {
-      await this.billingRepo.paymentFail(paymentId, tx);
+      await this.billingRepo.paymentFail(bookingId, tx);
     });
   }
 
-  async successPayment(paymentId: string, providerAccountId: string) {
+  async successPayment(bookingId: string, providerAccountId: string) {
     await this.transaction.startTransaction(async (tx: Tx) => {
-      await this.billingRepo.paymentSuccess(paymentId, providerAccountId, tx);
+      await this.billingRepo.paymentSuccess(bookingId, providerAccountId, tx);
     });
   }
 

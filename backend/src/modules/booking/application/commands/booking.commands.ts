@@ -1,7 +1,10 @@
 import { IBookingEntryData } from '../../domain/entities/booking.entity';
 
 export class CreateBookingCommand {
-  constructor(public readonly data: IBookingEntryData, public readonly idempotencyKey: string) {}
+  constructor(
+    public readonly data: IBookingEntryData,
+    public readonly idempotencyKey: string,
+  ) {}
 }
 
 export class CancelBookingStatusCommand {

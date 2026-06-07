@@ -57,19 +57,20 @@ export class BillingRefundPending {
   @Cron(CronExpression.EVERY_30_MINUTES)
   async handleProcessingOutboxes() {
     this.logger.log('Billing Refund Processing cron started');
-    let outboxes: IOutboxBillingViewData[] = [];
+    const retryable: IOutboxBillingViewData[] = [];
     await this.transaction.startTransaction(async (tx: Tx) => {
-      outboxes = await this.outbox.getExpiredProcessing(tx);
+      const outboxes = await this.outbox.getExpiredProcessing(tx);
       for (const outbox of outboxes) {
         if (outbox.retries < 5) {
           await this.outbox.markProcessing(outbox.id, tx);
           await this.outbox.incrementRetries(outbox.id, tx);
+          retryable.push(outbox);
         } else {
           await this.outbox.markFailed(outbox.id, tx);
         }
       }
     });
-    for (const task of outboxes) {
+    for (const task of retryable) {
       try {
         await this.processTask(task);
       } catch (error) {

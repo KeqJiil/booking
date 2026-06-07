@@ -29,7 +29,8 @@ async function bootstrap() {
     .setTitle('Booking Backend')
     .setDescription('API Options')
     .setVersion('1.0')
-    .addTag('Backend')
+    .addBearerAuth()
+    .addCookieAuth('refreshtoken')
     .build();
   const documentFactory = () => SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('api', app, documentFactory, {

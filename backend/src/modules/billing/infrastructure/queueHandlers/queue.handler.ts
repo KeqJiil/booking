@@ -39,7 +39,10 @@ export class BillingQueueHandler extends WorkerHost {
     const data = job.data as IOutboxBillingViewData;
     switch (data.type) {
       case 'REFUND_REQUEST': {
-        await this.paymentService.handleRefund(data.itemId.toString(), data.id);
+        await this.paymentService.handleRefund(
+          data.payload.paymentIntendId.toString(),
+          data.id,
+        );
         await this.transaction.startTransaction(async (tx: Tx) => {
           await this.outbox.markSucceeded(data.id, tx);
         });

@@ -7,13 +7,13 @@ import { createMock, DeepMocked } from '@golevelup/ts-jest';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { eventNames } from 'src/common/constants/eventnames';
 import { Tx } from '../../../infrastructure/repo/transactions/interfaces/TransactionRepo.interface';
+import { UserSettingsDto } from '../dto/settings.dto';
 
 jest.mock('bcrypt');
 
 describe('user service', () => {
   let service: UserService;
   let eventEmitterMock: DeepMocked<EventEmitter2>;
-  let prisma: PrismaService;
 
   const mockPrismaService = {
     user: {
@@ -40,7 +40,6 @@ describe('user service', () => {
     }).compile();
 
     service = module.get<UserService>(UserService);
-    prisma = module.get<PrismaService>(PrismaService);
     eventEmitterMock = module.get(EventEmitter2);
   });
 
@@ -210,7 +209,10 @@ describe('user service', () => {
       const mockResult = { id: 'user-1', ...settings };
       mockPrismaService.userSettings.update.mockResolvedValue(mockResult);
 
-      const result = await service.changeSettings('user-1', settings);
+      const result = await service.changeSettings(
+        'user-1',
+        settings as unknown as UserSettingsDto,
+      );
 
       expect(result).toEqual(mockResult);
     });
