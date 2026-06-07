@@ -334,39 +334,44 @@ Two domain details worth calling out:
 5. **Event emission** — `EventEmitter2` fires `booking_created` for cross-cutting concerns (e.g. notifications) in addition to the aggregate's own domain events committed via `entity.commit()`.
 
 ```mermaid
+%%{init: {'theme':'base', 'themeVariables': {'actorBkg':'#e3f2fd','actorBorder':'#1565c0','actorTextColor':'#102a43','signalColor':'#37474f','signalTextColor':'#102a43','labelBoxBkgColor':'#fff9c4','labelBoxBorderColor':'#f57f17','noteBkgColor':'#c8e6c9','noteBorderColor':'#2e7d32','fontSize':'16px'}}}%%
 sequenceDiagram
     autonumber
     actor Guest as "Guest (USER)"
     participant API as "BookingController"
     participant Handler as "CreateBookingHandler"
-    participant Cache as "Redis (idempotency)"
-    participant TX as "DB Transaction"
+    participant Cache as "Redis"
     participant Adapter as "PropertyAdapter"
-    participant Repo as "BookingRepo"
+    participant DB as "Postgres (tx)"
 
-    Guest->>API: POST /bookings, header X-Idempotency-Key
+    Guest->>API: POST /bookings (X-Idempotency-Key)
     API->>Handler: CreateBookingCommand
     Handler->>Cache: GET booking:create:KEY
-    alt key already seen
-        Cache-->>Handler: hit, return - no-op
+
+    alt key already processed
+        Cache-->>Handler: cached response found
+        Handler-->>API: return cached result, no-op
     else key not seen yet
-        Handler->>TX: startTransaction
-        TX->>Adapter: getData(propertyId)
-        Adapter-->>TX: price and hostId
-        TX->>TX: BookingEntity.create(...)
-        TX->>Repo: getOverlapping(dates, propertyId)
+        Cache-->>Handler: cache miss
+        Handler->>Adapter: getData(propertyId)
+        Adapter-->>Handler: price, hostId
+        Note right of Handler: BookingEntity.create() validates domain invariants
+        Handler->>DB: BEGIN tx, getOverlapping(dates, propertyId)
+
         alt overlap found
-            Repo-->>TX: true
-            TX-->>Handler: throw ConflictException, status 409
+            DB-->>Handler: rollback, 409 Conflict
         else no overlap
-            Repo-->>TX: false
-            TX->>Repo: save(entity)
-            TX-->>Handler: emit booking_created, commit domain events
+            DB-->>Handler: save + commit, 201 Created, domain events emitted
         end
-        Handler->>Cache: SET booking:create:KEY, TTL 360s
+
+        Handler->>Cache: SET booking:create:KEY (TTL 360s)
+        Handler-->>API: 201 Created or 409 Conflict
     end
-    Handler-->>API: 201 Created or 409 Conflict
+
+    API-->>Guest: final response
 ```
+
+> Simplified on purpose: the original version modeled the DB transaction as its own lifeline exchanging messages with the repository, which produced a lot of crossing arrows for not much extra information. Here the transaction is folded into a single `Postgres (tx)` participant, the two `alt` blocks run sequentially instead of nested, and self-messages are replaced with a `Note` — same flow, far fewer lines to trace.
 
 ### CQRS commands & queries
 
