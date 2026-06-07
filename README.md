@@ -334,7 +334,7 @@ Two domain details worth calling out:
 5. **Event emission** — `EventEmitter2` fires `booking_created` for cross-cutting concerns (e.g. notifications) in addition to the aggregate's own domain events committed via `entity.commit()`.
 
 ```mermaid
-%%{init: {'theme':'base', 'themeVariables': {'actorBkg':'#e3f2fd','actorBorder':'#1565c0','actorTextColor':'#102a43','signalColor':'#37474f','signalTextColor':'#102a43','labelBoxBkgColor':'#fff9c4','labelBoxBorderColor':'#f57f17','noteBkgColor':'#c8e6c9','noteBorderColor':'#2e7d32','fontSize':'16px'}}}%%
+%%{init: {'theme':'base', 'themeVariables': {'actorBkg':'#f5f5f5','actorBorder':'#212121','actorTextColor':'#212121','actorLineColor':'#616161','signalColor':'#212121','signalTextColor':'#212121','labelBoxBkgColor':'#e0e0e0','labelBoxBorderColor':'#212121','labelTextColor':'#212121','noteBkgColor':'#fafafa','noteBorderColor':'#424242','noteTextColor':'#212121','loopTextColor':'#212121','activationBkgColor':'#eeeeee','activationBorderColor':'#424242','fontSize':'16px'}}}%%
 sequenceDiagram
     autonumber
     actor Guest as "Guest (USER)"
